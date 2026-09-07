@@ -46,11 +46,11 @@ src="https://www.facebook.com/tr?id=1492963711498633&ev=PageView&noscript=1"
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outbound Campaign Calculator | BPO Hive</title>
+    <title>B2B Outbound ROI Calculator | BPO Hive</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="Estimate the touchpoints, sales conversations, and booked B2B demos a BPO Hive outbound campaign may generate from your planned investment.">
+        content="Estimate touchpoints, sales conversations, booked B2B demos, expected sales, projected revenue, and potential ROI from a BPO Hive outbound campaign.">
     <meta name="keywords"
         content="outbound campaign calculator, B2B appointment setting calculator, sales conversations, touchpoints, booked demos, BPO Hive">
     <meta name="author" content="BPO Hive">
@@ -519,8 +519,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     Outbound Campaign Calculator
                 </h1>
                 <p class="animate-fadeIn text-xl text-gray-600 mb-4">
-                    Choose an investment level to estimate campaign activity, real sales conversations, and booked
-                    B2B demos. These projections are directional estimates, not guaranteed results.
+                    Choose an investment level and add your own average sale value and close rate to estimate campaign
+                    activity, booked B2B demos, expected sales, projected revenue, and potential ROI.
                 </p>
             </div>
         </div>
@@ -556,10 +556,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </div>
                                 </div>
                             </label>
-                            <input type="range" id="rc-invest" min="3000" max="30000" step="3000" value="3000"
+                            <input type="range" id="rc-invest" min="3000" max="100000" step="1000" value="3000"
                                 class="w-full">
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>$3,000</span><span>$30,000</span></div>
+                                <span>$3,000</span><span>$100,000</span></div>
+                        </div>
+
+                        <div class="grid sm:grid-cols-2 gap-5 mt-8">
+                            <div>
+                                <label for="rc-deal-value" class="block text-sm font-semibold text-gray-700 mb-2">Average revenue per sale</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
+                                    <input type="number" id="rc-deal-value" min="0" step="1000" value="10000"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-8 pr-4 text-gray-900 font-semibold focus:outline-none focus:ring-2 focus:ring-[#4EA6FE] focus:border-transparent">
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Use your average first-year or contract revenue.</p>
+                            </div>
+
+                            <div>
+                                <label for="rc-close-rate" class="flex justify-between text-sm font-semibold text-gray-700 mb-2">
+                                    <span>Demo-to-sale close rate</span>
+                                    <span id="rc-close-rate-val" class="text-[#4EA6FE]">20%</span>
+                                </label>
+                                <input type="range" id="rc-close-rate" min="0" max="100" step="5" value="20" class="w-full">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1"><span>0%</span><span>100%</span></div>
+                            </div>
                         </div>
 
                         <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
@@ -620,6 +641,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8zm8 10v-2a4 4 0 00-3-3.87m-1-7.13a4 4 0 010 7.75" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Expected sales</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-sales">2–3</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">at your close rate</span>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Projected revenue</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-revenue">$20,000–$30,000</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">estimated range</span>
+                            </div>
+
+                            <div class="rounded-xl bg-green-50 border border-green-100 p-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div>
+                                        <p class="text-xs text-green-700 font-semibold uppercase tracking-wide">Potential revenue ROI</p>
+                                        <p class="text-2xl font-extrabold text-green-700" id="rc-roi">567%–900%</p>
+                                    </div>
+                                    <span class="text-xs text-green-700 text-right">projected revenue minus<br>investment, divided by investment</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
                                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -647,7 +708,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         </svg>
                     </button>
 
-                    <p class="text-xs text-gray-400 text-center mt-3">* Estimates only. Results vary by offer, ICP, market, data quality, channel mix, and sales conditions. Bookings are not guaranteed.</p>
+                    <p class="text-xs text-gray-400 text-center mt-3">* Estimates only. Results vary by offer, ICP, market, data quality, channel mix, sales close rate, and sales conditions. Bookings, sales, revenue, and ROI are not guaranteed. Revenue ROI does not account for your delivery costs or other expenses.</p>
                 </div>
             </div>
         </div>
@@ -854,6 +915,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Outbound Campaign Calculator Logic
         (function () {
             const investSlider = document.getElementById('rc-invest');
+            const dealValueInput = document.getElementById('rc-deal-value');
+            const closeRateSlider = document.getElementById('rc-close-rate');
 
             function fmt(n) {
                 if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
@@ -868,15 +931,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 var conversations = Math.round(units * 150);
                 var bookingsLow = Math.round(units * 10);
                 var bookingsHigh = Math.round(units * 15);
+                var dealValue = Math.max(0, parseFloat(dealValueInput.value) || 0);
+                var closeRate = parseInt(closeRateSlider.value) / 100;
+                var salesLow = Math.round(bookingsLow * closeRate);
+                var salesHigh = Math.round(bookingsHigh * closeRate);
+                var revenueLow = salesLow * dealValue;
+                var revenueHigh = salesHigh * dealValue;
+                var roiLow = Math.round(((revenueLow - invest) / invest) * 100);
+                var roiHigh = Math.round(((revenueHigh - invest) / invest) * 100);
 
                 document.getElementById('rc-invest-val').textContent = fmt(invest);
                 document.getElementById('rc-touchpoints').textContent = touchpoints.toLocaleString();
                 document.getElementById('rc-conversations').textContent = 'About ' + conversations.toLocaleString();
                 document.getElementById('rc-bookings').textContent = bookingsLow + '–' + bookingsHigh;
                 document.getElementById('rc-investment-result').textContent = fmt(invest);
+                document.getElementById('rc-close-rate-val').textContent = Math.round(closeRate * 100) + '%';
+                document.getElementById('rc-sales').textContent = salesLow + '–' + salesHigh;
+                document.getElementById('rc-revenue').textContent = fmt(revenueLow) + '–' + fmt(revenueHigh);
+                document.getElementById('rc-roi').textContent = roiLow.toLocaleString() + '%–' + roiHigh.toLocaleString() + '%';
             }
 
             investSlider.addEventListener('input', calculate);
+            dealValueInput.addEventListener('input', calculate);
+            closeRateSlider.addEventListener('input', calculate);
 
             // Make value displays clickable for manual input
             var valConfigs = [
