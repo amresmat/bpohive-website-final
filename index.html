@@ -2140,232 +2140,197 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </section>
 
     <!-- ROI Calculator Section -->
-    <section class="py-20 bg-gradient-to-br from-gray-50 to-blue-50" id="roi-calculator">
+<section class="py-20 bg-gradient-to-br from-gray-50 to-blue-50" id="roi-calculator">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 scroll-animate">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Calculate Your ROI</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">See how much revenue BPO Hive can generate for your
-                    business. Adjust the inputs below to estimate your return on investment.</p>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Calculate Your Outbound ROI</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Estimate touchpoints, conversations, booked demos, expected sales, projected revenue, and potential ROI using your own sales assumptions.</p>
             </div>
+            <div class="grid lg:grid-cols-5 gap-10">
 
-            <div class="grid lg:grid-cols-2 gap-12 items-start">
-                <!-- Left: Inputs -->
-                <div class="bg-white rounded-2xl shadow-lg p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Your Business Metrics</h3>
+                <!-- Left: Inputs (3 cols) -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Planned Campaign Investment</h2>
+                        <p class="text-gray-500 mb-8">Each $3,000 campaign unit funds approximately 10,000 coordinated touchpoints.</p>
 
-                    <!-- Sales Team Size -->
-                    <div class="mb-6">
-                        <label class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-semibold text-gray-700">Sales team size</span>
-                            <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-0.5">
-                                <span class="text-sm font-bold text-[#4EA6FE]" id="roi-team-val">5</span>
-                                <div class="flex flex-col -my-0.5">
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
-                                    </svg>
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
-                                    </svg>
+                        <!-- Campaign Investment -->
+                        <div>
+                            <label class="flex justify-between items-center mb-3">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-700">Campaign investment</span>
+                                    <p class="text-xs text-gray-400">Minimum investment: $3,000</p>
                                 </div>
-                            </div>
-                        </label>
-                        <input type="range" id="roi-team" min="1" max="50" value="5"
-                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4EA6FE]">
-                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>1</span><span>50</span></div>
-                    </div>
-
-                    <!-- Avg Deal Value -->
-                    <div class="mb-6">
-                        <label class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-semibold text-gray-700">Average deal value ($)</span>
-                            <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-0.5">
-                                <span class="text-sm font-bold text-[#4EA6FE]" id="roi-deal-val">$10,000</span>
-                                <div class="flex flex-col -my-0.5">
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
-                                    </svg>
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
-                                    </svg>
+                                <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-1">
+                                    <span class="text-lg font-bold text-[#4EA6FE]" id="rc-invest-val">$3,000</span>
+                                    <div class="flex flex-col -my-1">
+                                        <svg class="w-3 h-3 text-[#4EA6FE]/60" viewBox="0 0 12 12">
+                                            <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
+                                        </svg>
+                                        <svg class="w-3 h-3 text-[#4EA6FE]/60" viewBox="0 0 12 12">
+                                            <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
+                                        </svg>
+                                    </div>
                                 </div>
-                            </div>
-                        </label>
-                        <input type="range" id="roi-deal" min="1000" max="500000" step="1000" value="10000"
-                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4EA6FE]">
-                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>$1K</span><span>$500K</span>
+                            </label>
+                            <input type="range" id="rc-invest" min="3000" max="100000" step="1000" value="3000"
+                                class="w-full">
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>$3,000</span><span>$100,000</span></div>
                         </div>
-                    </div>
 
-                    <!-- Current Appointments/Month -->
-                    <div class="mb-6">
-                        <label class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-semibold text-gray-700">Current appointments per month</span>
-                            <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-0.5">
-                                <span class="text-sm font-bold text-[#4EA6FE]" id="roi-appts-val">10</span>
-                                <div class="flex flex-col -my-0.5">
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
-                                    </svg>
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
-                                    </svg>
+                        <div class="grid sm:grid-cols-2 gap-5 mt-8">
+                            <div>
+                                <label for="rc-deal-value" class="block text-sm font-semibold text-gray-700 mb-2">Average revenue per sale</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
+                                    <input type="number" id="rc-deal-value" min="0" step="1000" value="10000"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-8 pr-4 text-gray-900 font-semibold focus:outline-none focus:ring-2 focus:ring-[#4EA6FE] focus:border-transparent">
                                 </div>
+                                <p class="text-xs text-gray-400 mt-2">Use your average first-year or contract revenue.</p>
                             </div>
-                        </label>
-                        <input type="range" id="roi-appts" min="0" max="200" value="10"
-                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4EA6FE]">
-                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>0</span><span>200</span>
+
+                            <div>
+                                <label for="rc-close-rate" class="flex justify-between text-sm font-semibold text-gray-700 mb-2">
+                                    <span>Demo-to-sale close rate</span>
+                                    <span id="rc-close-rate-val" class="text-[#4EA6FE]">20%</span>
+                                </label>
+                                <input type="range" id="rc-close-rate" min="0" max="100" step="5" value="20" class="w-full">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1"><span>0%</span><span>100%</span></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Close Rate -->
-                    <div class="mb-6">
-                        <label class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-semibold text-gray-700">Close rate (%)</span>
-                            <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-0.5">
-                                <span class="text-sm font-bold text-[#4EA6FE]" id="roi-close-val">20%</span>
-                                <div class="flex flex-col -my-0.5">
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
-                                    </svg>
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </label>
-                        <input type="range" id="roi-close" min="5" max="60" value="20"
-                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4EA6FE]">
-                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>5%</span><span>60%</span>
+                        <div class="mt-5 bg-amber-50 border border-amber-100 rounded-xl p-4">
+                            <p class="text-sm font-semibold text-gray-900 mb-1">High-ticket adjustment</p>
+                            <p class="text-sm text-gray-600">This model uses the standard appointment estimate for offers up to $15,000, then reduces it gradually to 50% between $15,000 and $20,000. Offers worth $20,000 or more use the 50% estimate.</p>
                         </div>
-                    </div>
 
-                    <!-- Monthly Budget -->
-                    <div class="mb-2">
-                        <label class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-semibold text-gray-700">Monthly budget ($)</span>
-                            <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-0.5">
-                                <span class="text-sm font-bold text-[#4EA6FE]" id="roi-invest-val">$5,000</span>
-                                <div class="flex flex-col -my-0.5">
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
-                                    </svg>
-                                    <svg class="w-2.5 h-2.5 text-[#4EA6FE]/60" viewBox="0 0 12 12">
-                                        <path d="M6 9L2 4H10L6 9Z" fill="currentColor" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </label>
-                        <input type="range" id="roi-invest" min="1000" max="50000" step="500" value="5000"
-                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4EA6FE]">
-                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>$1K</span><span>$50K</span>
+                        <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
+                            <p class="text-sm font-semibold text-gray-900 mb-2">What counts as a touchpoint?</p>
+                            <p class="text-sm text-gray-600">One outbound call, email, LinkedIn connection request, or LinkedIn message. The channel mix is planned around your ICP, market, and offer.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right: Results -->
-                <div class="scroll-animate">
-                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Projected Results with BPO Hive</h3>
+                <!-- Right: Results (2 cols) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Touchpoint Headline Card -->
+                    <div
+                        class="bg-gradient-to-br from-[#4EA6FE] to-[#3d9aef] rounded-2xl shadow-lg p-8 text-white text-center">
+                        <p class="text-sm font-medium text-white/80 uppercase tracking-wider mb-2">Estimated Touchpoints</p>
+                        <p class="text-6xl font-bold mb-2" id="rc-touchpoints">10,000</p>
+                        <p class="text-sm text-white/70">calls, emails, and LinkedIn outreach</p>
+                    </div>
 
-                        <!-- Additional Appointments -->
-                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                            <div>
-                                <p class="text-sm text-gray-500">Additional appointments / month</p>
-                                <p class="text-3xl font-bold text-gray-900" id="roi-extra-appts">+15</p>
-                            </div>
-                            <div class="w-12 h-12 bg-[#EBF5FF] rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-[#4EA6FE]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                        </div>
+                    <!-- Results Breakdown -->
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-8">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6">Estimated Campaign Outcomes</h3>
 
-                        <!-- Additional Closed Deals -->
-                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                            <div>
-                                <p class="text-sm text-gray-500">Additional closed deals / month</p>
-                                <p class="text-3xl font-bold text-gray-900" id="roi-extra-deals">+3</p>
+                        <div class="space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#EBF5FF] rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#4EA6FE]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Sales conversations</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-conversations">About 150</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">estimated</span>
                             </div>
-                            <div class="w-12 h-12 bg-[#EBF5FF] rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-[#4EA6FE]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                        </div>
 
-                        <!-- Additional Monthly Revenue -->
-                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                            <div>
-                                <p class="text-sm text-gray-500">Additional monthly revenue</p>
-                                <p class="text-3xl font-bold text-green-600" id="roi-extra-revenue">$30,000</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#EBF5FF] rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#4EA6FE]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Booked B2B demos</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-bookings">10–15</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">estimated range</span>
                             </div>
-                            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                        </div>
 
-                        <!-- Annual Revenue Impact -->
-                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                            <div>
-                                <p class="text-sm text-gray-500">Annual revenue impact</p>
-                                <p class="text-3xl font-bold text-green-600" id="roi-annual-revenue">$360,000</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8zm8 10v-2a4 4 0 00-3-3.87m-1-7.13a4 4 0 010 7.75" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Expected sales</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-sales">2–3</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">at your close rate</span>
                             </div>
-                            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                            </div>
-                        </div>
 
-                        <!-- ROI Percentage -->
-                        <div class="flex items-center justify-between py-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Estimated ROI</p>
-                                <p class="text-4xl font-bold text-[#4EA6FE]" id="roi-percentage">500%</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Projected revenue</p>
+                                        <p class="text-xl font-bold text-gray-900" id="rc-revenue">$20,000–$30,000</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">estimated range</span>
                             </div>
-                            <div class="w-12 h-12 bg-[#EBF5FF] rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-[#4EA6FE]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
+
+                            <div class="rounded-xl bg-green-50 border border-green-100 p-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div>
+                                        <p class="text-xs text-green-700 font-semibold uppercase tracking-wide">Potential revenue ROI</p>
+                                        <p class="text-2xl font-extrabold text-green-700" id="rc-roi">567%–900%</p>
+                                    </div>
+                                    <span class="text-xs text-green-700 text-right">projected revenue minus<br>investment, divided by investment</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Campaign investment</p>
+                                        <p class="text-xl font-bold text-green-600" id="rc-investment-result">$3,000</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">selected</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <button onclick="openBookingModal()"
-                            class="btn-primary flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-xl text-lg">
-                            Book Your Free Consultation
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </button>
-                        <a href="roi-calculator.html"
-                            class="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-[#4EA6FE] text-[#4EA6FE] font-semibold rounded-xl text-lg hover:bg-[#4EA6FE] hover:text-white transition-all duration-300">
-                            Full ROI Calculator
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-                    </div>
+                    <!-- CTA -->
+                    <button onclick="openBookingModal()"
+                        class="btn-primary w-full inline-flex items-center justify-center gap-2 px-8 py-5 text-white font-semibold rounded-xl text-lg">
+                        Get Started &mdash; Book Your Free Consultation
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </button>
 
-                    <p class="text-xs text-gray-400 mt-4 text-center">* Projections based on average client performance.
-                        BPO Hive typically delivers 15&ndash;40 additional qualified appointments per month with a
-                        20&ndash;35% close rate improvement.</p>
+                    <p class="text-xs text-gray-400 text-center mt-3">* Estimates only. Results vary by offer, ICP, market, data quality, channel mix, sales close rate, and sales conditions. Bookings, sales, revenue, and ROI are not guaranteed. Revenue ROI does not account for your delivery costs or other expenses.</p>
                 </div>
             </div>
         </div>
@@ -2581,15 +2546,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
         });
 
-        // ROI Calculator
+        // Outbound Campaign Calculator Logic
         (function () {
-            const sliders = {
-                team: document.getElementById('roi-team'),
-                deal: document.getElementById('roi-deal'),
-                appts: document.getElementById('roi-appts'),
-                close: document.getElementById('roi-close'),
-                invest: document.getElementById('roi-invest')
-            };
+            const investSlider = document.getElementById('rc-invest');
+            const dealValueInput = document.getElementById('rc-deal-value');
+            const closeRateSlider = document.getElementById('rc-close-rate');
 
             function fmt(n) {
                 if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
@@ -2598,51 +2559,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             function calculate() {
-                const team = parseInt(sliders.team.value);
-                const deal = parseInt(sliders.deal.value);
-                const appts = parseInt(sliders.appts.value);
-                const closeRate = parseInt(sliders.close.value) / 100;
-                const invest = parseInt(sliders.invest.value);
+                var invest = parseInt(investSlider.value);
+                var units = invest / 3000;
+                var touchpoints = Math.round(units * 10000);
+                var conversations = Math.round(units * 150);
+                var dealValue = Math.max(0, parseFloat(dealValueInput.value) || 0);
+                var appointmentMultiplier = 1;
+                if (dealValue >= 20000) {
+                    appointmentMultiplier = 0.5;
+                } else if (dealValue > 15000) {
+                    appointmentMultiplier = 1 - ((dealValue - 15000) / 5000) * 0.5;
+                }
+                var bookingsLow = Math.round(units * 10 * appointmentMultiplier);
+                var bookingsHigh = Math.round(units * 15 * appointmentMultiplier);
+                var closeRate = parseInt(closeRateSlider.value) / 100;
+                var salesLow = Math.round(bookingsLow * closeRate);
+                var salesHigh = Math.round(bookingsHigh * closeRate);
+                var revenueLow = salesLow * dealValue;
+                var revenueHigh = salesHigh * dealValue;
+                var roiLow = Math.round(((revenueLow - invest) / invest) * 100);
+                var roiHigh = Math.round(((revenueHigh - invest) / invest) * 100);
 
-                // BPO Hive typically adds 3 appointments per rep per month
-                const extraAppts = Math.round(team * 3);
-                const extraDeals = Math.round(extraAppts * closeRate);
-                const extraRevenue = extraDeals * deal;
-                const annualRevenue = extraRevenue * 12;
-                const annualInvest = invest * 12;
-                const roi = annualInvest > 0 ? Math.round(((annualRevenue - annualInvest) / annualInvest) * 100) : 0;
-
-                // Update display values
-                document.getElementById('roi-team-val').textContent = team;
-                document.getElementById('roi-deal-val').textContent = fmt(deal);
-                document.getElementById('roi-appts-val').textContent = appts;
-                document.getElementById('roi-close-val').textContent = closeRate * 100 + '%';
-                document.getElementById('roi-invest-val').textContent = fmt(invest);
-
-                // Update results
-                document.getElementById('roi-extra-appts').textContent = '+' + extraAppts;
-                document.getElementById('roi-extra-deals').textContent = '+' + extraDeals;
-                document.getElementById('roi-extra-revenue').textContent = fmt(extraRevenue);
-                document.getElementById('roi-annual-revenue').textContent = fmt(annualRevenue);
-                document.getElementById('roi-percentage').textContent = roi + '%';
+                document.getElementById('rc-invest-val').textContent = fmt(invest);
+                document.getElementById('rc-touchpoints').textContent = touchpoints.toLocaleString();
+                document.getElementById('rc-conversations').textContent = 'About ' + conversations.toLocaleString();
+                document.getElementById('rc-bookings').textContent = bookingsLow + '–' + bookingsHigh;
+                document.getElementById('rc-investment-result').textContent = fmt(invest);
+                document.getElementById('rc-close-rate-val').textContent = Math.round(closeRate * 100) + '%';
+                document.getElementById('rc-sales').textContent = salesLow + '–' + salesHigh;
+                document.getElementById('rc-revenue').textContent = fmt(revenueLow) + '–' + fmt(revenueHigh);
+                document.getElementById('rc-roi').textContent = roiLow.toLocaleString() + '%–' + roiHigh.toLocaleString() + '%';
             }
 
-            Object.values(sliders).forEach(s => {
-                if (s) s.addEventListener('input', calculate);
-            });
+            investSlider.addEventListener('input', calculate);
+            dealValueInput.addEventListener('input', calculate);
+            closeRateSlider.addEventListener('input', calculate);
 
             // Make value displays clickable for manual input
-            var roiValConfigs = [
-                { valId: 'roi-team-val', sliderId: 'roi-team' },
-                { valId: 'roi-deal-val', sliderId: 'roi-deal' },
-                { valId: 'roi-appts-val', sliderId: 'roi-appts' },
-                { valId: 'roi-close-val', sliderId: 'roi-close' },
-                { valId: 'roi-invest-val', sliderId: 'roi-invest' }
+            var valConfigs = [
+                { valId: 'rc-invest-val', sliderId: 'rc-invest' }
             ];
 
-            roiValConfigs.forEach(function (cfg) {
+            valConfigs.forEach(function (cfg) {
                 var valEl = document.getElementById(cfg.valId);
-                var wrapper = valEl.parentElement;
+                var wrapper = valEl.parentElement; // the div wrapper with arrows
                 var slider = document.getElementById(cfg.sliderId);
                 wrapper.style.cursor = 'pointer';
                 wrapper.title = 'Click to edit';
@@ -2655,7 +2615,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     input.min = slider.min;
                     input.max = slider.max;
                     if (slider.step) input.step = slider.step;
-                    input.className = 'text-sm font-bold text-[#4EA6FE] bg-[#EBF5FF] px-2 py-1 rounded-lg w-24 text-center outline-none ring-2 ring-[#4EA6FE]';
+                    input.className = 'text-lg font-bold text-[#4EA6FE] bg-[#EBF5FF] px-3 py-1 rounded-lg w-28 text-center outline-none ring-2 ring-[#4EA6FE]';
 
                     wrapper.replaceWith(input);
                     input.focus();
