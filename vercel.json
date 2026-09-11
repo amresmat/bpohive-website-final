@@ -1,4 +1,16 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/services/customer-support",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/customer-support.html",
+      "destination": "/services",
+      "permanent": true
+    }
+  ]
 }
