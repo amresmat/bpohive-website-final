@@ -1,5 +1,22 @@
 # BPOHIVE - B2B Lead Generation Agency Landing Page
 
+## Outbound assessment setup
+
+`outbound-assessment.html` qualifies prospects before showing the Discovery Call calendar. Qualified submissions prefill name, email, and ten custom Calendly answers. Keep the Discovery Call invitee questions in this exact order:
+
+1. Company name
+2. Company website
+3. Job title
+4. Phone number
+5. What product/service are you selling?
+6. Who are you trying to reach?
+7. Average revenue per closed sale
+8. Services needed
+9. Initial campaign budget
+10. Desired launch timeline
+
+Add the variables in `.env.example` to the Vercel project. The main Zapier webhook receives every assessment field plus ready-to-send prospect and owner email content. Set `ZAPIER_SENDS_EMAIL=true` only after the Zap's two email actions are enabled. The optional booking webhook records completed Calendly bookings.
+
 A pixel-perfect recreation of the Belkins.io landing page built with HTML, Tailwind CSS, and React.
 
 ## 📁 Project Structure
