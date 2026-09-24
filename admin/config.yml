@@ -1,0 +1,147 @@
+{
+  "backend": {
+    "name": "github",
+    "repo": "amresmat/bpohive-website-final",
+    "branch": "main",
+    "base_url": "https://www.bpohive.com",
+    "auth_endpoint": "api/cms/auth",
+    "preview_context": "Vercel"
+  },
+  "site_url": "https://www.bpohive.com",
+  "display_url": "https://www.bpohive.com",
+  "publish_mode": "editorial_workflow",
+  "media_folder": "assets/uploads",
+  "public_folder": "/assets/uploads",
+  "slug": {
+    "encoding": "ascii",
+    "clean_accents": true,
+    "sanitize_replacement": "-"
+  },
+  "collections": [
+    {
+      "name": "blog",
+      "label": "Blog posts",
+      "folder": "content/blog",
+      "create": true,
+      "delete": false,
+      "extension": "json",
+      "format": "json",
+      "slug": "{{slug}}",
+      "preview_path": "blog-{{slug}}",
+      "description": "Save drafts, review, then publish. Drafts are not on the live site, but this public GitHub repository makes draft files visible. Sign out and back in if your session expires after 8 hours.",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "widget": "string"
+        },
+        {
+          "name": "date",
+          "label": "Publication date",
+          "widget": "datetime",
+          "format": "YYYY-MM-DD",
+          "date_format": "YYYY-MM-DD",
+          "time_format": false
+        },
+        {
+          "name": "updated",
+          "label": "Last updated",
+          "widget": "datetime",
+          "format": "YYYY-MM-DD",
+          "date_format": "YYYY-MM-DD",
+          "time_format": false,
+          "required": false
+        },
+        {
+          "name": "author",
+          "label": "Author",
+          "widget": "string",
+          "default": "BPO Hive Growth Team"
+        },
+        {
+          "name": "category",
+          "label": "Category",
+          "widget": "string"
+        },
+        {
+          "name": "description",
+          "label": "Summary",
+          "widget": "text"
+        },
+        {
+          "name": "featured_image",
+          "label": "Featured image",
+          "widget": "image",
+          "required": false,
+          "allow_multiple": false,
+          "media_library": {
+            "config": {
+              "multiple": false
+            }
+          }
+        },
+        {
+          "name": "image_alt",
+          "label": "Image description",
+          "widget": "string",
+          "required": false
+        },
+        {
+          "name": "seo_title",
+          "label": "SEO title",
+          "widget": "string",
+          "required": false
+        },
+        {
+          "name": "seo_description",
+          "label": "SEO description",
+          "widget": "text",
+          "required": false
+        },
+        {
+          "name": "body",
+          "label": "Article",
+          "widget": "markdown"
+        }
+      ]
+    },
+    {
+      "name": "site",
+      "label": "Website text",
+      "files": [
+        {
+          "name": "home",
+          "label": "Homepage",
+          "file": "content/site/home.json",
+          "fields": [
+            {
+              "name": "hero_title",
+              "label": "hero title",
+              "widget": "string"
+            },
+            {
+              "name": "hero_accent",
+              "label": "hero accent",
+              "widget": "string"
+            },
+            {
+              "name": "hero_copy",
+              "label": "hero copy",
+              "widget": "text"
+            },
+            {
+              "name": "final_title",
+              "label": "final title",
+              "widget": "string"
+            },
+            {
+              "name": "final_copy",
+              "label": "final copy",
+              "widget": "text"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

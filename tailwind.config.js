@@ -2,7 +2,10 @@
 module.exports = {
   content: [
     "./*.html",
-    "./services/*.html"
+    "./services/*.html",
+    "./industries/*.html",
+    "./templates/*.html",
+    "./scripts/*.cjs"
   ],
   safelist: [
     // Classes dynamically added via JavaScript classList operations
