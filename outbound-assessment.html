@@ -110,7 +110,11 @@
     .email-confirm{margin:22px 0;padding:14px 16px;border:1px solid #bee7d6;border-radius:12px;color:#23684f;background:#f1fbf7;font-size:13px;line-height:1.5}
     .calendar-heading{scroll-margin-top:24px;margin:36px 0 9px!important;font-size:31px!important}
     .calendar-copy{margin:0 0 19px;color:var(--muted);line-height:1.6}
-    #calendly-embed{min-width:320px;height:740px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+    #calendly-embed{width:100%;min-width:0;height:740px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+    .calendar-fallback{margin:14px 0;color:var(--muted);font-size:14px;line-height:1.5}
+    .calendar-fallback a{color:#086aa6;text-decoration:underline;font-weight:750}
+    .card-grid.results-visible{grid-template-columns:minmax(0,1fr)}
+    .results-visible .side-panel{display:none}
     .booked{margin:18px 0 0;padding:16px;border-radius:12px;color:#1d684d;background:#edf9f4;font-weight:750}
     .readiness{display:grid;gap:12px;margin:23px 0}
     .readiness-item{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
@@ -122,6 +126,28 @@
     .footer-row nav{display:flex;gap:17px}
     @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:26px}.plan-preview{display:none}.card-grid{grid-template-columns:1fr}.side-panel{display:none}.hero{padding:42px 0 112px}}
     @media(max-width:660px){.shell{width:min(100% - 24px,1160px)}.nav-inner{min-height:68px}.brand img{width:145px}.back-link{font-size:12px}.hero{padding:34px 0 94px}.hero h1{font-size:clamp(37px,11vw,48px)}.hero-copy{font-size:15px;line-height:1.55}.trust-line{gap:10px 16px;margin-top:15px}.assessment-wrap{margin-top:-62px}.form-panel{padding:25px 20px 32px}.fields,.result-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.step-actions{align-items:stretch;flex-direction:column-reverse}.step-actions .btn{width:100%}#calendly-embed{height:720px}.footer-row{align-items:center;flex-direction:column}.calendar-heading{font-size:27px!important}}
+    /* Keep the first fields visible before the visitor needs to scroll. */
+    .hero{padding:28px 0 66px}
+    .hero-grid{grid-template-columns:1fr;gap:0}
+    .plan-preview{display:none}
+    .hero h1{max-width:900px;margin:14px 0 12px;font-size:clamp(30px,3.5vw,44px);line-height:1.08}
+    .hero-copy{max-width:800px;font-size:16px;line-height:1.5}
+    .trust-line{margin-top:14px}
+    .assessment-wrap{margin-top:-36px}
+    .form-panel{padding:28px 32px 32px}
+    .progress-row{margin-bottom:20px}
+    .step h2{font-size:clamp(25px,2.8vw,32px);line-height:1.15}
+    .step-intro{margin:10px 0 20px;line-height:1.5}
+    @media(max-width:660px){
+      .hero{padding:22px 0 48px}.hero h1{font-size:30px;line-height:1.08}
+      .hero-copy{font-size:15px}.trust-line{font-size:12px;gap:8px 14px}
+      .assessment-wrap{margin-top:-24px}.form-panel{padding:22px 16px 28px}
+      .assessment-card{border-radius:20px}.progress-row{margin-bottom:16px}
+      .step-kicker{margin-bottom:6px}.step-intro{font-size:14px;margin-bottom:18px}
+      .results-visible .form-panel{padding-inline:8px}
+      .calendar-heading,.calendar-copy,.calendar-fallback{margin-left:8px;margin-right:8px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
   </style>
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -152,9 +178,9 @@
     <section class="hero">
       <div class="shell hero-grid">
         <div>
-          <div class="eyebrow">Free 2-minute outbound assessment</div>
-          <h1>How many qualified meetings could <span>your market produce?</span></h1>
-          <p class="hero-copy">Tell us what you sell and who you want to reach. We’ll give you a practical starting plan, a directional meeting range, and—if the fit is right—the option to build the campaign with us.</p>
+          <div class="eyebrow">Free outbound forecast · 3 short steps</div>
+          <h1>Build your plan. <span>Then pick a time.</span></h1>
+          <p class="hero-copy">Tell us about your business to see a starting campaign and estimated meeting range. Ready to invest $3,000+? Choose your strategy-call time right here.</p>
           <div class="trust-line"><span>Free forecast</span><span>No obligation</span><span>Managed campaigns start at $3,000</span></div>
         </div>
         <aside class="plan-preview" aria-label="Your outbound plan includes">
@@ -181,8 +207,8 @@
 
               <section class="step" data-step="1">
                 <p class="step-kicker">Your company</p>
-                <h2>What are we taking to market?</h2>
-                <p class="step-intro">This gives the forecast enough context to be useful and gives our strategy team the information it needs if you book.</p>
+                <h2>Tell us about your business.</h2>
+                <p class="step-intro">A sentence or two is enough. We’ll use your answers to prepare for your call.</p>
                 <div class="fields">
                   <div class="field"><label for="companyName">Company name</label><input id="companyName" name="companyName" type="text" autocomplete="organization" required></div>
                   <div class="field"><label for="website">Company website</label><input id="website" name="website" type="text" inputmode="url" placeholder="yourcompany.com" autocomplete="url" required></div>
@@ -194,8 +220,8 @@
 
               <section class="step" data-step="2" hidden>
                 <p class="step-kicker">Campaign readiness</p>
-                <h2>What would make the campaign commercially worthwhile?</h2>
-                <p class="step-intro">Your sales economics and available investment determine whether the Validation Sprint is the right next step.</p>
+                <h2>Set your budget and timing.</h2>
+                <p class="step-intro">Managed campaigns start at $3,000. If you’re not ready yet, you’ll receive a practical readiness plan.</p>
                 <div class="fields">
                   <div class="field"><label for="averageSale">Average revenue from one closed sale</label><select id="averageSale" name="averageSale" required><option value="">Select a range</option><option>Under $5,000</option><option>$5,000–$9,999</option><option>$10,000–$24,999</option><option>$25,000–$49,999</option><option>$50,000+</option></select></div>
                   <div class="field"><label for="service">Which support do you need most?</label><select id="service" name="service" required><option value="">Select one</option><option>Full omnichannel campaign</option><option>Appointment setting</option><option>Cold calling</option><option>Cold email outreach</option><option>LinkedIn lead generation</option><option>B2B prospect data</option></select></div>
@@ -207,8 +233,8 @@
 
               <section class="step" data-step="3" hidden>
                 <p class="step-kicker">Your forecast</p>
-                <h2>Where should we send your plan?</h2>
-                <p class="step-intro">Qualified companies can choose a strategy-call time immediately. Every detail will already be filled into Calendly.</p>
+                <h2>See your forecast. Then choose a time.</h2>
+                <p class="step-intro">We’ll email your plan. If your budget is $3,000+, you can book immediately with your details prefilled.</p>
                 <div class="fields">
                   <div class="field"><label for="firstName">First name</label><input id="firstName" name="firstName" type="text" autocomplete="given-name" required></div>
                   <div class="field"><label for="lastName">Last name</label><input id="lastName" name="lastName" type="text" autocomplete="family-name" required></div>
@@ -236,8 +262,9 @@
               <p class="result-note">Directional estimate only. Results depend on the offer, market, data quality, channel mix, sales process, and current market conditions. Meetings and sales are not guaranteed.</p>
               <div class="email-confirm" id="email-confirm">We’re sending a copy of this plan to your work email.</div>
               <h2 class="calendar-heading" id="calendar-heading">Select your time now.</h2>
-              <p class="calendar-copy">Your details and assessment answers are already pre-filled. Choose an available time below and book your strategy call.</p>
+              <p class="calendar-copy">Choose a day and time, review your prefilled details, then confirm your strategy call.</p>
               <section id="calendly-embed" aria-label="Book a BPO Hive strategy call"></section>
+              <p class="calendar-fallback">Calendar not loading? <a id="calendar-fallback-link" target="_blank" rel="noopener noreferrer">Choose a time on Calendly ↗</a>. Your answers go with you.</p>
               <p class="booked" id="booked-message" hidden>Your strategy call is booked. We have your full assessment and will come prepared.</p>
             </section>
 
@@ -258,10 +285,10 @@
 
           <aside class="side-panel" aria-label="What happens after the assessment">
             <h3>What happens next</h3>
-            <p>This is a planning assessment, not a generic contact form.</p>
+            <p>Your plan first. Your strategy call next.</p>
             <ul class="side-points">
-              <li><b>1</b><span>We calculate a practical first campaign from your offer and sales economics.</span></li>
-              <li><b>2</b><span>If the fit is right, Calendly opens here with every answer already attached.</span></li>
+              <li><b>1</b><span>See a starting scope and an estimated meeting range based on your average sale value.</span></li>
+              <li><b>2</b><span>With a $3,000+ budget, choose a time here. Your answers are prefilled in Calendly.</span></li>
               <li><b>3</b><span>Our strategy call validates the ICP, audience, message, qualification rules, and launch plan.</span></li>
             </ul>
             <p class="side-note">BPO Hive will never present a planning estimate as a guaranteed result.</p>
@@ -293,15 +320,28 @@
         progressCopy.textContent='Step '+number+' of 3';
         progressFill.style.width=(number/3*100)+'%';
         errorBox.hidden=true;
+        const heading=steps[number-1].querySelector('h2');
+        heading.tabIndex=-1;
+        heading.focus({preventScroll:true});
         window.scrollTo({top:document.querySelector('.assessment-wrap').offsetTop-24,behavior:'smooth'});
       }
 
       function validateCurrentStep(){
         const active=steps.find(function(step){return Number(step.dataset.step)===currentStep});
         const fields=Array.from(active.querySelectorAll('input,select,textarea')).filter(function(field){return field.required});
-        for(const field of fields){if(!field.checkValidity()){field.reportValidity();return false}}
+        for(const field of fields){
+          field.setCustomValidity('');
+          if(typeof field.value==='string'&&!field.value.trim())field.setCustomValidity('Please complete this field.');
+          if(field.id==='website'&&field.value.trim()){
+            try{const url=new URL(/^https?:\/\//i.test(field.value.trim())?field.value.trim():'https://'+field.value.trim());if(!/^https?:$/.test(url.protocol)||!url.hostname.includes('.')||url.username||url.password)throw new Error();}
+            catch{field.setCustomValidity('Enter a website such as yourcompany.com.');}
+          }
+          if(field.id==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value.trim()))field.setCustomValidity('Enter a valid email address.');
+          if(!field.checkValidity()){field.reportValidity();return false}
+        }
         return true;
       }
+      form.addEventListener('input',function(event){if(event.target.setCustomValidity)event.target.setCustomValidity('')});
 
       document.querySelectorAll('[data-next]').forEach(function(button){button.addEventListener('click',function(){if(validateCurrentStep())showStep(Math.min(3,currentStep+1))})});
       document.querySelectorAll('[data-back]').forEach(function(button){button.addEventListener('click',function(){showStep(Math.max(1,currentStep-1))})});
@@ -315,6 +355,13 @@
 
       function loadCalendly(bookingUrl,payload){
         const parent=document.getElementById('calendly-embed');
+        const fallbackUrl=new URL(bookingUrl||calendlyUrl);
+        if(!bookingUrl){
+          const answers={name:(payload.firstName+' '+payload.lastName).trim(),email:payload.email,a1:payload.companyName,a2:payload.website,a3:payload.jobTitle,a4:payload.phone,a5:payload.offer,a6:payload.targetMarket,a7:payload.averageSale,a8:payload.service,a9:document.querySelector('#budget option:checked').textContent,a10:payload.timeline};
+          Object.entries(answers).forEach(function(entry){fallbackUrl.searchParams.set(entry[0],entry[1])});
+        }
+        document.getElementById('calendar-fallback-link').href=fallbackUrl.toString();
+        let attempts=0;
         function init(){
           if(window.Calendly){
             window.Calendly.initInlineWidget({
@@ -333,18 +380,19 @@
             });
             return
           }
-          window.setTimeout(init,120);
+          if(++attempts<80)window.setTimeout(init,120);
         }
         init();
       }
 
       function showResult(result,payload){
+        document.querySelector('.card-grid').classList.add('results-visible');
         form.hidden=true;
         document.getElementById('progress-row').hidden=true;
         if(result.qualified){
           document.getElementById('result-touchpoints').textContent=result.forecast.touchpoints.toLocaleString();
           document.getElementById('result-meetings').textContent=result.forecast.meetingRange;
-          document.getElementById('qualified-summary').textContent=payload.companyName+' meets the starting criteria for a managed Validation Sprint. The strategy call will validate the audience, messaging, and realistic launch plan.';
+          document.getElementById('qualified-summary').textContent=payload.companyName+' meets the $3,000 starting budget. Your call will confirm campaign fit, audience, messaging, and launch plan.';
           document.getElementById('email-confirm').innerHTML=result.emailConfigured?'We’re sending a copy of this plan to <strong>'+escapeHtml(payload.email)+'</strong>.':'Your plan is ready below. Choose a time and we’ll receive every answer with your Calendly booking.';
           qualifiedResult.hidden=false;
           loadCalendly(result.bookingUrl,payload);
@@ -360,6 +408,8 @@
 
       form.addEventListener('submit',async function(event){
         event.preventDefault();
+        if(currentStep<3){if(validateCurrentStep())showStep(currentStep+1);return}
+        if(!validateCurrentStep())return;
         if(!form.checkValidity()){form.reportValidity();return}
         latestPayload=formPayload();
         submitButton.disabled=true;
@@ -383,7 +433,7 @@
         }finally{submitButton.disabled=false;submitButton.textContent='Build My Forecast'}
       });
 
-      document.getElementById('restart-button').addEventListener('click',function(){nurtureResult.hidden=true;form.hidden=false;document.getElementById('progress-row').hidden=false;showStep(2)});
+      document.getElementById('restart-button').addEventListener('click',function(){document.querySelector('.card-grid').classList.remove('results-visible');nurtureResult.hidden=true;form.hidden=false;document.getElementById('progress-row').hidden=false;showStep(2)});
 
       window.addEventListener('message',function(event){
         if(event.origin!=='https://calendly.com'||!event.data||event.data.event!=='calendly.event_scheduled')return;
