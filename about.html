@@ -446,6 +446,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- BPO-HIVE-TEAM:START -->
                 <!-- Team Member 1 - Amr Abdelrazzak (CEO) -->
                 <div class="team-card scroll-animate bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                     <div class="relative overflow-hidden aspect-[4/5]">
@@ -464,15 +465,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
 
-                <!-- Team Member 2 - Abdullah M. (Head of Sales) -->
+                <!-- Team Member 2 - Abdullah M. (VP of Sales) -->
                 <div class="team-card scroll-animate bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                     <div class="relative overflow-hidden aspect-[4/5]">
-                        <img src="assets/about-us/team-photos/Abdullah.webp" alt="Abdullah M. - Head of Sales" loading="lazy"
+                        <img src="assets/about-us/team-photos/Abdullah.webp" alt="Abdullah M. - VP of Sales" loading="lazy"
                             class="team-image w-full h-full object-cover">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-belkins-dark">Abdullah M.</h3>
-                        <p class="text-bpo-blue font-medium mb-3">Head of Sales</p>
+                        <p class="text-bpo-blue font-medium mb-3">VP of Sales</p>
                         <p class="text-belkins-gray text-sm mb-4">Expert in building high-performing sales teams and developing winning strategies for complex B2B sales cycles.</p>
                         <a href="https://www.linkedin.com/company/bpohive" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-[#0A66C2] hover:underline text-sm font-medium">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -580,6 +581,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         </a>
                     </div>
                 </div>
+<!-- BPO-HIVE-TEAM:END -->
             </div>
             <div class="text-center mt-12">
                 <a href="outbound-assessment.html"
@@ -635,7 +637,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 // Initialize map after DOM loads
                 document.addEventListener('DOMContentLoaded', function() {
                     // Office locations with Google Maps links
-                    const offices = [
+                    const offices = /*BPO-HIVE-OFFICES:START*/
+[
                         {
                             name: "Wyoming, USA",
                             subtitle: "United States Office",
@@ -648,11 +651,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         {
                             name: "Cairo, Egypt",
                             subtitle: "Egypt Office",
-                            address: "Street 2, El-waha, Nasr City, Cairo Governorate 11577",
-                            lat: 30.0626,
-                            lng: 31.3370,
+                            address: "Block H6 Ibn Melka St, First Settlement, Cairo Governorate 11865",
+                            lat: 30.0655,
+                            lng: 31.4330,
                             isHQ: false,
-                            googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Street+2+El-waha+Nasr+City+Cairo+Egypt+11577"
+                            googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Block+H6+Ibn+Melka+St+First+Settlement+Cairo+Governorate+11865+Egypt"
                         },
                         {
                             name: "New Cairo, Egypt",
@@ -672,7 +675,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             isHQ: true,
                             googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Dubai+Digital+Park+Dubai+Silicon+Oasis+UAE"
                         }
-                    ];
+                    ]
+/*BPO-HIVE-OFFICES:END*/;
 
                     // Create map centered on world view
                     const map = L.map('office-map', {
@@ -684,10 +688,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     });
 
                     // Add tile layer (using a clean, modern style)
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                        subdomains: 'abcd',
-                        maxZoom: 20
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
+                        maxNativeZoom: 16,
+                        maxZoom: 18
                     }).addTo(map);
 
                     // Custom marker icons
@@ -853,6 +857,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- Location Cards -->
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- BPO-HIVE-OFFICE-CARDS:START -->
                 <!-- Cairo -->
                 <div onclick="zoomToLocation(30.0626, 31.3370, 'Cairo, Egypt')" class="location-card scroll-animate bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl hover:border-bpo-blue transition-all">
                     <div class="flex flex-col">
@@ -866,8 +871,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <span class="px-2 py-1 bg-gray-100 text-belkins-gray text-xs font-semibold rounded-full">Egypt</span>
                         </div>
                         <h3 class="text-xl font-bold text-belkins-dark mb-1">Cairo, Egypt</h3>
-                        <p class="text-belkins-gray text-sm">Street 2, El-waha, Nasr City</p>
-                        <p class="text-belkins-gray text-sm">Cairo Governorate 11577</p>
+                        <p class="text-belkins-gray text-sm">Block H6 Ibn Melka St, First Settlement</p>
+                        <p class="text-belkins-gray text-sm">Cairo Governorate 11865</p>
                         <p class="text-bpo-blue text-xs mt-2 font-medium">Click to view on map &rarr;</p>
                     </div>
                 </div>
@@ -928,6 +933,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <p class="text-bpo-blue text-xs mt-2 font-medium">Click to view on map &rarr;</p>
                     </div>
                 </div>
+<!-- BPO-HIVE-OFFICE-CARDS:END -->
             </div>
 
             <!-- Contact CTA -->

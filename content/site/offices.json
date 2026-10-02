@@ -1,0 +1,44 @@
+{
+  "offices": [
+    {
+      "name": "Cairo, Egypt",
+      "tag": "Egypt",
+      "subtitle": "Egypt Office",
+      "address_line1": "Block H6 Ibn Melka St, First Settlement",
+      "address_line2": "Cairo Governorate 11865",
+      "lat": 30.0655,
+      "lng": 31.433,
+      "is_hq": false
+    },
+    {
+      "name": "New Cairo, Egypt",
+      "tag": "Egypt",
+      "subtitle": "Egypt Office",
+      "address_line1": "Agora Mall",
+      "address_line2": "Building D",
+      "lat": 30.0304,
+      "lng": 31.4913,
+      "is_hq": false
+    },
+    {
+      "name": "Dubai, UAE",
+      "tag": "HQ",
+      "subtitle": "Headquarters",
+      "address_line1": "Building A1, Dubai Digital Park",
+      "address_line2": "Dubai Silicon Oasis",
+      "lat": 25.1212,
+      "lng": 55.3773,
+      "is_hq": true
+    },
+    {
+      "name": "Wyoming, USA",
+      "tag": "USA",
+      "subtitle": "United States Office",
+      "address_line1": "30 N Gould St Ste R",
+      "address_line2": "Sheridan, WY 82801",
+      "lat": 44.7972,
+      "lng": -106.9562,
+      "is_hq": false
+    }
+  ]
+}

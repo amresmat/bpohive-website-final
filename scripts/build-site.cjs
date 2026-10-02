@@ -59,6 +59,7 @@ function build(out=path.join(root,'dist')) {
   $('article').first().parent().html(cards);fs.writeFileSync(path.join(out,'blogs.html'),$.html());
   let sitemap=read('sitemap.xml').replace(/<url>\s*<loc>[^<]*\/blog-[\s\S]*?<\/url>/g,'');
   sitemap=sitemap.replace('</urlset>',posts.map(p=>`<url><loc>${origin}/blog-${p.slug}</loc><lastmod>${escape(p.updated||p.date)}</lastmod></url>`).join('\n')+'\n</urlset>');fs.writeFileSync(path.join(out,'sitemap.xml'),sitemap);
+  require('./cms-sections.cjs').buildSections(root,out);
   console.log(`Built ${posts.length} blog posts and homepage content.`);
 }
 if(require.main===module)build();
