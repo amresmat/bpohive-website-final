@@ -1,0 +1,25 @@
+{
+  "title": "New Jersey Flooring Company",
+  "subtitle": "Built and Managed a Sales Team",
+  "duration": "~16 months",
+  "value_label": "Value Generated:",
+  "value": "~$3.2M",
+  "metrics": [
+    {
+      "value": "$200K",
+      "label": "Avg. Monthly Revenue"
+    },
+    {
+      "value": "~$3.2M",
+      "label": "Total Revenue"
+    },
+    {
+      "value": "Consistent",
+      "label": "Team Performance"
+    }
+  ],
+  "challenge": "Build a sales team quickly while keeping performance accountable. Ensure consistent follow-up so leads did not leak from the pipeline.",
+  "solution": "Recruited and onboarded sales talent, delivered training, coaching, and performance management. Implemented follow-up discipline and supported reporting.",
+  "result": "Sales team averaged approximately $200,000 per month in revenue with improved operational clarity.",
+  "order": 30
+}

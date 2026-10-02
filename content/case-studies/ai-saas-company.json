@@ -1,0 +1,25 @@
+{
+  "title": "AI SaaS Company",
+  "subtitle": "Shown Demos to Conversions",
+  "duration": "~18 months",
+  "value_label": "Value Generated:",
+  "value": "~$864K",
+  "metrics": [
+    {
+      "value": "180",
+      "label": "Total Shown Demos"
+    },
+    {
+      "value": "~20%",
+      "label": "Conversion Rate"
+    },
+    {
+      "value": "36",
+      "label": "New Clients"
+    }
+  ],
+  "challenge": "Generate consistent demo volume—and ensure demos were attended. Maintain weekly visibility on pipeline health, show rates, and conversion performance.",
+  "solution": "Built an outreach and follow-up system optimized for shown demos. Ran weekly meetings and reporting to monitor show rates and conversion-to-customer.",
+  "result": "Average output of 10 shown demos per month with 20% conversion to new customers.",
+  "order": 40
+}

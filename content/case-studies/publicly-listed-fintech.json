@@ -1,0 +1,25 @@
+{
+  "title": "Publicly Listed Fintech",
+  "subtitle": "Location Acquisition Program",
+  "duration": "18 months",
+  "value_label": "Value Generated:",
+  "value": "~$16.0M",
+  "metrics": [
+    {
+      "value": "~400",
+      "label": "Locations Closed"
+    },
+    {
+      "value": "~400%",
+      "label": "Engagement Growth"
+    },
+    {
+      "value": "5x",
+      "label": "Expansion in First 90 Days"
+    }
+  ],
+  "challenge": "Client needed a repeatable location pipeline that could move prospects from initial identification to closed locations without slipping follow-ups or policy requirements.",
+  "solution": "Designed a structured outreach and follow-up cadence, executed client policies consistently, created reporting for pipeline health, and operated with weekly performance reviews.",
+  "result": "Delivered a scalable playbook the client could continue using for ongoing expansion.",
+  "order": 10
+}
