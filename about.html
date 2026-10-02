@@ -464,15 +464,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
 
-                <!-- Team Member 2 - Abdullah M. (Head of Sales) -->
+                <!-- Team Member 2 - Abdullah M. (VP of Sales) -->
                 <div class="team-card scroll-animate bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                     <div class="relative overflow-hidden aspect-[4/5]">
-                        <img src="assets/about-us/team-photos/Abdullah.webp" alt="Abdullah M. - Head of Sales" loading="lazy"
+                        <img src="assets/about-us/team-photos/Abdullah.webp" alt="Abdullah M. - VP of Sales" loading="lazy"
                             class="team-image w-full h-full object-cover">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-belkins-dark">Abdullah M.</h3>
-                        <p class="text-bpo-blue font-medium mb-3">Head of Sales</p>
+                        <p class="text-bpo-blue font-medium mb-3">VP of Sales</p>
                         <p class="text-belkins-gray text-sm mb-4">Expert in building high-performing sales teams and developing winning strategies for complex B2B sales cycles.</p>
                         <a href="https://www.linkedin.com/company/bpohive" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-[#0A66C2] hover:underline text-sm font-medium">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -684,10 +684,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     });
 
                     // Add tile layer (using a clean, modern style)
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                        subdomains: 'abcd',
-                        maxZoom: 20
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19
                     }).addTo(map);
 
                     // Custom marker icons
