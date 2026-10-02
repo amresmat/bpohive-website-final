@@ -1,15 +1,19 @@
-# BPO Hive content manager
+# BPO Hive admin
 
 Open https://www.bpohive.com/admin and sign in with the authorized GitHub account.
 
-Blog posts: create a post, add its title, date, category, summary, image, SEO fields and article text. Save it as a draft, move it through the editorial workflow, and publish when ready. Publishing updates the blog listing, article page and sitemap after Vercel finishes building. Existing article URLs are preserved. Deletion is disabled to protect indexed URLs.
+Everything you publish goes live about a minute later, after Vercel rebuilds the site. There are no drafts: Publish means live. Every change is saved in GitHub history and can be undone there.
 
-Website text: edit the five homepage heading and paragraph fields. Layout, lead routing and email templates are not editable in this collection.
+What you can edit:
 
-Drafts do not appear on the production website. The GitHub repository is public, so draft branches and their content are publicly readable. Do not put confidential material in drafts. GitHub sessions expire after eight hours; sign out and sign in again when asked.
+- Job openings: title, description, location, type, department and the JotForm link. Turn off "Open" to hide a job without deleting it.
+- Blog posts: title, date, category, summary, image and article text. Deleting posts is disabled to protect indexed URLs.
+- Team members: name, title, bio, photo, LinkedIn (About page).
+- Case studies (Case studies page).
+- Website settings: homepage text and stats, office locations (cards and map pins), and the Sign in link, contact email and Calendly link used across the site.
 
-Authentication uses the private BPO Hive Content Manager GitHub App, installed only on amresmat/bpohive-website-final. Permissions: contents and pull requests read/write; metadata and commit statuses read-only. No private key or installation token is used. The server exchanges an authorization code with PKCE and signed state, verifies the GitHub account and repository write permission, then delivers a short-lived user token only to the canonical site origin.
+"Order" fields: lower numbers show first.
 
-Vercel production variables: CMS_GITHUB_CLIENT_ID, CMS_GITHUB_CLIENT_SECRET, CMS_STATE_SECRET. Optional CMS_ALLOWED_USERS defaults to amresmat. Secrets must never be committed. Callback: https://www.bpohive.com/api/cms/callback. Authentication on preview domains is deliberately unavailable.
+If a change does not appear after a few minutes, the build probably rejected it (for example a link that does not start with https://). Check the latest deployment in Vercel; the live site keeps the previous version until the problem is fixed.
 
-Build: npm ci then npm run build. Test: npm run test:cms. The dist directory contains only deployable static files; root api functions remain Vercel serverless functions. Baselines retain the exact original HTML for unchanged imported articles; edited/new articles use the shared article template.
+Technical notes: the admin is Decap CMS (admin/config.yml, JSON syntax). Content lives in content/. scripts/build-site.cjs and scripts/cms-sections.cjs render it into dist at build time, between the BPO-HIVE-* markers in careers.html, about.html and case-studies.html and the cms: markers in index.html. Authentication uses the private BPO Hive Content Manager GitHub App, installed only on amresmat/bpohive-website-final, with PKCE and signed state. Vercel production variables: CMS_GITHUB_CLIENT_ID, CMS_GITHUB_CLIENT_SECRET, CMS_STATE_SECRET; optional CMS_ALLOWED_USERS defaults to amresmat. Secrets must never be committed. Callback: https://www.bpohive.com/api/cms/callback. Sign in does not work on preview domains. The repository is public, so all content files are publicly readable. Build: npm ci then npm run build. Test: npm run test:cms.

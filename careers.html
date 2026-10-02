@@ -230,6 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </section>
 
+<!-- BPO-HIVE-MODALS:START -->
     <!-- Application Modal: SDR -->
     <div role="dialog" aria-modal="true" aria-label="Job application" id="apply-modal-sdr" class="fixed inset-0 z-[100] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeApplyModal('apply-modal-sdr')"></div>
@@ -274,6 +275,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
     </div>
+
+<!-- BPO-HIVE-MODALS:END -->
 
     <!-- Open Positions Section -->
     <section id="open-positions" class="py-20 bg-white">
@@ -371,14 +374,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                closeApplyModal('apply-modal-sdr');
-                closeApplyModal('apply-modal-vendor');
+                document.querySelectorAll('[id^="apply-modal-"]').forEach(function(m) { closeApplyModal(m.id); });
             }
         });
 
         // Initialize JotForm
         if (typeof window.jotformEmbedHandler === "function") {
-["242284005259555", "262284958216163"].forEach(function(id) { window.jotformEmbedHandler("iframe[id='JotFormIFrame-" + id + "']", "https://form.jotform.com/"); });
+document.querySelectorAll('iframe[id^="JotFormIFrame-"]').forEach(function(f) { window.jotformEmbedHandler("iframe[id='" + f.id + "']", "https://form.jotform.com/"); });
 }
 
     </script>
