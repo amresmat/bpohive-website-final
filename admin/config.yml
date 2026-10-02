@@ -4,12 +4,10 @@
     "repo": "amresmat/bpohive-website-final",
     "branch": "main",
     "base_url": "https://www.bpohive.com",
-    "auth_endpoint": "api/cms/auth",
-    "preview_context": "Vercel"
+    "auth_endpoint": "api/cms/auth"
   },
   "site_url": "https://www.bpohive.com",
   "display_url": "https://www.bpohive.com",
-  "publish_mode": "editorial_workflow",
   "media_folder": "assets/uploads",
   "public_folder": "/assets/uploads",
   "slug": {
@@ -18,6 +16,75 @@
     "sanitize_replacement": "-"
   },
   "collections": [
+    {
+      "name": "jobs",
+      "label": "Job openings",
+      "label_singular": "job",
+      "folder": "content/jobs",
+      "create": true,
+      "delete": true,
+      "extension": "json",
+      "format": "json",
+      "slug": "{{slug}}",
+      "description": "Jobs shown on the Careers page. Turn off \"Open\" to hide a job without deleting it.",
+      "summary": "{{title}}",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Job title",
+          "widget": "string"
+        },
+        {
+          "name": "description",
+          "label": "Short description",
+          "widget": "text"
+        },
+        {
+          "name": "location",
+          "label": "Location",
+          "widget": "string",
+          "default": "Remote",
+          "required": false
+        },
+        {
+          "name": "type",
+          "label": "Job type",
+          "widget": "string",
+          "default": "Full-time",
+          "required": false
+        },
+        {
+          "name": "department",
+          "label": "Department",
+          "widget": "string",
+          "required": false
+        },
+        {
+          "name": "apply_url",
+          "label": "Application form link",
+          "widget": "string",
+          "hint": "Paste the JotForm link, e.g. https://form.jotform.com/242284005259555",
+          "pattern": [
+            "^https://.+",
+            "Must start with https://"
+          ]
+        },
+        {
+          "name": "open",
+          "label": "Open (shown on site)",
+          "widget": "boolean",
+          "default": true
+        },
+        {
+          "name": "order",
+          "label": "Order",
+          "widget": "number",
+          "value_type": "int",
+          "default": 100,
+          "hint": "Lower numbers show first."
+        }
+      ]
+    },
     {
       "name": "blog",
       "label": "Blog posts",
@@ -28,7 +95,7 @@
       "format": "json",
       "slug": "{{slug}}",
       "preview_path": "blog-{{slug}}",
-      "description": "Save drafts, review, then publish. Drafts are not on the live site, but this public GitHub repository makes draft files visible. Sign out and back in if your session expires after 8 hours.",
+      "description": "Write a post and press Publish. It appears on the site about a minute later.",
       "fields": [
         {
           "name": "title",
@@ -106,38 +173,343 @@
       ]
     },
     {
+      "name": "team",
+      "label": "Team members",
+      "label_singular": "team member",
+      "folder": "content/team",
+      "create": true,
+      "delete": true,
+      "extension": "json",
+      "format": "json",
+      "identifier_field": "name",
+      "slug": "{{slug}}",
+      "summary": "{{name}} ({{title}})",
+      "description": "People shown on the About page.",
+      "fields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "widget": "string"
+        },
+        {
+          "name": "title",
+          "label": "Job title",
+          "widget": "string"
+        },
+        {
+          "name": "bio",
+          "label": "Short bio",
+          "widget": "text",
+          "required": false
+        },
+        {
+          "name": "photo",
+          "label": "Photo",
+          "widget": "image",
+          "allow_multiple": false,
+          "hint": "Portrait photo, JPG, PNG or WebP."
+        },
+        {
+          "name": "photo_position",
+          "label": "Photo focus",
+          "widget": "string",
+          "required": false,
+          "hint": "Optional. Use if the face is cut off, e.g. \"center top\" or \"35% center\"."
+        },
+        {
+          "name": "linkedin",
+          "label": "LinkedIn link",
+          "widget": "string",
+          "required": false,
+          "pattern": [
+            "^https://.+",
+            "Must start with https://"
+          ]
+        },
+        {
+          "name": "order",
+          "label": "Order",
+          "widget": "number",
+          "value_type": "int",
+          "default": 100,
+          "hint": "Lower numbers show first."
+        }
+      ]
+    },
+    {
+      "name": "case_studies",
+      "label": "Case studies",
+      "label_singular": "case study",
+      "folder": "content/case-studies",
+      "create": true,
+      "delete": true,
+      "extension": "json",
+      "format": "json",
+      "slug": "{{slug}}",
+      "summary": "{{title}}",
+      "description": "Shown on the Case studies page.",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Client",
+          "widget": "string"
+        },
+        {
+          "name": "subtitle",
+          "label": "Program name",
+          "widget": "string",
+          "required": false
+        },
+        {
+          "name": "duration",
+          "label": "Duration",
+          "widget": "string",
+          "required": false,
+          "hint": "e.g. 18 months"
+        },
+        {
+          "name": "value_label",
+          "label": "Headline label",
+          "widget": "string",
+          "default": "Value Generated:",
+          "required": false
+        },
+        {
+          "name": "value",
+          "label": "Headline number",
+          "widget": "string",
+          "required": false,
+          "hint": "e.g. ~$16.0M"
+        },
+        {
+          "name": "metrics",
+          "label": "Key numbers (up to 3)",
+          "widget": "list",
+          "max": 3,
+          "required": false,
+          "fields": [
+            {
+              "name": "value",
+              "label": "Number",
+              "widget": "string"
+            },
+            {
+              "name": "label",
+              "label": "Label",
+              "widget": "string"
+            }
+          ]
+        },
+        {
+          "name": "challenge",
+          "label": "Challenge",
+          "widget": "text",
+          "required": false
+        },
+        {
+          "name": "solution",
+          "label": "Solution",
+          "widget": "text",
+          "required": false
+        },
+        {
+          "name": "result",
+          "label": "Result",
+          "widget": "text",
+          "required": false
+        },
+        {
+          "name": "order",
+          "label": "Order",
+          "widget": "number",
+          "value_type": "int",
+          "default": 100,
+          "hint": "Lower numbers show first."
+        }
+      ]
+    },
+    {
       "name": "site",
-      "label": "Website text",
+      "label": "Website settings",
       "files": [
         {
           "name": "home",
-          "label": "Homepage",
+          "label": "Homepage text and stats",
           "file": "content/site/home.json",
           "fields": [
             {
               "name": "hero_title",
-              "label": "hero title",
+              "label": "Hero title",
               "widget": "string"
             },
             {
               "name": "hero_accent",
-              "label": "hero accent",
+              "label": "Hero accent",
               "widget": "string"
             },
             {
               "name": "hero_copy",
-              "label": "hero copy",
+              "label": "Hero copy",
               "widget": "text"
             },
             {
               "name": "final_title",
-              "label": "final title",
+              "label": "Final title",
               "widget": "string"
             },
             {
               "name": "final_copy",
-              "label": "final copy",
+              "label": "Final copy",
               "widget": "text"
+            },
+            {
+              "name": "stat1_value",
+              "label": "Stat 1: number",
+              "widget": "string"
+            },
+            {
+              "name": "stat1_label",
+              "label": "Stat 1: label",
+              "widget": "string"
+            },
+            {
+              "name": "stat2_value",
+              "label": "Stat 2: number",
+              "widget": "string"
+            },
+            {
+              "name": "stat2_label",
+              "label": "Stat 2: label",
+              "widget": "string"
+            },
+            {
+              "name": "stat3_value",
+              "label": "Stat 3 (Clutch rating): number",
+              "widget": "string"
+            },
+            {
+              "name": "stat3_label",
+              "label": "Stat 3 (Clutch rating): label",
+              "widget": "string"
+            },
+            {
+              "name": "stat4_value",
+              "label": "Stat 4: number",
+              "widget": "string"
+            },
+            {
+              "name": "stat4_label",
+              "label": "Stat 4: label",
+              "widget": "string"
+            },
+            {
+              "name": "stats_note",
+              "label": "Small note under the stats",
+              "widget": "text"
+            }
+          ]
+        },
+        {
+          "name": "offices",
+          "label": "Office locations",
+          "file": "content/site/offices.json",
+          "fields": [
+            {
+              "name": "offices",
+              "label": "Offices",
+              "label_singular": "office",
+              "widget": "list",
+              "summary": "{{fields.name}}",
+              "min": 1,
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "City / name",
+                  "widget": "string",
+                  "hint": "e.g. Cairo, Egypt"
+                },
+                {
+                  "name": "tag",
+                  "label": "Tag",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "Small label on the card, e.g. Egypt, USA, HQ"
+                },
+                {
+                  "name": "subtitle",
+                  "label": "Map popup subtitle",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "e.g. Egypt Office"
+                },
+                {
+                  "name": "address_line1",
+                  "label": "Address line 1",
+                  "widget": "string"
+                },
+                {
+                  "name": "address_line2",
+                  "label": "Address line 2",
+                  "widget": "string",
+                  "required": false
+                },
+                {
+                  "name": "lat",
+                  "label": "Latitude",
+                  "widget": "number",
+                  "value_type": "float",
+                  "step": 0.0001,
+                  "hint": "In Google Maps, right-click the building and click the numbers to copy them. The first number is latitude."
+                },
+                {
+                  "name": "lng",
+                  "label": "Longitude",
+                  "widget": "number",
+                  "value_type": "float",
+                  "step": 0.0001,
+                  "hint": "The second number from Google Maps."
+                },
+                {
+                  "name": "is_hq",
+                  "label": "Headquarters",
+                  "widget": "boolean",
+                  "default": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "settings",
+          "label": "Links and contact",
+          "file": "content/site/settings.json",
+          "fields": [
+            {
+              "name": "signin_url",
+              "label": "Sign in button link",
+              "widget": "string",
+              "pattern": [
+                "^https://.+",
+                "Must start with https://"
+              ]
+            },
+            {
+              "name": "contact_email",
+              "label": "Contact email",
+              "widget": "string",
+              "pattern": [
+                "^[^@\\s]+@[^@\\s]+\\.[a-zA-Z]{2,}$",
+                "Enter a valid email"
+              ]
+            },
+            {
+              "name": "calendly_url",
+              "label": "Calendly booking link",
+              "widget": "string",
+              "pattern": [
+                "^https://.+",
+                "Must start with https://"
+              ]
             }
           ]
         }
