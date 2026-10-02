@@ -648,11 +648,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         {
                             name: "Cairo, Egypt",
                             subtitle: "Egypt Office",
-                            address: "Street 2, El-waha, Nasr City, Cairo Governorate 11577",
-                            lat: 30.0626,
-                            lng: 31.3370,
+                            address: "Block H6 Ibn Melka St, First Settlement, Cairo Governorate 11865",
+                            lat: 30.0655,
+                            lng: 31.4330,
                             isHQ: false,
-                            googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Street+2+El-waha+Nasr+City+Cairo+Egypt+11577"
+                            googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Block+H6+Ibn+Melka+St+First+Settlement+Cairo+Governorate+11865+Egypt"
                         },
                         {
                             name: "New Cairo, Egypt",
@@ -684,9 +684,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     });
 
                     // Add tile layer (using a clean, modern style)
-                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        maxZoom: 19
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
+                        maxNativeZoom: 16,
+                        maxZoom: 18
                     }).addTo(map);
 
                     // Custom marker icons
@@ -865,8 +866,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <span class="px-2 py-1 bg-gray-100 text-belkins-gray text-xs font-semibold rounded-full">Egypt</span>
                         </div>
                         <h3 class="text-xl font-bold text-belkins-dark mb-1">Cairo, Egypt</h3>
-                        <p class="text-belkins-gray text-sm">Street 2, El-waha, Nasr City</p>
-                        <p class="text-belkins-gray text-sm">Cairo Governorate 11577</p>
+                        <p class="text-belkins-gray text-sm">Block H6 Ibn Melka St, First Settlement</p>
+                        <p class="text-belkins-gray text-sm">Cairo Governorate 11865</p>
                         <p class="text-bpo-blue text-xs mt-2 font-medium">Click to view on map &rarr;</p>
                     </div>
                 </div>
