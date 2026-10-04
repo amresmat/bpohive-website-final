@@ -73,7 +73,7 @@
     }
     *{box-sizing:border-box}
     html{max-width:100%;overflow-x:hidden;scroll-behavior:smooth;scroll-padding-top:88px}
-    body{max-width:100%;margin:0;overflow-x:hidden;color:var(--ink);font-family:var(--body);background:var(--white);-webkit-font-smoothing:antialiased}
+    body{max-width:100%;margin:0;overflow-x:hidden;overflow-x:clip;color:var(--ink);font-family:var(--body);background:var(--white);-webkit-font-smoothing:antialiased}
     body.menu-open{overflow:hidden}
     a{color:inherit;text-decoration:none}
     button,input{font:inherit}
@@ -173,6 +173,34 @@
     .bento h3{margin-top:20px;font-size:20px}
     .channel-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:19px}
     .channel-pills span{padding:7px 9px;border:1px solid rgba(155,213,255,.19);border-radius:999px;color:#acd9f7;background:rgba(49,165,246,.08);font-size:11px;font-weight:850}
+    .hero h1{margin-bottom:34px}
+    #process{overflow:clip}
+    .aces-timeline{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:72px;align-items:start}
+    .aces-rail{position:sticky;top:112px}
+    .aces-rail h2{font-size:clamp(32px,3.3vw,44px)}
+    .aces-nav{position:relative;display:flex;flex-direction:column;gap:30px;margin:38px 0 0;padding:0;list-style:none}
+    .aces-track{position:absolute;left:21px;top:22px;bottom:22px;width:2px;border-radius:2px;background:rgba(255,255,255,.12)}
+    .aces-fill{display:block;width:100%;height:100%;border-radius:2px;background:linear-gradient(var(--blue-300),var(--blue-500));transform:scaleY(var(--aces-progress,0));transform-origin:top}
+    .aces-node{position:relative;display:flex;align-items:center;gap:16px;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .aces-dot{flex:none;width:44px;height:44px;display:grid;place-items:center;border:2px solid rgba(255,255,255,.18);border-radius:50%;color:#8ea4b3;background:var(--navy-900);font-size:16px;font-weight:900;transition:color .3s ease,background .3s ease,border-color .3s ease,box-shadow .3s ease,transform .3s ease}
+    .aces-label{display:grid;gap:1px;opacity:.5;transition:opacity .3s ease}
+    .aces-label strong{font-size:18px;letter-spacing:-.02em}
+    .aces-label small{color:#aebfca;font-size:13px}
+    .aces-node.done .aces-dot{border-color:var(--blue-500);color:var(--blue-300)}
+    .aces-node.done .aces-label{opacity:.78}
+    .aces-node.active .aces-dot{border-color:transparent;color:var(--navy-950);background:linear-gradient(135deg,var(--blue-300),var(--blue-500));box-shadow:0 0 0 7px rgba(49,165,246,.16);transform:scale(1.08)}
+    .aces-node.active .aces-label{opacity:1}
+    .aces-node:hover .aces-label{opacity:1}
+    .aces-node:focus-visible{outline:2px solid var(--blue-300);outline-offset:6px;border-radius:12px}
+    .aces-steps{display:grid;gap:26px;padding:6vh 0 26vh}
+    .aces-steps .aces-card{min-height:230px;display:flex;gap:24px;align-items:flex-start;padding:34px;opacity:.42;transform:translateY(10px) scale(.985);transition:opacity .45s ease,transform .45s ease,border-color .45s ease,background .45s ease}
+    .aces-steps .aces-card h3{margin:6px 0 11px;font-size:24px}
+    .aces-steps .aces-card p{font-size:15.5px}
+    .aces-steps .aces-num{flex:none}
+    .aces-steps .aces-card.active{opacity:1;transform:none;border-color:rgba(104,191,255,.55);background:linear-gradient(155deg,rgba(104,191,255,.16),rgba(255,255,255,.04))}
+    @media (max-width:960px){.aces-timeline{grid-template-columns:1fr;gap:26px}.aces-rail{position:static}.aces-nav{display:none}.aces-steps{padding:0}.aces-steps .aces-card{min-height:0;padding:25px}}
+    @media (max-width:560px){.aces-steps .aces-card{flex-direction:column;gap:6px}}
+    @media (prefers-reduced-motion:reduce){.aces-dot,.aces-label,.aces-steps .aces-card{transition:none}.aces-steps .aces-card{transform:none}}
     .aces-intro{max-width:790px}
     .aces-intro .lead{max-width:680px;margin-top:19px}
     .aces-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:49px}
@@ -392,7 +420,6 @@ fbq('track', 'PageView');
         <div class="hero-copy-block">
           <p class="eyebrow">Award-winning B2B appointment-setting company</p>
           <h1><!--cms:hero_title-->We Fill Your Pipeline With<!--/cms:hero_title--> <span><!--cms:hero_accent-->Sales-Qualified Leads.<!--/cms:hero_accent--></span></h1>
-          <p class="hero-copy"><!--cms:hero_copy-->BPO Hive builds and runs the complete outbound system—from market analysis and B2B prospect data to phone, email, LinkedIn, qualification, calendar booking, and live campaign reporting.<!--/cms:hero_copy--></p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="outbound-assessment.html">Fill My Calendar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             <a class="btn btn-light-outline" href="#process">See how the system works</a>
@@ -451,12 +478,17 @@ fbq('track', 'PageView');
 
     <section class="section section-dark" id="process">
       <div class="shell">
-        <div class="aces-intro reveal"><p class="kicker">The BPO Hive ACES system</p><h2>Analyze. Contrive. Execute. Scale.</h2><p class="lead">A structured operating system that turns outbound activity into a campaign you can test, understand, improve, and grow.</p></div>
-        <div class="aces-grid reveal">
-          <article class="aces-card" data-letter="A"><div class="aces-num">01</div><h3>Analyze the Market</h3><p>We study your offer, exact customer profile, buyer roles, audience size, sales process, previous outreach, and the evidence behind your strongest fit.</p></article>
-          <article class="aces-card" data-letter="C"><div class="aces-num">02</div><h3>Contrive the Strategy</h3><p>We choose the ICPs to test and define the prospect data, positioning, qualification rules, channel mix, follow-up, and touchpoint sequence.</p></article>
-          <article class="aces-card" data-letter="E"><div class="aces-num">03</div><h3>Execute the Outreach</h3><p>We run phone, email, and LinkedIn outreach, qualify genuine interest, book meetings on your calendar, support attendance, and report every stage.</p></article>
-          <article class="aces-card" data-letter="S"><div class="aces-num">04</div><h3>Scale What Works</h3><p>We review conversations, objections, meetings, show rates, and client feedback—then keep the strongest ICPs and expand with control.</p></article>
+        <div class="aces-timeline">
+          <div class="aces-rail">
+            <div class="aces-intro reveal"><p class="kicker">The BPO Hive ACES system</p><h2>Analyze. Contrive. Execute. Scale.</h2><p class="lead">A structured operating system that turns outbound activity into a campaign you can test, understand, improve, and grow.</p></div>
+            <ol class="aces-nav" aria-label="ACES steps"><li class="aces-track" aria-hidden="true"><span class="aces-fill"></span></li><li><button type="button" class="aces-node" data-step="0" aria-controls="aces-step-1"><span class="aces-dot">A</span><span class="aces-label"><strong>Analyze</strong><small>the market</small></span></button></li><li><button type="button" class="aces-node" data-step="1" aria-controls="aces-step-2"><span class="aces-dot">C</span><span class="aces-label"><strong>Contrive</strong><small>the strategy</small></span></button></li><li><button type="button" class="aces-node" data-step="2" aria-controls="aces-step-3"><span class="aces-dot">E</span><span class="aces-label"><strong>Execute</strong><small>the outreach</small></span></button></li><li><button type="button" class="aces-node" data-step="3" aria-controls="aces-step-4"><span class="aces-dot">S</span><span class="aces-label"><strong>Scale</strong><small>what works</small></span></button></li></ol>
+          </div>
+          <div class="aces-steps">
+            <article class="aces-card" id="aces-step-1" data-letter="A"><div class="aces-num">01</div><div><h3>Analyze the Market</h3><p>We study your offer, exact customer profile, buyer roles, audience size, sales process, previous outreach, and the evidence behind your strongest fit.</p></div></article>
+            <article class="aces-card" id="aces-step-2" data-letter="C"><div class="aces-num">02</div><div><h3>Contrive the Strategy</h3><p>We choose the ICPs to test and define the prospect data, positioning, qualification rules, channel mix, follow-up, and touchpoint sequence.</p></div></article>
+            <article class="aces-card" id="aces-step-3" data-letter="E"><div class="aces-num">03</div><div><h3>Execute the Outreach</h3><p>We run phone, email, and LinkedIn outreach, qualify genuine interest, book meetings on your calendar, support attendance, and report every stage.</p></div></article>
+            <article class="aces-card" id="aces-step-4" data-letter="S"><div class="aces-num">04</div><div><h3>Scale What Works</h3><p>We review conversations, objections, meetings, show rates, and client feedback—then keep the strongest ICPs and expand with control.</p></div></article>
+          </div>
         </div>
       </div>
     </section>
@@ -629,6 +661,25 @@ fbq('track', 'PageView');
     target=[(e.clientX-r.left+r.width*.1)/(r.width*1.2),(e.clientY-r.top+r.height*.2)/(r.height*1.4)];go();
   },{passive:true});
   hero.addEventListener('pointerleave',function(){target=HOME.slice();go();});
+})();
+</script>
+<script>
+(function(){
+  var root=document.querySelector('.aces-timeline');if(!root)return;
+  var cards=[].slice.call(root.querySelectorAll('.aces-card')),nodes=[].slice.call(root.querySelectorAll('.aces-node')),raf=0;
+  function update(){
+    raf=0;
+    var mid=window.innerHeight*.5,centers=cards.map(function(c){var r=c.getBoundingClientRect();return r.top+r.height/2;}),n=cards.length,pos=0;
+    /* position along the steps: 0 = first step centred on screen, n-1 = last step centred */
+    if(mid<=centers[0])pos=0;else if(mid>=centers[n-1])pos=n-1;else for(var i=0;i<n-1;i++){if(mid>=centers[i]&&mid<centers[i+1]){pos=i+(mid-centers[i])/(centers[i+1]-centers[i]);break;}}
+    var active=Math.round(pos);
+    root.style.setProperty('--aces-progress',(pos/(n-1)).toFixed(4));
+    cards.forEach(function(c,i){c.classList.toggle('active',i===active);});
+    nodes.forEach(function(b,i){b.classList.toggle('active',i===active);b.classList.toggle('done',i<active);if(i===active)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+  }
+  function queue(){if(!raf)raf=requestAnimationFrame(update);}
+  nodes.forEach(function(b,i){b.addEventListener('click',function(){cards[i].scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});});});
+  window.addEventListener('scroll',queue,{passive:true});window.addEventListener('resize',queue);update();
 })();
 </script>
 </body>
