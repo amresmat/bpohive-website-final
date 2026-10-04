@@ -396,11 +396,6 @@
               "name": "stat4_label",
               "label": "Stat 4: label",
               "widget": "string"
-            },
-            {
-              "name": "stats_note",
-              "label": "Small note under the stats",
-              "widget": "text"
             }
           ]
         },
