@@ -67,7 +67,6 @@ function funnel(out){
   if(rel.startsWith('blog-')){const target=$('article').first();target.append('<aside class="growth-links"><a href="/services/appointment-setting">Explore appointment setting</a><a href="/services/sales-development">Explore sales development</a></aside>');}
   if(rel==='index.html'){
    $('title').text('B2B Appointment Setting · USA, Canada & GCC | BPO Hive');
-   $('.hero-copy').first().append(' Managed campaigns for the USA, Canada and GCC start at $4,000/month.').after(byline+'<p class="hero-copy">'+policy.insights+'</p>');
    $('footer').before('<section class="growth"><h2>Featured and listed</h2><div class="growth-links"><a href="https://evergreenawards.com/awards/bpo-hive-best-outsourcing-appointment-setting-company-in-the-us-of-2025">Evergreen Award · 2025</a><a href="https://themanifest.com/eg/bpo/companies">The Manifest · BPO listing</a><a href="https://clutch.co/profile/bpo-hive">Clutch · Reviews</a><a href="https://www.goodfirms.co/bpo-services/egypt">GoodFirms · BPO listing</a></div><p class="growth-caption">Awards and directory listings have different selection methods; these links are not performance guarantees.</p></section>');
   }
   if(rel==='about.html')$('h3').filter((i,e)=>$(e).text().trim()==='Amr Abdelrazzak').attr('id','amr-abdelrazzak');
