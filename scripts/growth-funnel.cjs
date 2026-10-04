@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),c=require('cheerio');
-const {page,org,author,ld,byline,DATE,ORIGIN}=require('./growth-site.cjs');
+const {page,org,author,ld,DATE,ORIGIN}=require('./growth-site.cjs');
 const policy=require('../lib/campaign-policy.cjs');
 const read=(out,p)=>c.load(fs.readFileSync(path.join(out,p),'utf8'));
 const write=(out,p,$)=>fs.writeFileSync(path.join(out,p),$.html());
@@ -36,7 +36,7 @@ function funnel(out){
  $=read(out,'pricing.html');$('title').text('Appointment Setting Pricing · From $4,000/Month | BPO Hive');$('h1').first().text('Managed outbound pricing from $4,000 per month');
  $('p').each((i,e)=>{if($(e).text().includes('No public package price'))$(e).text('Managed campaigns start at $4,000 per month. Growth and Enterprise programs are custom quoted around audience, market, language and delivery capacity. Your written proposal defines the exact scope and any third-party costs.');});
  $('h3').each((i,e)=>{const v=$(e).text().trim();if(v==='Validation Sprint')$(e).after('<p class="growth-price"><strong>From $4,000/month</strong></p>');if(['Growth','Enterprise'].includes(v))$(e).after('<p class="growth-price"><strong>Custom quote · above the $4,000 starting scope</strong></p>');});
- $('.herocopy').first().text('BPO Hive managed outbound starts at $4,000/month for an agreed campaign scope. USA, Canada and GCC programs combine research, outreach, qualification and reporting; higher-capacity tiers are custom quoted.').after(byline+'<p class="herocopy">'+policy.scope+' '+policy.portal+' '+policy.insights+'</p>');$('main').append('<div class="growth-links"><a href="/appointment-setting-cost">Cost and ROI guide</a><a href="/vs/in-house-sdr">Compare in-house SDRs</a><a href="/vs/belkins">Compare Belkins</a><a href="/vs/salesroads">Compare SalesRoads</a></div>');write(out,'pricing.html',$);
+ $('.herocopy').first().text('BPO Hive managed outbound starts at $4,000/month for an agreed campaign scope. USA, Canada and GCC programs combine research, outreach, qualification and reporting; higher-capacity tiers are custom quoted.').after('<p class="herocopy">'+policy.scope+' '+policy.portal+' '+policy.insights+'</p>');$('main').append('<div class="growth-links"><a href="/appointment-setting-cost">Cost and ROI guide</a><a href="/vs/in-house-sdr">Compare in-house SDRs</a><a href="/vs/belkins">Compare Belkins</a><a href="/vs/salesroads">Compare SalesRoads</a></div>');write(out,'pricing.html',$);
  // Common commercial navigation, schema and content-link rules across published HTML.
  const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(x=>x.isDirectory()&&!['assets','admin'].includes(x.name)?walk(path.join(dir,x.name)):x.isFile()&&x.name.endsWith('.html')?[path.join(dir,x.name)]:[]);
  for(const file of walk(out)){
@@ -67,7 +67,7 @@ function funnel(out){
   if(rel.startsWith('blog-')){const target=$('article').first();target.append('<aside class="growth-links"><a href="/services/appointment-setting">Explore appointment setting</a><a href="/services/sales-development">Explore sales development</a></aside>');}
   if(rel==='index.html'){
    $('title').text('B2B Appointment Setting · USA, Canada & GCC | BPO Hive');
-   $('.hero-copy').first().append(' Managed campaigns for the USA, Canada and GCC start at $4,000/month.').after(byline+'<p class="hero-copy">'+policy.insights+'</p>');
+   $('.hero-copy').first().append(' Managed campaigns for the USA, Canada and GCC start at $4,000/month.').after('<p class="hero-copy">'+policy.insights+'</p>');
    $('footer').before('<section class="growth"><h2>Featured and listed</h2><div class="growth-links"><a href="https://evergreenawards.com/awards/bpo-hive-best-outsourcing-appointment-setting-company-in-the-us-of-2025">Evergreen Award · 2025</a><a href="https://themanifest.com/eg/bpo/companies">The Manifest · BPO listing</a><a href="https://clutch.co/profile/bpo-hive">Clutch · Reviews</a><a href="https://www.goodfirms.co/bpo-services/egypt">GoodFirms · BPO listing</a></div><p class="growth-caption">Awards and directory listings have different selection methods; these links are not performance guarantees.</p></section>');
   }
   if(rel==='about.html')$('h3').filter((i,e)=>$(e).text().trim()==='Amr Abdelrazzak').attr('id','amr-abdelrazzak');
