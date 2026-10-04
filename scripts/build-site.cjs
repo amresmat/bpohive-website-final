@@ -60,7 +60,9 @@ function build(out=path.join(root,'dist')) {
   let sitemap=read('sitemap.xml').replace(/<url>\s*<loc>[^<]*\/blog-[\s\S]*?<\/url>/g,'');
   sitemap=sitemap.replace('</urlset>',posts.map(p=>`<url><loc>${origin}/blog-${p.slug}</loc><lastmod>${escape(p.updated||p.date)}</lastmod></url>`).join('\n')+'\n</urlset>');fs.writeFileSync(path.join(out,'sitemap.xml'),sitemap);
   require('./cms-sections.cjs').buildSections(root,out);
-  console.log(`Built ${posts.length} blog posts and homepage content.`);
+  require('./growth-site.cjs').generate(out);
+  require('./growth-funnel.cjs').funnel(out);
+  console.log(`Built ${posts.length} blog posts, CMS sections, regional content and lead funnel.`);
 }
 if(require.main===module)build();
 module.exports={build,validate,renderPost};

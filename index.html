@@ -110,8 +110,7 @@
     .hero::after{content:"";position:absolute;inset:0;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:62px 62px;mask-image:linear-gradient(to bottom,black,transparent 85%)}
     .hero-grid{position:relative;z-index:1;min-height:0;display:block;padding:72px 0 68px}
     .hero-copy-block{max-width:1040px}
-    .eyebrow{width:fit-content;max-width:100%;display:inline-flex;align-items:flex-start;gap:9px;padding:8px 12px;border:1px solid rgba(155,213,255,.25);border-radius:999px;color:#bfe4ff;background:rgba(49,165,246,.1);font-size:12px;font-weight:900;line-height:1.45;letter-spacing:.085em;text-transform:uppercase;overflow-wrap:anywhere}
-    .eyebrow-mark{flex:0 0 auto;width:8px;height:8px;margin-top:4px;border-radius:50%;background:var(--blue-400);box-shadow:0 0 0 5px rgba(104,191,255,.12)}
+    .eyebrow{max-width:100%;color:#a9c7d9;font-size:14px;font-weight:600;line-height:1.5;letter-spacing:.01em;overflow-wrap:anywhere}
     h1,h2,h3{font-family:var(--display)}
     h1{max-width:900px;margin:22px 0 21px;font-size:clamp(49px,5.5vw,74px);line-height:.99;letter-spacing:-.055em}
     h1 span{color:var(--blue-300)}
@@ -391,6 +390,7 @@ fbq('track', 'PageView');
     <section class="hero" id="top">
       <div class="shell hero-grid">
         <div class="hero-copy-block">
+          <p class="eyebrow">Award-winning B2B appointment-setting company</p>
           <h1><!--cms:hero_title-->We Fill Your Pipeline With<!--/cms:hero_title--> <span><!--cms:hero_accent-->Sales-Qualified Leads.<!--/cms:hero_accent--></span></h1>
           <p class="hero-copy"><!--cms:hero_copy-->BPO Hive builds and runs the complete outbound system—from market analysis and B2B prospect data to phone, email, LinkedIn, qualification, calendar booking, and live campaign reporting.<!--/cms:hero_copy--></p>
           <div class="hero-actions">
@@ -490,12 +490,12 @@ fbq('track', 'PageView');
         <div class="calculator-wrap reveal">
           <div class="calculator">
             <div class="calc-controls"><h3>Your assumptions</h3><p class="calc-sub">Adjust the campaign and your sales economics.</p>
-              <div class="field"><label for="investment"><span>Campaign investment</span><output id="investment-output">$3,000</output></label><input id="investment" type="range" min="3000" max="100000" step="1000" value="3000"><div class="range-labels"><span>$3,000</span><span>$100,000</span></div></div>
+              <div class="field"><label for="investment"><span>Campaign investment</span><output id="investment-output">$4,000</output></label><input id="investment" type="range" min="4000" max="100000" step="1000" value="4000"><div class="range-labels"><span>$4,000</span><span>$100,000</span></div></div>
               <div class="field"><label for="deal-value"><span>Average revenue per sale</span></label><input id="deal-value" type="number" min="1000" step="1000" value="10000" inputmode="numeric"></div>
               <div class="field"><label for="close-rate"><span>Demo-to-sale close rate</span><output id="close-output">20%</output></label><input id="close-rate" type="range" min="20" max="100" step="5" value="20"><div class="range-labels"><span>20%</span><span>100%</span></div></div>
             </div>
             <div class="calc-results" aria-live="polite"><h3>Estimated campaign outcome</h3><p class="calc-sub">Directional estimates—not guaranteed results.</p><div class="result-grid">
-              <div class="result"><span>Touchpoints</span><strong id="touchpoints">10,000</strong></div><div class="result"><span>Conversations</span><strong id="conversations">About 150</strong></div><div class="result"><span>Booked demos</span><strong id="bookings">10–15</strong></div><div class="result"><span>Expected sales</span><strong id="sales">2–3</strong></div><div class="result"><span>Projected revenue</span><strong id="revenue">$20K–$30K</strong></div><div class="result"><span>Investment</span><strong id="investment-result">$3,000</strong></div><div class="result roi"><span>Potential revenue ROI</span><strong id="roi">567%–900%</strong></div>
+              <div class="result"><span>Touchpoints</span><strong id="touchpoints">10,000</strong></div><div class="result"><span>Conversations</span><strong id="conversations">About 150</strong></div><div class="result"><span>Booked demos</span><strong id="bookings">10–15</strong></div><div class="result"><span>Expected sales</span><strong id="sales">2–3</strong></div><div class="result"><span>Projected revenue</span><strong id="revenue">$20K–$30K</strong></div><div class="result"><span>Investment</span><strong id="investment-result">$4,000</strong></div><div class="result roi"><span>Potential revenue ROI</span><strong id="roi">567%–900%</strong></div>
             </div><p class="fine-print">Estimates only. Results vary by offer, ICP, market, data quality, price point, channel mix, close rate, and sales conditions. Bookings, sales, revenue, and ROI are not guaranteed. Revenue ROI excludes delivery costs and other expenses.</p></div>
           </div>
         </div>
@@ -602,7 +602,7 @@ fbq('track', 'PageView');
       const money=function(n){return n>=1000000?'$'+(n/1000000).toFixed(1)+'M':n>=1000?'$'+Math.round(n).toLocaleString():'$'+Math.round(n)};
       const compactMoney=function(n){return n>=1000000?'$'+(n/1000000).toFixed(1)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n)};
       function calculate(){
-        const invest=Number(investment.value);const value=Math.max(1000,Number(dealValue.value)||1000);const close=Number(closeRate.value)/100;const units=invest/3000;let conversationMultiplier=1;let appointmentMultiplier=1;
+        const invest=Number(investment.value);const value=Math.max(1000,Number(dealValue.value)||1000);const close=Number(closeRate.value)/100;const units=invest/4000;let conversationMultiplier=1;let appointmentMultiplier=1;
         if(value<=1000){conversationMultiplier=2.5;appointmentMultiplier=3}else if(value<10000){const progress=(value-1000)/9000;conversationMultiplier=2.5-(1.5*progress);appointmentMultiplier=3-(2*progress)}else if(value>15000&&value<20000){const progress=(value-15000)/5000;conversationMultiplier=1-(.25*progress);appointmentMultiplier=1-(.5*progress)}else if(value>=20000){conversationMultiplier=.75;appointmentMultiplier=.5}
         const touchpoints=Math.round(units*10000);const conversations=Math.round(units*150*conversationMultiplier);const bookingLow=Math.round(units*10*appointmentMultiplier);const bookingHigh=Math.round(units*15*appointmentMultiplier);const salesLow=Math.round(bookingLow*close);const salesHigh=Math.round(bookingHigh*close);const revenueLow=salesLow*value;const revenueHigh=salesHigh*value;const roiLow=Math.round(((revenueLow-invest)/invest)*100);const roiHigh=Math.round(((revenueHigh-invest)/invest)*100);
         document.getElementById('investment-output').textContent=money(invest);document.getElementById('close-output').textContent=Math.round(close*100)+'%';document.getElementById('touchpoints').textContent=touchpoints.toLocaleString();document.getElementById('conversations').textContent='About '+conversations.toLocaleString();document.getElementById('bookings').textContent=bookingLow+'–'+bookingHigh;document.getElementById('sales').textContent=salesLow+'–'+salesHigh;document.getElementById('revenue').textContent=compactMoney(revenueLow)+'–'+compactMoney(revenueHigh);document.getElementById('investment-result').textContent=money(invest);document.getElementById('roi').textContent=roiLow.toLocaleString()+'%–'+roiHigh.toLocaleString()+'%';
