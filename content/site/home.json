@@ -4,12 +4,11 @@
   "final_title": "Start filling your pipeline now!",
   "final_copy": "Let’s map your exact ICP, audience, offer, and campaign opportunity, then define the right first campaign.",
   "stat1_value": "$25M+",
-  "stat1_label": "Client revenue attributed*",
+  "stat1_label": "Client revenue attributed",
   "stat2_value": "21,200+",
-  "stat2_label": "Appointments set*",
+  "stat2_label": "Appointments set",
   "stat3_value": "4.9/5",
   "stat3_label": "Clutch · 11 reviews",
   "stat4_value": "10+",
-  "stat4_label": "Industries served*",
-  "stats_note": "*Based on BPO Hive internal campaign records. Client outcomes vary. Clutch rating verified September 2026."
+  "stat4_label": "Industries served"
 }
