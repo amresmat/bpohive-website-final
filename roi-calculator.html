@@ -535,17 +535,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="lg:col-span-3">
                     <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">Planned Campaign Investment</h2>
-                        <p class="text-gray-500 mb-8">Each $3,000 campaign unit funds approximately 10,000 coordinated touchpoints.</p>
+                        <p class="text-gray-500 mb-8">Each $4,000 campaign unit funds approximately 10,000 coordinated touchpoints.</p>
 
                         <!-- Campaign Investment -->
                         <div>
                             <label class="flex justify-between items-center mb-3">
                                 <div>
                                     <span class="text-sm font-semibold text-gray-700">Campaign investment</span>
-                                    <p class="text-xs text-gray-400">Minimum investment: $3,000</p>
+                                    <p class="text-xs text-gray-400">Minimum investment: $4,000</p>
                                 </div>
                                 <div class="flex items-center gap-1 bg-[#EBF5FF] rounded-lg px-2 py-1">
-                                    <span class="text-lg font-bold text-[#4EA6FE]" id="rc-invest-val">$3,000</span>
+                                    <span class="text-lg font-bold text-[#4EA6FE]" id="rc-invest-val">$4,000</span>
                                     <div class="flex flex-col -my-1">
                                         <svg class="w-3 h-3 text-[#4EA6FE]/60" viewBox="0 0 12 12">
                                             <path d="M6 3L10 8H2L6 3Z" fill="currentColor" />
@@ -556,10 +556,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </div>
                                 </div>
                             </label>
-                            <input type="range" id="rc-invest" min="3000" max="100000" step="1000" value="3000"
+                            <input type="range" id="rc-invest" min="4000" max="100000" step="1000" value="4000"
                                 class="w-full">
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>$3,000</span><span>$100,000</span></div>
+                                <span>$4,000</span><span>$100,000</span></div>
                         </div>
 
                         <div class="grid sm:grid-cols-2 gap-5 mt-8">
@@ -690,7 +690,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-400">Campaign investment</p>
-                                        <p class="text-xl font-bold text-green-600" id="rc-investment-result">$3,000</p>
+                                        <p class="text-xl font-bold text-green-600" id="rc-investment-result">$4,000</p>
                                     </div>
                                 </div>
                                 <span class="text-xs text-gray-400">selected</span>
@@ -926,7 +926,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             function calculate() {
                 var invest = parseInt(investSlider.value);
-                var units = invest / 3000;
+                var units = invest / 4000;
                 var touchpoints = Math.round(units * 10000);
                 var dealValue = Math.max(1000, parseFloat(dealValueInput.value) || 1000);
                 var conversationMultiplier = 1;

@@ -3,6 +3,16 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/work-with-us",
+      "destination": "/careers",
+      "statusCode": 301
+    },
+    {
+      "source": "/work-with-us.html",
+      "destination": "/careers",
+      "statusCode": 301
+    },
+    {
       "source": "/services/customer-support",
       "destination": "/services",
       "permanent": true
