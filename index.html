@@ -122,7 +122,7 @@
     .hero-proof{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:32px;border:1px solid rgba(155,213,255,.18);border-radius:17px;background:rgba(255,255,255,.055);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.12)}
     .hero-proof-item{min-width:0;padding:17px 12px;border-right:1px solid rgba(255,255,255,.09)}
     .hero-proof-item:last-child{border-right:0}
-    .hero-proof-item strong{display:block;color:#fff;font-family:"Arial Black",var(--display);font-size:25px;line-height:1;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+    .hero-proof-item strong{display:block;color:#fff;font-family:var(--display);font-weight:800;font-size:25px;line-height:1;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
     .hero-proof-item span{display:block;margin-top:7px;color:#9fb4c1;font-size:14px;line-height:1.35}
     .hero-proof-link{transition:background .2s ease}
     .hero-proof-link:hover{background:rgba(49,165,246,.12)}
@@ -130,7 +130,7 @@
     .proof{position:relative;z-index:3;margin-top:-1px;background:linear-gradient(180deg,#f8fcff,#fff)}
     .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:34px 0 14px}
     .proof-card{min-height:142px;display:flex;flex-direction:column;justify-content:center;padding:24px;border:1px solid #d7e9f5;border-radius:18px;background:#fff;box-shadow:var(--shadow-sm)}
-    .proof-card strong{display:block;color:var(--blue-600);font-family:"Arial Black",var(--display);font-size:clamp(34px,3.4vw,49px);line-height:1;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+    .proof-card strong{display:block;color:var(--blue-600);font-family:var(--display);font-weight:800;font-size:clamp(34px,3.4vw,49px);line-height:1;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
     .proof-card span{display:block;margin-top:11px;color:#4d6574;font-size:16px;font-weight:750;line-height:1.4}
     .proof-card.link:hover{border-color:var(--blue-300);transform:translateY(-2px)}
     .proof-note{margin:0;padding:0 0 27px;color:#748895;font-size:14px;line-height:1.55}
@@ -212,7 +212,7 @@
     .aces-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:49px}
     .aces-grid::before{content:"";position:absolute;left:8%;right:8%;top:38px;height:1px;background:linear-gradient(90deg,transparent,var(--blue-500),transparent);opacity:.5}
     .aces-card{position:relative;min-height:314px;padding:25px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:linear-gradient(155deg,rgba(255,255,255,.08),rgba(255,255,255,.025));overflow:hidden}
-    .aces-card::after{content:attr(data-letter);position:absolute;right:9px;bottom:-42px;color:rgba(255,255,255,.035);font-family:"Arial Black",sans-serif;font-size:150px;line-height:1}
+    .aces-card::after{content:attr(data-letter);position:absolute;right:9px;bottom:-42px;color:rgba(255,255,255,.035);font-family:var(--display);font-weight:900;font-size:150px;line-height:1}
     .aces-num{position:relative;z-index:2;width:76px;height:76px;display:grid;place-items:center;border:9px solid var(--navy-900);border-radius:50%;color:var(--navy-950);background:linear-gradient(135deg,var(--blue-300),var(--blue-500));font-size:23px;font-weight:950;box-shadow:0 0 0 1px rgba(155,213,255,.25)}
     .aces-card h3{position:relative;z-index:1;margin:28px 0 11px;font-size:22px;letter-spacing:-.025em}
     .aces-card p{position:relative;z-index:1;margin:0;color:#aebfca;font-size:16px;line-height:1.68}
@@ -294,7 +294,7 @@
     .fine-print{margin:15px 0 0;color:#7a8e9b;font-size:13px;line-height:1.55}
     .region-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}
     .region-card{position:relative;min-height:390px;padding:34px;border:1px solid var(--line);border-radius:26px;background:#fff;box-shadow:var(--shadow-sm);overflow:hidden}
-    .region-card::after{content:attr(data-region);position:absolute;right:-4px;bottom:-24px;color:rgba(22,143,220,.045);font-family:"Arial Black",sans-serif;font-size:108px;letter-spacing:-.09em}
+    .region-card::after{content:attr(data-region);position:absolute;right:-4px;bottom:-24px;color:rgba(22,143,220,.045);font-family:var(--display);font-weight:900;font-size:108px;letter-spacing:-.09em}
     .region-tag{width:max-content;padding:7px 10px;border-radius:999px;color:var(--blue-600);background:var(--blue-100);font-size:13px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
     .region-card h3{position:relative;z-index:1;max-width:470px;margin:24px 0 13px;font-size:29px;line-height:1.16;letter-spacing:-.035em}
     .region-card p{position:relative;z-index:1;margin:0;color:var(--muted);font-size:16px;line-height:1.73}
