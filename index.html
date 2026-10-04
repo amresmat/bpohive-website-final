@@ -106,7 +106,7 @@
     .btn svg{width:17px;height:17px;transition:transform .2s ease}
     .btn:hover svg{transform:translateX(3px)}
     .hero{position:relative;overflow:hidden;color:#fff;background:var(--navy-950)}
-    .hero::before{content:"";position:absolute;inset:-20% -10%;background:radial-gradient(circle at 78% 32%,rgba(49,165,246,.28),transparent 29%),radial-gradient(circle at 4% 100%,rgba(104,191,255,.11),transparent 32%);pointer-events:none}
+    .hero::before{content:"";position:absolute;inset:-20% -10%;background:radial-gradient(circle at var(--glow-x,78%) var(--glow-y,32%),rgba(49,165,246,.28),transparent 29%),radial-gradient(circle at 4% 100%,rgba(104,191,255,.11),transparent 32%);pointer-events:none}
     .hero::after{content:"";position:absolute;inset:0;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:62px 62px;mask-image:linear-gradient(to bottom,black,transparent 85%)}
     .hero-grid{position:relative;z-index:1;min-height:0;display:block;padding:72px 0 68px}
     .hero-copy-block{max-width:1040px}
@@ -611,5 +611,25 @@ fbq('track', 'PageView');
 
     })();
   </script>
+<script>
+(function(){
+  var hero=document.querySelector('.hero');
+  if(!hero||!window.matchMedia('(hover:hover) and (pointer:fine)').matches||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var HOME=[.78,.32],cur=HOME.slice(),target=HOME.slice(),raf=0;
+  function tick(){
+    cur[0]+=(target[0]-cur[0])*.12;cur[1]+=(target[1]-cur[1])*.12;
+    hero.style.setProperty('--glow-x',(cur[0]*100).toFixed(2)+'%');
+    hero.style.setProperty('--glow-y',(cur[1]*100).toFixed(2)+'%');
+    raf=(Math.abs(target[0]-cur[0])+Math.abs(target[1]-cur[1])>.0005)?requestAnimationFrame(tick):0;
+  }
+  function go(){if(!raf)raf=requestAnimationFrame(tick);}
+  hero.addEventListener('pointermove',function(e){
+    var r=hero.getBoundingClientRect();
+    /* the glow layer is larger than the hero: inset -20% (top/bottom) and -10% (left/right) */
+    target=[(e.clientX-r.left+r.width*.1)/(r.width*1.2),(e.clientY-r.top+r.height*.2)/(r.height*1.4)];go();
+  },{passive:true});
+  hero.addEventListener('pointerleave',function(){target=HOME.slice();go();});
+})();
+</script>
 </body>
 </html>
