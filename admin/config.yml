@@ -534,6 +534,26 @@
                   "hint": "e.g. VP Sales \u00b7 Bitcoin Depot"
                 },
                 {
+                  "name": "rating",
+                  "label": "Star rating",
+                  "widget": "select",
+                  "options": [
+                    {
+                      "label": "5 stars",
+                      "value": 5
+                    },
+                    {
+                      "label": "4 stars",
+                      "value": 4
+                    },
+                    {
+                      "label": "3 stars",
+                      "value": 3
+                    }
+                  ],
+                  "default": 5
+                },
+                {
                   "name": "verified",
                   "label": "Show the Verified on Clutch badge",
                   "widget": "boolean",
