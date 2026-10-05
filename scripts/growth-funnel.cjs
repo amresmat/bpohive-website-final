@@ -58,9 +58,9 @@ function funnel(out){
    $('footer').before(`<section class="bh-featured" aria-labelledby="bh-featured-title">
     <style>
      .bh-featured{max-width:1200px;margin:0 auto;padding:56px 24px 64px}
-     .bh-featured h2{margin:0 0 28px;color:#f5f9fc;font-size:clamp(26px,3vw,36px);font-weight:700;line-height:1.2;letter-spacing:-.025em}
+     .bh-featured h2{margin:0 0 28px;color:#102534;font-size:clamp(26px,3vw,36px);font-weight:700;line-height:1.2;letter-spacing:-.025em}
      .bh-featured-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-     .bh-featured-card{display:flex;flex-direction:column;border:1px solid #b0d5ed30;border-radius:18px;overflow:hidden;background:#ffffff08;text-decoration:none;color:#f5f9fc;transition:border-color .2s,transform .2s}
+     .bh-featured-card{display:flex;flex-direction:column;border:1px solid #dbe8f0;border-radius:18px;overflow:hidden;background:#f3f8fc;text-decoration:none;color:#102534;transition:border-color .2s,transform .2s}
      .bh-featured-card:hover{border-color:#87caff;transform:translateY(-3px)}
      .bh-featured-card:focus-visible{outline:3px solid #87caff;outline-offset:4px}
      .bh-featured-logo{height:120px;display:flex;align-items:center;justify-content:center;background:#fff;padding:24px}
