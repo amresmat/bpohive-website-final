@@ -113,12 +113,9 @@ function applyShell(html, rel) {
   // One font source for every page: drop the old Google Fonts links and preload our own files
   // so text is drawn in the right font from the first frame.
   $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
-  const preload = ['inter-latin-wght-normal.woff2', 'nunito-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
-  // Headlines use Avenir Next where the device has it (Apple devices) and Nunito Sans elsewhere.
-  // This tiny check runs before the page is drawn so the right letter-spacing is applied from the start.
-  const fontCheck = `<script>(function(){try{var c=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmlliWQ';c.font='700 72px monospace';var a=c.measureText(t).width;c.font='700 72px "Avenir Next",monospace';if(c.measureText(t).width!==a)document.documentElement.classList.add('has-avenir');}catch(e){}})();</script>`;
+  const preload = ['inter-latin-wght-normal.woff2', 'dm-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
   const charset = $('head meta[charset]').first();
-  if (charset.length) charset.after(preload + fontCheck); else $('head').prepend(preload + fontCheck);
+  if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
   body.addClass('bh-has-shell');
   return $.html();
