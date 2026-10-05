@@ -74,14 +74,14 @@ function footer(rel) {
 // nothing is hidden unless this script runs, and reduced-motion visitors are left alone.
 const REVEAL = `<script>(function(){
 if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-var SEL='[class*="card"],.bento,.panel,article,details,.section-head,.aces-intro,.hero-proof,.logo-grid,.calculator-wrap,.visibility-panel,.platform-copy,.rounded-2xl,.rounded-3xl,.growth .content>*,.growth-links,main section h2,main section>div>h2+p';
-var SKIP='.bh-header,.bh-footer,.aces-timeline,[role="dialog"],.scroll-animate,.hidden,[hidden],.leaflet-container,iframe';
+var SEL='.scroll-animate,[class*="card"],.bento,.panel,article,details,.section-head,.aces-intro,.hero-proof,.logo-grid,.calculator-wrap,.visibility-panel,.platform-copy,.rounded-2xl,.rounded-3xl,.growth .content>*,.growth-links,main section h2,main section>div>h2+p';
+var SKIP='.bh-header,.bh-footer,.aces-timeline,[role="dialog"],.hidden,[hidden],.leaflet-container,iframe';
 function init(){var vh=window.innerHeight,chosen=[];
 [].forEach.call(document.querySelectorAll(SEL),function(el){
-if(el.closest(SKIP)||el.querySelector('.scroll-animate,.aces-rail,.leaflet-container'))return;
+if(el.closest(SKIP)||el.querySelector('.aces-rail,.leaflet-container'))return;
 for(var i=0;i<chosen.length;i++)if(chosen[i].contains(el))return;
 var r=el.getBoundingClientRect();if(!r.height||!r.width||r.height>vh*1.25||r.top<vh*.92)return;
-var pos=getComputedStyle(el).position;if(pos==='fixed'||pos==='sticky')return;
+var cs=getComputedStyle(el);if(cs.position==='fixed'||cs.position==='sticky'||cs.opacity==='0')return;
 chosen.push(el);});
 if(!chosen.length)return;
 var rows={};
@@ -111,8 +111,11 @@ function applyShell(html, rel) {
   // so text is drawn in the right font from the first frame.
   $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
   const preload = ['inter-latin-wght-normal.woff2', 'nunito-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
+  // Headlines use Avenir Next where the device has it (Apple devices) and Nunito Sans elsewhere.
+  // This tiny check runs before the page is drawn so the right letter-spacing is applied from the start.
+  const fontCheck = `<script>(function(){try{var c=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmlliWQ';c.font='700 72px monospace';var a=c.measureText(t).width;c.font='700 72px "Avenir Next",monospace';if(c.measureText(t).width!==a)document.documentElement.classList.add('has-avenir');}catch(e){}})();</script>`;
   const charset = $('head meta[charset]').first();
-  if (charset.length) charset.after(preload); else $('head').prepend(preload);
+  if (charset.length) charset.after(preload + fontCheck); else $('head').prepend(preload + fontCheck);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
   body.addClass('bh-has-shell');
   return $.html();
