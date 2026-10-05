@@ -85,5 +85,5 @@ body.bh-has-shell{padding-top:78px}
 @media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 
 /* ---------- Fade in on scroll ---------- */
-.bh-reveal{opacity:0!important;transform:translateY(28px)!important;transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)!important;will-change:opacity,transform}
-.bh-reveal.bh-in{opacity:1!important;transform:none!important}
+.bh-reveal.bh-reveal{opacity:0!important;transform:translateY(28px)!important;transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)!important;will-change:opacity,transform}
+.bh-reveal.bh-reveal.bh-in{opacity:1!important;transform:none!important}
