@@ -101,6 +101,9 @@ function applyShell(html, rel) {
   $('body > header').filter((i, e) => $(e).find('nav').length > 0).remove();
   $('nav').filter((i, e) => !$(e).closest('main,footer,article,section,details,aside').length).remove();
   $('#mobile-menu,.mobile-menu,.growth-mobile-book').remove();
+  // No author/date lines anywhere on the site.
+  $('.byline').remove();
+  $('p,span,div').filter((i, e) => !$(e).children('p,div,section,ul,h1,h2,h3').length && /^\s*By\s+Amr Abdelrazzak\b/.test($(e).text())).remove();
   $('footer').remove();
   const skip = body.children('.skip-link,a[href="#main"]').first();
   if (skip.length) skip.after(header(rel)); else body.prepend(header(rel));
@@ -121,6 +124,21 @@ function applyShell(html, rel) {
   return $.html();
 }
 
+// House style: no long dashes (em dashes) anywhere. Applied to the finished page so it also
+// covers text added later through the admin.
+function noLongDashes(html) {
+  return html.replace(/(\s*)(?:—|&mdash;|&#8212;|&#x2014;)(\s*)/gi, (m, before, after, offset, all) => {
+    const prev = all[offset - 1];
+    if (prev === '>' || prev === undefined) {
+      const tagStart = all.lastIndexOf('<', offset - 1);
+      const tag = all.slice(tagStart, offset);
+      // "<strong>Label</strong> — detail" becomes "Label: detail"; a dash that opens a line is dropped.
+      return /^<\/(?:strong|b|em|i|a|span)>$/i.test(tag) ? ': ' : before;
+    }
+    return before && after ? ': ' : ', ';
+  });
+}
+
 function shell(out) {
   const walk = dir => {
     for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -128,11 +146,12 @@ function shell(out) {
       if (f.isDirectory()) { if (f.name !== 'admin' && f.name !== 'assets') walk(p); continue; }
       if (!f.name.endsWith('.html')) continue;
       const rel = path.relative(out, p).split(path.sep).join('/');
-      const next = applyShell(fs.readFileSync(p, 'utf8'), rel);
-      if (next) fs.writeFileSync(p, next);
+      const html = fs.readFileSync(p, 'utf8');
+      const next = noLongDashes(applyShell(html, rel) || html);
+      if (next !== html) fs.writeFileSync(p, next);
     }
   };
   walk(out);
 }
 
-module.exports = { shell, applyShell, header, footer };
+module.exports = { noLongDashes, shell, applyShell, header, footer };

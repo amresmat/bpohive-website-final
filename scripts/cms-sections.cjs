@@ -166,9 +166,10 @@ function renderReviews(html, data) {
   const cards = list.map((r, i) => {
     const where = `Review ${i + 1}`;
     const name = str(r, 'name', where), quote = opt(r, 'quote').replace(/^[“"']+|[”"']+$/g, ''), role = opt(r, 'role');
+    const rating = Math.min(5, Math.max(1, Math.round(Number(r.rating)) || 5));
     const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
     return `          <article class="testimonial-card">
-            <div class="testimonial-top"><span class="testimonial-rating" aria-label="5 out of 5 stars">★★★★★</span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>
+            <div class="testimonial-top"><span class="testimonial-rating" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}<i>${'★'.repeat(5 - rating)}</i></span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>
             <blockquote>“${esc(quote)}”</blockquote>
             <div class="testimonial-person"><span class="person-mark">${esc(initials)}</span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
           </article>`;
