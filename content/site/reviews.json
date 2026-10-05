@@ -1,0 +1,16 @@
+{
+  "reviews": [
+    {
+      "quote": "I was impressed with their ability to scale with us as we grow.",
+      "name": "Sarah Wessel",
+      "role": "VP Sales · Bitcoin Depot",
+      "verified": true
+    },
+    {
+      "quote": "They’re easy to approach and committed.",
+      "name": "Osama Boghdady",
+      "role": "Regional Marketing Manager · ZWSOFT",
+      "verified": true
+    }
+  ]
+}
