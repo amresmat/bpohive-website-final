@@ -348,11 +348,6 @@
               "widget": "string"
             },
             {
-              "name": "hero_copy",
-              "label": "Hero copy",
-              "widget": "text"
-            },
-            {
               "name": "final_title",
               "label": "Final title",
               "widget": "string"
@@ -401,11 +396,6 @@
               "name": "stat4_label",
               "label": "Stat 4: label",
               "widget": "string"
-            },
-            {
-              "name": "stats_note",
-              "label": "Small note under the stats",
-              "widget": "text"
             }
           ]
         },
@@ -509,6 +499,66 @@
               "pattern": [
                 "^https://.+",
                 "Must start with https://"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "reviews",
+          "label": "Client reviews (homepage)",
+          "file": "content/site/reviews.json",
+          "fields": [
+            {
+              "name": "reviews",
+              "label": "Reviews",
+              "label_singular": "review",
+              "widget": "list",
+              "summary": "{{fields.name}}",
+              "fields": [
+                {
+                  "name": "quote",
+                  "label": "Quote",
+                  "widget": "text",
+                  "hint": "Keep it short: one or two sentences. Quotation marks are added for you."
+                },
+                {
+                  "name": "name",
+                  "label": "Person's name",
+                  "widget": "string"
+                },
+                {
+                  "name": "role",
+                  "label": "Job title and company",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "e.g. VP Sales \u00b7 Bitcoin Depot"
+                },
+                {
+                  "name": "rating",
+                  "label": "Star rating",
+                  "widget": "select",
+                  "options": [
+                    {
+                      "label": "5 stars",
+                      "value": 5
+                    },
+                    {
+                      "label": "4 stars",
+                      "value": 4
+                    },
+                    {
+                      "label": "3 stars",
+                      "value": 3
+                    }
+                  ],
+                  "default": 5
+                },
+                {
+                  "name": "verified",
+                  "label": "Show the Verified on Clutch badge",
+                  "widget": "boolean",
+                  "default": true
+                }
               ]
             }
           ]

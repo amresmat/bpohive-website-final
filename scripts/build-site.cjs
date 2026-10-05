@@ -62,6 +62,7 @@ function build(out=path.join(root,'dist')) {
   require('./cms-sections.cjs').buildSections(root,out);
   require('./growth-site.cjs').generate(out);
   require('./growth-funnel.cjs').funnel(out);
+  require('./site-shell.cjs').shell(out);
   console.log(`Built ${posts.length} blog posts, CMS sections, regional content and lead funnel.`);
 }
 if(require.main===module)build();

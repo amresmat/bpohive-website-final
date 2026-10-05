@@ -1,0 +1,89 @@
+/* Shared header and footer used on every page (see scripts/site-shell.cjs).
+   Everything is prefixed with bh- and sized in px so no page stylesheet can change it. */
+.bh-header,.bh-header *,.bh-footer,.bh-footer *{box-sizing:border-box}
+.bh-shell{width:min(1180px,calc(100% - 40px));margin-inline:auto}
+
+/* ---------- Header ---------- */
+body.bh-has-shell{padding-top:78px}
+.bh-header{position:fixed;top:0;left:0;right:0;z-index:1000;border-bottom:1px solid rgba(219,232,240,.9);background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 8px 28px rgba(13,29,43,.045);font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.2;letter-spacing:0;text-align:left;color:#405967}
+.bh-header-inner{height:78px;display:flex;align-items:center;justify-content:space-between;gap:28px}
+.bh-header .bh-brand{flex:none;display:block;line-height:0}
+.bh-header .bh-brand img{display:block;width:160px;height:auto;max-width:none;object-fit:contain}
+.bh-header .bh-links{display:flex;align-items:center;gap:28px;margin:0;padding:0;border:0;box-shadow:none;background:none}
+.bh-header .bh-links a{position:relative;display:block;padding:29px 0;color:#405967;font-family:inherit;font-size:16px;font-weight:600;line-height:20px;letter-spacing:0;text-decoration:none;white-space:nowrap;transition:color .2s ease}
+.bh-header .bh-links a::after{content:"";position:absolute;left:0;right:100%;bottom:20px;height:2px;border-radius:2px;background:#31a5f6;transition:right .22s ease}
+.bh-header .bh-links a:hover{color:#0d1d2b}
+.bh-header .bh-links a:hover::after,.bh-header .bh-links a[aria-current="page"]::after{right:0}
+.bh-header .bh-links a[aria-current="page"]{color:#0d1d2b}
+.bh-header .bh-actions{flex:none;display:flex;align-items:center;gap:10px}
+.bh-header .bh-btn,.bh-footer .bh-btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 21px;border:1px solid transparent;border-radius:13px;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1;letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.bh-header .bh-btn:hover,.bh-footer .bh-btn:hover{transform:translateY(-2px)}
+.bh-header .bh-actions>.bh-btn-solid{min-width:136px}
+.bh-header a.bh-btn-outline{color:#0d1d2b;border-color:#dbe8f0;background:#fff;box-shadow:none}
+.bh-header a.bh-btn-solid,.bh-footer a.bh-btn-solid{color:#fff;background:#0f7ac4;box-shadow:0 10px 24px rgba(15,122,196,.22)}
+.bh-header a.bh-btn-solid:hover,.bh-footer a.bh-btn-solid:hover{background:#0c6cae}
+.bh-header .bh-menu-btn{display:none;width:46px;height:46px;padding:0;border:1px solid #dbe8f0;border-radius:13px;background:#fff;cursor:pointer}
+.bh-header .bh-menu-btn span{display:block;width:20px;height:2px;margin:4px auto;border-radius:2px;background:#0d1d2b;transition:transform .2s ease,opacity .2s ease}
+.bh-header .bh-menu-btn.is-open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.bh-header .bh-menu-btn.is-open span:nth-child(2){opacity:0}
+.bh-header .bh-menu-btn.is-open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.bh-header .bh-mobile-menu{position:absolute;left:0;right:0;top:100%;padding:12px 20px 22px;border-bottom:1px solid #dbe8f0;background:#fff;box-shadow:0 25px 45px rgba(8,21,33,.12)}
+.bh-header .bh-mobile-menu[hidden]{display:none}
+.bh-header .bh-mobile-menu nav{display:grid;gap:4px;margin:0;padding:0;border:0;box-shadow:none;background:none}
+.bh-header .bh-mobile-menu nav a{display:block;padding:13px 10px;border-radius:10px;color:#344d5c;font-size:17px;font-weight:600;line-height:22px;text-decoration:none}
+.bh-header .bh-mobile-menu nav a[aria-current="page"]{color:#0d1d2b;background:#f1f9ff}
+.bh-header .bh-mobile-menu .bh-btn{width:100%;margin-top:10px}
+@media (max-width:1020px){
+  .bh-header .bh-links,.bh-header .bh-actions>.bh-btn{display:none}
+  .bh-header .bh-menu-btn{display:block}
+}
+@media (max-width:760px){.bh-shell{width:min(100% - 28px,1180px)}.bh-header-inner{height:70px}body.bh-has-shell{padding-top:70px}.bh-header .bh-brand img{width:146px}}
+
+/* ---------- Footer ---------- */
+.bh-footer{padding:68px 0 28px;border-top:1px solid #dbe8f0;background:#081521;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;letter-spacing:0;text-align:left;color:#aebfca}
+.bh-footer a{color:#c7d6df;text-decoration:none;transition:color .2s ease}
+.bh-footer a:hover{color:#fff}
+.bh-footer-grid{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,.8fr)) minmax(0,1.45fr);gap:36px;align-items:start}
+.bh-footer-brand img{display:block;width:176px;height:auto;max-width:none;margin-left:-4px}
+.bh-footer-brand p{max-width:300px;margin:18px 0 0;color:#aebfca;font-size:16px;line-height:1.65}
+.bh-footer-brand .bh-footer-regions{margin-top:12px;font-size:15px;color:#8ea4b3}
+.bh-footer-brand .bh-footer-regions a{text-decoration:underline;text-underline-offset:3px}
+.bh-footer-col{display:grid;gap:11px;align-content:start}
+.bh-footer-col strong,.bh-contact strong{display:block;margin:0 0 6px;color:#fff;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bh-footer-col a{font-size:16px;line-height:1.4}
+.bh-contact{display:grid;gap:12px;padding:26px;border:1px solid rgba(155,213,255,.18);border-radius:20px;background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.bh-footer .bh-contact-row{display:block;color:#fff;font-size:17px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.bh-footer .bh-contact-row span{display:block;margin-bottom:2px;color:#8ea4b3;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.bh-footer .bh-contact-row:hover{color:#9bd5ff}
+.bh-contact .bh-btn{margin-top:8px}
+.bh-footer-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px;margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);color:#8ea4b3;font-size:15px}
+.bh-footer-bottom nav{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0;padding:0;border:0;box-shadow:none;background:none}
+.bh-footer-bottom nav a{font-size:15px;font-weight:500}
+@media (max-width:1080px){.bh-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bh-footer-brand{grid-column:1/-1}.bh-contact{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center}.bh-contact strong{grid-column:1/-1}.bh-contact .bh-btn{grid-column:1/-1;justify-self:start;margin-top:4px}}
+@media (max-width:640px){.bh-footer{padding-top:52px}.bh-footer-grid{grid-template-columns:1fr 1fr;gap:30px 22px}.bh-contact{grid-template-columns:1fr}.bh-contact .bh-btn{justify-self:stretch}.bh-footer-bottom{display:grid}}
+@media (prefers-reduced-motion:reduce){.bh-header *,.bh-footer *{transition:none!important}}
+
+/* ---------- Overrides for older page stylesheets that restyle every footer ---------- */
+.bh-footer.bh-footer{background:#081521!important;border-color:#dbe8f0!important}
+.bh-footer .bh-footer-brand img{filter:none!important}
+.bh-footer .bh-footer-col strong,.bh-footer .bh-contact strong{color:#fff!important}
+.bh-footer .bh-footer-brand p{color:#aebfca!important}
+.bh-footer .bh-footer-brand .bh-footer-regions{color:#8ea4b3!important}
+.bh-footer a{color:#c7d6df!important}
+.bh-footer a:hover{color:#fff!important}
+.bh-footer a.bh-contact-row{color:#fff!important}
+.bh-footer a.bh-contact-row span{color:#8ea4b3!important}
+.bh-footer a.bh-contact-row:hover{color:#9bd5ff!important}
+.bh-footer a.bh-btn-solid,.bh-footer a.bh-btn-solid:hover{color:#fff!important}
+.bh-footer .bh-footer-bottom,.bh-footer .bh-footer-bottom span{color:#8ea4b3!important}
+
+/* ---------- Smooth page-to-page navigation: the header stays put, the page cross-fades ---------- */
+@view-transition{navigation:auto}
+.bh-header{view-transition-name:bh-header}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+::view-transition-old(bh-header),::view-transition-new(bh-header){animation:none}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+
+/* ---------- Fade in on scroll ---------- */
+.bh-reveal.bh-reveal{opacity:0!important;transform:translateY(28px)!important;transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)!important;will-change:opacity,transform}
+.bh-reveal.bh-reveal.bh-in{opacity:1!important;transform:none!important}

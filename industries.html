@@ -136,6 +136,35 @@ src="https://www.facebook.com/tr?id=1492963711498633&ev=PageView&noscript=1"
             animation-delay: 0.4s;
         }
 
+
+        /* Industries page: navy look matching the homepage */
+        .ind-hero{background:#081521;color:#fff;padding-top:104px!important;padding-bottom:112px!important}
+        .ind-hero::before{content:"";position:absolute;inset:-20% -10%;background:radial-gradient(circle at 78% 30%,rgba(49,165,246,.24) 0,rgba(49,165,246,.12) 16%,rgba(49,165,246,.04) 32%,transparent 46%),radial-gradient(circle at 6% 100%,rgba(104,191,255,.1),transparent 32%);pointer-events:none}
+        .ind-hero>.absolute{display:none}
+        .ind-hero h1{color:#fff!important}
+        .ind-hero h1 .gradient-text{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#9bd5ff!important;color:#9bd5ff!important}
+        .ind-hero p{color:#c1d2dd!important}
+        .ind-hero .ind-kicker{color:#9bd5ff!important;font-size:14px;letter-spacing:.12em}
+        .ind-proof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px;margin:48px auto 0;border:1px solid rgba(155,213,255,.18);border-radius:18px;background:rgba(255,255,255,.055);text-align:center}
+        .ind-proof div{padding:22px 16px}
+        .ind-proof div+div{border-left:1px solid rgba(255,255,255,.09)}
+        .ind-proof strong{display:block;color:#fff;font-family:var(--display);font-size:32px;font-weight:800;line-height:1;letter-spacing:-.015em}
+        .ind-proof span{display:block;margin-top:8px;color:#aebfca;font-size:15px}
+        .industry-icon{background:#e6f4ff!important}
+        .industry-card:nth-child(3n+2) .industry-icon{background:#d6edff!important}
+        .industry-card:nth-child(3n) .industry-icon{background:#eef8ff!important}
+        .industry-icon svg{color:#168fdc!important}
+        .industry-card{display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto 1fr auto;align-items:start}
+        .industry-card>*{grid-column:1/-1}
+        .industry-card>ul{margin-bottom:28px}
+        .industry-card>a{grid-column:auto;align-self:center;margin-top:0!important}
+        .industry-card>a:last-child{justify-self:end;padding:11px 18px!important;border-radius:13px!important;background:#0f7ac4!important;color:#fff!important;font-weight:600!important}
+        .industry-card>a:last-child:hover{background:#0c6cae!important}
+        .ind-cta{position:relative;overflow:hidden;background:linear-gradient(145deg,#0d1d2b,#081521)}
+        .ind-cta::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 88% 12%,rgba(49,165,246,.18),transparent 34%);pointer-events:none}
+        .ind-cta>div{position:relative}
+        .ind-cta a{border-radius:13px!important;background:linear-gradient(135deg,#9bd5ff,#31a5f6)!important;color:#07131d!important}
+        @media (max-width:640px){.ind-proof strong{font-size:26px}.industry-card>a:last-child{justify-self:start}}
         /* Scroll animations */
         .scroll-animate {
             opacity: 0;
@@ -507,13 +536,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 overflow-hidden bg-gradient-to-br from-white via-blue-50/30 to-white">
+    <section class="ind-hero relative pt-32 pb-20 overflow-hidden">
         <div class="absolute top-20 right-0 w-96 h-96 bg-[#4EA6FE]/10 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#78BBFA]/10 rounded-full blur-3xl"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-4xl mx-auto">
-                <p class="animate-fadeInUp text-belkins-orange font-semibold tracking-wider uppercase mb-4">
+                <p class="ind-kicker animate-fadeInUp font-semibold tracking-wider uppercase mb-4">
                     INDUSTRY EXPERTISE
                 </p>
                 <h1
@@ -530,32 +559,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         Discuss Your Industry
                     </a>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Bar -->
-    <section class="py-12 bg-gradient-to-r from-[#4EA6FE] to-[#78BBFA]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
-                <div class="scroll-animate">
-                    <p class="text-4xl md:text-5xl font-bold mb-2">$25.0M+</p>
-                    <p class="text-white/80">Revenue Generated</p>
+                <div class="ind-proof animate-fadeInUp delay-300" aria-label="BPO Hive results">
+                    <div><strong>$25M+</strong><span>Revenue generated</span></div>
+                    <div><strong>21,200+</strong><span>Appointments set</span></div>
                 </div>
-                <div class="scroll-animate">
-                    <p class="text-4xl md:text-5xl font-bold mb-2">21,200</p>
-                    <p class="text-white/80">Appointments Set</p>
-                </div>
-                <div class="scroll-animate">
-                    <p class="text-4xl md:text-5xl font-bold mb-2">30%</p>
-                    <p class="text-white/80">90-Day Sales Increase</p>
-                </div>
-            </div>
-            <div class="text-center mt-12">
-                <a href="outbound-assessment.html"
-                    class="btn-primary inline-flex items-center px-8 py-4 bg-belkins-orange text-white font-semibold rounded-full text-lg">
-                    See How We Achieve These Results
-                </a>
             </div>
         </div>
     </section>
@@ -1053,7 +1060,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-gradient-to-r from-[#4EA6FE] to-[#78BBFA]">
+    <section class="ind-cta py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
                 Don't See Your Industry?

@@ -160,6 +160,23 @@ function renderCaseStudies(html, studies) {
   return between(html, 'CASE-STUDIES', cards.join('\n\n'));
 }
 
+// ---------- Homepage client reviews ----------
+function renderReviews(html, data) {
+  const list = (Array.isArray(data.reviews) ? data.reviews : []).filter(r => r && opt(r, 'quote'));
+  const cards = list.map((r, i) => {
+    const where = `Review ${i + 1}`;
+    const name = str(r, 'name', where), quote = opt(r, 'quote').replace(/^[“"']+|[”"']+$/g, ''), role = opt(r, 'role');
+    const rating = Math.min(5, Math.max(1, Math.round(Number(r.rating)) || 5));
+    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    return `          <article class="testimonial-card">
+            <div class="testimonial-top"><span class="testimonial-rating" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}<i>${'★'.repeat(5 - rating)}</i></span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>
+            <blockquote>“${esc(quote)}”</blockquote>
+            <div class="testimonial-person"><span class="person-mark">${esc(initials)}</span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
+          </article>`;
+  });
+  return between(html, 'REVIEWS', cards.join('\n'));
+}
+
 // ---------- Site-wide settings ----------
 const DEFAULTS = { signin_url: 'https://analytics.bpohive.com', contact_email: 'info@bpohive.com', calendly_url: 'https://calendly.com/d/cxkp-cvw-qyg' };
 
@@ -183,9 +200,12 @@ function buildSections(root, out) {
   about = renderOffices(about, json('content/site/offices.json', {}));
   fs.writeFileSync(path.join(out, 'about.html'), about);
   fs.writeFileSync(path.join(out, 'case-studies.html'), renderCaseStudies(read('case-studies.html'), readFolder(root, 'content/case-studies')));
+  // The homepage is written earlier in the build; add the client reviews to that built file.
+  const homeOut = path.join(out, 'index.html');
+  fs.writeFileSync(homeOut, renderReviews(fs.readFileSync(homeOut, 'utf8'), json('content/site/reviews.json', { reviews: [] })));
   const apply = settingsReplacer(json('content/site/settings.json', {}));
   const walk = dir => { for (const f of fs.readdirSync(dir, { withFileTypes: true })) { const p = path.join(dir, f.name); if (f.isDirectory()) { if (f.name !== 'admin' && f.name !== 'assets') walk(p); } else if (f.name.endsWith('.html')) { const before = fs.readFileSync(p, 'utf8'), after = apply(before); if (after !== before) fs.writeFileSync(p, after); } } };
   walk(out);
 }
 
-module.exports = { buildSections, renderJobs, renderTeam, renderOffices, renderCaseStudies, settingsReplacer, readFolder };
+module.exports = { renderReviews, buildSections, renderJobs, renderTeam, renderOffices, renderCaseStudies, settingsReplacer, readFolder };
