@@ -4,12 +4,56 @@
       "quote": "I was impressed with their ability to scale with us as we grow.",
       "name": "Sarah Wessel",
       "role": "VP Sales · Bitcoin Depot",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "They don't just focus on volume, but on delivering well-qualified, high-intent appointments.",
+      "name": "Summer Henderson",
+      "role": "Owner · Solar With Summer",
+      "rating": 4,
       "verified": true
     },
     {
       "quote": "They’re easy to approach and committed.",
       "name": "Osama Boghdady",
       "role": "Regional Marketing Manager · ZWSOFT",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "They've been very responsive when we've needed anything. Their system is easy to set up and use.",
+      "name": "Michael Ford",
+      "role": "CEO · Greenlit Brands",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "Their project management was organized and reliable. They are proactive, responsive, and adapt quickly.",
+      "name": "Shawn Samuel",
+      "role": "CEO · Chemical Safety International",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "All the personnel we have worked with are knowledgeable and incredibly friendly. Courteous, timely, and professional.",
+      "name": "Charles Rattray",
+      "role": "CEO · Southerly Ten",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "I really appreciated their insights. Thanks to them, we hired five full-time talents on time and within budget.",
+      "name": "Chris Frazier",
+      "role": "Co-Founder · FBDC",
+      "rating": 5,
+      "verified": true
+    },
+    {
+      "quote": "The person I work with from their team is the best! They're smart, driven, and resourceful.",
+      "name": "Anonymous Owner",
+      "role": "Consulting Company",
+      "rating": 5,
       "verified": true
     }
   ]
