@@ -70,8 +70,11 @@ function build(out=path.join(root,'dist')) {
       if (entry.isDirectory()) {
         if (!['admin', 'assets'].includes(entry.name)) addLivechat(file);
       } else if (entry.name.endsWith('.html')) {
-        const html = fs.readFileSync(file, 'utf8');
-        if (!html.includes(livechat)) fs.writeFileSync(file, html.replace('</body>', livechat + '\n</body>'));
+        const original = fs.readFileSync(file, 'utf8');
+        let html = original.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, script =>
+          /https:\/\/(?:www\.)?chatbase\.co\/embed\.min\.js/i.test(script) ? '' : script);
+        if (!html.includes(livechat)) html = html.replace('</body>', livechat + '\n</body>');
+        if (html !== original) fs.writeFileSync(file, html);
       }
     }
   };
