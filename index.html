@@ -159,7 +159,17 @@
     h2{margin:0;font-size:clamp(37px,4.2vw,56px);line-height:1.06;letter-spacing:-.048em}
     .lead{margin:0;color:var(--muted);font-size:18px;line-height:1.75}
     .section-dark .lead{color:#aebfca}
-    .system-grid{display:grid;grid-template-columns:1.13fr .87fr;gap:16px}
+    .section-head.section-head-solo{display:block;max-width:820px}
+    .system-grid{display:grid;grid-template-columns:1fr;gap:16px}
+    .system-main.system-one{display:grid;grid-template-columns:1.05fr .95fr;gap:52px;min-height:0;padding:46px}
+    .system-one .system-lead,.system-one .system-points{position:relative;z-index:1}
+    .system-one .system-points{display:grid;gap:28px;align-content:center;padding-left:52px;border-left:1px solid var(--line)}
+    .system-point{display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;align-items:start}
+    .system-point h4{margin:2px 0 7px;font-size:20px;letter-spacing:-.02em;color:var(--ink)}
+    .system-point p{margin:0;color:var(--muted);font-size:16px;line-height:1.65}
+    .system-point .channel-pills{margin-top:14px}
+    .system-point .channel-pills span{color:var(--blue-600);border-color:var(--blue-100);background:var(--blue-50)}
+    @media (max-width:900px){.system-main.system-one{grid-template-columns:1fr;gap:34px;padding:28px}.system-one .system-points{padding-left:0;padding-top:32px;border-left:0;border-top:1px solid var(--line)}}
     .system-main{position:relative;min-height:450px;padding:39px;border:1px solid var(--line);border-radius:var(--radius-lg);background:linear-gradient(145deg,#fff,#f4faff);box-shadow:var(--shadow-sm);overflow:hidden}
     .system-main::after{content:"";position:absolute;right:-95px;bottom:-120px;width:320px;height:320px;border-radius:50%;border:52px solid rgba(49,165,246,.07)}
     .icon-box{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;color:var(--blue-600);background:var(--blue-100)}
@@ -258,8 +268,17 @@
     .platform-point strong{display:block;margin:1px 0 4px;font-size:16px}
     .platform-point span{display:block;color:#99afbc;font-size:15px;line-height:1.55}
     .reviews-head{max-width:760px;margin:0 auto 44px;text-align:center}
-    .testimonial-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
-    .testimonial-card{flex:0 1 calc((100% - 54px)/4);min-width:250px;min-height:300px;display:flex;flex-direction:column;padding:24px;border:1px solid #d9e8f1;border-radius:24px;background:#fff;box-shadow:var(--shadow-sm)}
+    .testimonial-grid{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:18px;overflow:hidden;scroll-behavior:smooth;padding:4px 0 26px;margin-bottom:-26px}
+    .testimonial-grid.is-static{justify-content:center}
+    .reviews-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:26px}
+    .reviews-nav[hidden]{display:none}
+    .reviews-arrow{width:46px;height:46px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:6px;color:var(--navy-900);background:#fff;cursor:pointer;transition:background .2s ease,border-color .2s ease,opacity .2s ease}
+    .reviews-arrow svg{width:20px;height:20px}
+    .reviews-arrow:hover:not(:disabled){border-color:var(--blue-500);background:var(--blue-50)}
+    .reviews-arrow:disabled{opacity:.35;cursor:default}
+    .reviews-count{min-width:54px;text-align:center;color:var(--muted);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+    @media (prefers-reduced-motion:reduce){.testimonial-grid{scroll-behavior:auto}}
+    .testimonial-card{flex:0 0 calc((100% - 54px)/4);min-width:0;min-height:300px;display:flex;flex-direction:column;padding:24px;border:1px solid #d9e8f1;border-radius:24px;background:#fff;box-shadow:var(--shadow-sm)}
     .testimonial-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
     .testimonial-rating i{color:#d9e2e8;font-style:normal}
     .testimonial-rating{color:#f3a928;font-size:19px;letter-spacing:2px}
@@ -430,12 +449,6 @@ fbq('track', 'PageView');
             <a class="btn btn-primary" href="outbound-assessment.html">Fill My Calendar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             <a class="btn btn-light-outline" href="#process">See how the system works</a>
           </div>
-          <div class="hero-proof" id="proof" aria-label="BPO Hive results and independent rating">
-            <div class="hero-proof-item"><strong><!--cms:stat1_value-->$25M+<!--/cms:stat1_value--></strong><span><!--cms:stat1_label-->Client revenue attributed<!--/cms:stat1_label--></span></div>
-            <div class="hero-proof-item"><strong><!--cms:stat2_value-->21,200+<!--/cms:stat2_value--></strong><span><!--cms:stat2_label-->Appointments set<!--/cms:stat2_label--></span></div>
-            <a class="hero-proof-item hero-proof-link" href="https://clutch.co/profile/bpo-hive" target="_blank" rel="noopener"><strong><!--cms:stat3_value-->4.9/5<!--/cms:stat3_value--></strong><span><!--cms:stat3_label-->Clutch · 11 reviews<!--/cms:stat3_label--></span></a>
-            <div class="hero-proof-item"><strong><!--cms:stat4_value-->10+<!--/cms:stat4_value--></strong><span><!--cms:stat4_label-->Industries served<!--/cms:stat4_label--></span></div>
-          </div>
         </div>
 
       </div>
@@ -464,24 +477,25 @@ fbq('track', 'PageView');
 
     <section class="section" id="system">
       <div class="shell">
-        <div class="section-head reveal">
-          <div><p class="kicker">What BPO Hive delivers</p><h2>Everything needed to turn a market into qualified conversations.</h2></div>
-          <p class="lead">Market intelligence, B2B prospect data, coordinated outreach, qualification, booking, and live reporting work as one managed system—not disconnected services.</p>
+        <div class="section-head section-head-solo reveal">
+          <h2>Everything needed to turn a market into qualified conversations.</h2>
         </div>
         <div class="system-grid reveal">
-          <article class="system-main">
-            <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg></div>
-            <h3>Define the market before contacting it.</h3>
-            <p>We examine your offer, previous outreach, customer profile, buyer roles, audience size, qualification requirements, and sales process. Then we prepare the B2B prospect data around the ICPs approved for testing.</p>
-            <div class="data-map">
+          <article class="system-main system-one">
+            <div class="system-lead">
+              <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg></div>
+              <h3>Define the market before contacting it.</h3>
+              <p>We examine your offer, previous outreach, customer profile, buyer roles, audience size, qualification requirements, and sales process. Then we prepare the B2B prospect data around the ICPs approved for testing.</p>
+              <div class="data-map">
               <div class="data-node"><small>Your strongest fit</small><strong>Offer + customer evidence</strong></div><div class="data-arrow">→</div><div class="data-node"><small>Campaign-ready ICP</small><strong>Companies + decision-makers</strong></div>
             </div>
+            </div>
+            <div class="system-points">
+              <div class="system-point"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg></div><div><h4>Own prospect data</h4><p>B2B lists built around approved company, market, and buyer criteria.</p></div></div>
+              <div class="system-point"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h7M7 16h4"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div><div><h4>Qualified booking</h4><p>Interested prospects are qualified and booked directly on your calendar.</p></div></div>
+              <div class="system-point"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v6M18 2v6M3 10h18M5 5h14a2 2 0 0 1 2 2v14H3V7a2 2 0 0 1 2-2Z"/></svg></div><div><h4>Omnichannel execution with live visibility</h4><p>Phone creates conversations. Email and LinkedIn support the sequence. Your dedicated client login shows activity, conversations, objections, qualified interest, and meetings as the campaign develops.</p><div class="channel-pills"><span>Phone</span><span>Email</span><span>LinkedIn</span><span>Client platform</span><span>Reporting</span></div></div></div>
+            </div>
           </article>
-          <div class="system-side">
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg></div><h3>Own prospect data</h3><p>B2B lists built around approved company, market, and buyer criteria.</p></article>
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h7M7 16h4"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div><h3>Qualified booking</h3><p>Interested prospects are qualified and booked directly on your calendar.</p></article>
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v6M18 2v6M3 10h18M5 5h14a2 2 0 0 1 2 2v14H3V7a2 2 0 0 1 2-2Z"/></svg></div><h3>Omnichannel execution with live visibility</h3><p>Phone creates conversations. Email and LinkedIn support the sequence. Your dedicated client login shows activity, conversations, objections, qualified interest, and meetings as the campaign develops.</p><div class="channel-pills"><span>Phone</span><span>Email</span><span>LinkedIn</span><span>Client platform</span><span>Reporting</span></div></article>
-          </div>
         </div>
       </div>
     </section>
@@ -506,9 +520,16 @@ fbq('track', 'PageView');
     <section class="section section-soft" id="reviews">
       <div class="shell">
         <div class="reviews-head reveal"><h2>Client feedback tied to real engagements.</h2></div>
-        <div class="testimonial-grid reveal">
+        <div class="reviews-carousel reveal">
+          <div class="testimonial-grid" id="reviews-track">
 <!-- BPO-HIVE-REVIEWS:START -->
 <!-- BPO-HIVE-REVIEWS:END -->
+          </div>
+          <div class="reviews-nav">
+            <button class="reviews-arrow" type="button" data-dir="-1" aria-label="Previous reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button>
+            <span class="reviews-count" aria-live="polite"></span>
+            <button class="reviews-arrow" type="button" data-dir="1" aria-label="Next reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
         </div>
         <a class="reviews-link" href="https://clutch.co/profile/bpo-hive" target="_blank" rel="noopener">Read all 11 BPO Hive reviews on Clutch →</a>
       </div>
@@ -687,6 +708,17 @@ fbq('track', 'PageView');
   /* duplicate the logos once so the strip can loop seamlessly */
   [].slice.call(track.children).forEach(function(c){var d=c.cloneNode(true);d.setAttribute('aria-hidden','true');d.setAttribute('tabindex','-1');track.appendChild(d);});
   grid.classList.add('is-carousel');
+})();
+</script>
+<script>
+(function(){
+  var track=document.getElementById('reviews-track');if(!track)return;
+  var nav=track.parentNode.querySelector('.reviews-nav'),prev=nav.querySelector('[data-dir="-1"]'),next=nav.querySelector('[data-dir="1"]'),count=nav.querySelector('.reviews-count'),page=0;
+  function layout(){var cards=track.children,n=cards.length;if(!n)return {per:1,pages:1,step:0};var w=cards[0].getBoundingClientRect().width,gap=parseFloat(getComputedStyle(track).columnGap)||0;var per=Math.max(1,Math.round((track.clientWidth+gap)/(w+gap)));return {per:per,pages:Math.ceil(n/per),step:w+gap};}
+  function show(instant){var l=layout();page=Math.max(0,Math.min(page,l.pages-1));var left=Math.min(page*l.per*l.step,track.scrollWidth-track.clientWidth);if(instant){var b=track.style.scrollBehavior;track.style.scrollBehavior='auto';track.scrollLeft=left;track.style.scrollBehavior=b;}else track.scrollLeft=left;
+    var single=l.pages<2;nav.hidden=single;track.classList.toggle('is-static',single);prev.disabled=page===0;next.disabled=page>=l.pages-1;count.textContent=(page+1)+' / '+l.pages;}
+  prev.addEventListener('click',function(){page--;show();});next.addEventListener('click',function(){page++;show();});
+  var t;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(function(){show(true);},120);});show(true);
 })();
 </script>
 </body>
