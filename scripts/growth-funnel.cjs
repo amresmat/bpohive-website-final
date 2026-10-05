@@ -55,7 +55,38 @@ function funnel(out){
   if(rel==='index.html'){
    $('title').text('B2B Appointment Setting · USA, Canada & GCC | BPO Hive');
    $('.hero-copy').first().append(' Managed campaigns for the USA, Canada and GCC start at $4,000/month.').after('<p class="hero-copy">'+policy.insights+'</p>');
-   $('footer').before('<section class="growth"><h2>Featured and listed</h2><div class="growth-links"><a href="https://evergreenawards.com/awards/bpo-hive-best-outsourcing-appointment-setting-company-in-the-us-of-2025">Evergreen Award · 2025</a><a href="https://themanifest.com/eg/bpo/companies">The Manifest · BPO listing</a><a href="https://clutch.co/profile/bpo-hive">Clutch · Reviews</a><a href="https://www.goodfirms.co/bpo-services/egypt">GoodFirms · BPO listing</a></div><p class="growth-caption">Awards and directory listings have different selection methods; these links are not performance guarantees.</p></section>');
+   $('footer').before(`<section class="bh-featured" aria-labelledby="bh-featured-title">
+    <style>
+     .bh-featured{max-width:1200px;margin:0 auto;padding:56px 24px 64px}
+     .bh-featured h2{margin:0 0 28px;color:#f5f9fc;font-size:clamp(26px,3vw,36px);font-weight:700;line-height:1.2;letter-spacing:-.025em}
+     .bh-featured-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+     .bh-featured-card{display:flex;flex-direction:column;border:1px solid #b0d5ed30;border-radius:18px;overflow:hidden;background:#ffffff08;text-decoration:none;color:#f5f9fc;transition:border-color .2s,transform .2s}
+     .bh-featured-card:hover{border-color:#87caff;transform:translateY(-3px)}
+     .bh-featured-card:focus-visible{outline:3px solid #87caff;outline-offset:4px}
+     .bh-featured-logo{height:120px;display:flex;align-items:center;justify-content:center;background:#fff;padding:24px}
+     .bh-featured-logo img{width:auto;max-width:100%;height:auto;max-height:72px;object-fit:contain}
+     .bh-featured-goodfirms{font-family:Arial,sans-serif;font-size:30px;font-weight:700;color:#1674bd;letter-spacing:-1.4px}
+     .bh-featured-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:18px;font-size:14px;line-height:1.4}
+     .bh-featured-label span:last-child{color:#87caff;font-size:20px}
+     @media(max-width:760px){.bh-featured{padding:38px 18px 44px}.bh-featured-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bh-featured-logo{height:104px;padding:18px}.bh-featured-goodfirms{font-size:25px}.bh-featured-label{padding:14px;font-size:12px}}
+     @media(prefers-reduced-motion:reduce){.bh-featured-card{transition:none}.bh-featured-card:hover{transform:none}}
+    </style>
+    <h2 id="bh-featured-title">Featured and listed</h2>
+    <div class="bh-featured-grid">
+     <a class="bh-featured-card" href="https://evergreenawards.com/awards/bpo-hive-best-outsourcing-appointment-setting-company-in-the-us-of-2025" target="_blank" rel="noopener" aria-label="Evergreen Award · 2025">
+      <div class="bh-featured-logo"><img src="/assets/logo/trust-badges/evergreen.webp" alt="Evergreen Awards" loading="lazy"></div><div class="bh-featured-label"><span>Evergreen Award · 2025</span><span aria-hidden="true">↗</span></div>
+     </a>
+     <a class="bh-featured-card" href="https://themanifest.com/eg/bpo/companies" target="_blank" rel="noopener" aria-label="The Manifest · BPO listing">
+      <div class="bh-featured-logo"><img src="/assets/logo/trust-badges/themanifestlogo.webp" alt="The Manifest" loading="lazy"></div><div class="bh-featured-label"><span>BPO listing</span><span aria-hidden="true">↗</span></div>
+     </a>
+     <a class="bh-featured-card" href="https://clutch.co/profile/bpo-hive" target="_blank" rel="noopener" aria-label="Clutch · Reviews">
+      <div class="bh-featured-logo"><img src="/assets/logo/trust-badges/Clutch-Logo.png" alt="Clutch" loading="lazy"></div><div class="bh-featured-label"><span>Client reviews</span><span aria-hidden="true">↗</span></div>
+     </a>
+     <a class="bh-featured-card" href="https://www.goodfirms.co/bpo-services/egypt" target="_blank" rel="noopener" aria-label="GoodFirms · BPO listing">
+      <div class="bh-featured-logo"><span class="bh-featured-goodfirms">GoodFirms</span></div><div class="bh-featured-label"><span>BPO listing</span><span aria-hidden="true">↗</span></div>
+     </a>
+    </div>
+   </section>`);
   }
   if(rel==='about.html')$('h3').filter((i,e)=>$(e).text().trim()==='Amr Abdelrazzak').attr('id','amr-abdelrazzak');
   if(rel==='case-studies.html'){
