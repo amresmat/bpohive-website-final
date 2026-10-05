@@ -63,6 +63,19 @@ function build(out=path.join(root,'dist')) {
   require('./growth-site.cjs').generate(out);
   require('./growth-funnel.cjs').funnel(out);
   require('./site-shell.cjs').shell(out);
+  const livechat = '<script src="https://d1svrfmyhkyg8q.cloudfront.net/livechat/prod/livechat.js" data-site-key="lc_site_omfmLsDbq3qE4OCnnnm1uQebn0Dh_NKQ-YFI77UheWY" async></script>';
+  const addLivechat = dir => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!['admin', 'assets'].includes(entry.name)) addLivechat(file);
+      } else if (entry.name.endsWith('.html')) {
+        const html = fs.readFileSync(file, 'utf8');
+        if (!html.includes(livechat)) fs.writeFileSync(file, html.replace('</body>', livechat + '\n</body>'));
+      }
+    }
+  };
+  addLivechat(out);
   console.log(`Built ${posts.length} blog posts, CMS sections, regional content and lead funnel.`);
 }
 if(require.main===module)build();
