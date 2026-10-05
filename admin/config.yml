@@ -348,6 +348,11 @@
               "widget": "string"
             },
             {
+              "name": "hero_tagline",
+              "label": "Hero tagline (grey line under the headline)",
+              "widget": "string"
+            },
+            {
               "name": "final_title",
               "label": "Final title",
               "widget": "string"
