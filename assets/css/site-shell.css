@@ -62,3 +62,28 @@ body.bh-has-shell{padding-top:78px}
 @media (max-width:1080px){.bh-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bh-footer-brand{grid-column:1/-1}.bh-contact{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center}.bh-contact strong{grid-column:1/-1}.bh-contact .bh-btn{grid-column:1/-1;justify-self:start;margin-top:4px}}
 @media (max-width:640px){.bh-footer{padding-top:52px}.bh-footer-grid{grid-template-columns:1fr 1fr;gap:30px 22px}.bh-contact{grid-template-columns:1fr}.bh-contact .bh-btn{justify-self:stretch}.bh-footer-bottom{display:grid}}
 @media (prefers-reduced-motion:reduce){.bh-header *,.bh-footer *{transition:none!important}}
+
+/* ---------- Overrides for older page stylesheets that restyle every footer ---------- */
+.bh-footer.bh-footer{background:#081521!important;border-color:#dbe8f0!important}
+.bh-footer .bh-footer-brand img{filter:none!important}
+.bh-footer .bh-footer-col strong,.bh-footer .bh-contact strong{color:#fff!important}
+.bh-footer .bh-footer-brand p{color:#aebfca!important}
+.bh-footer .bh-footer-brand .bh-footer-regions{color:#8ea4b3!important}
+.bh-footer a{color:#c7d6df!important}
+.bh-footer a:hover{color:#fff!important}
+.bh-footer a.bh-contact-row{color:#fff!important}
+.bh-footer a.bh-contact-row span{color:#8ea4b3!important}
+.bh-footer a.bh-contact-row:hover{color:#9bd5ff!important}
+.bh-footer a.bh-btn-solid,.bh-footer a.bh-btn-solid:hover{color:#fff!important}
+.bh-footer .bh-footer-bottom,.bh-footer .bh-footer-bottom span{color:#8ea4b3!important}
+
+/* ---------- Smooth page-to-page navigation: the header stays put, the page cross-fades ---------- */
+@view-transition{navigation:auto}
+.bh-header{view-transition-name:bh-header}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+::view-transition-old(bh-header),::view-transition-new(bh-header){animation:none}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+
+/* ---------- Fade in on scroll ---------- */
+.bh-reveal{opacity:0!important;transform:translateY(28px)!important;transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)!important;will-change:opacity,transform}
+.bh-reveal.bh-in{opacity:1!important;transform:none!important}
