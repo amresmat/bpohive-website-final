@@ -257,12 +257,13 @@
     .point-icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(155,213,255,.18);border-radius:12px;color:var(--blue-300);background:rgba(49,165,246,.09);font-weight:900}
     .platform-point strong{display:block;margin:1px 0 4px;font-size:16px}
     .platform-point span{display:block;color:#99afbc;font-size:15px;line-height:1.55}
-    .testimonial-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    .testimonial-card{min-height:290px;display:flex;flex-direction:column;padding:29px;border:1px solid #d9e8f1;border-radius:24px;background:#fff;box-shadow:var(--shadow-sm)}
-    .testimonial-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .reviews-head{max-width:760px;margin:0 auto 44px;text-align:center}
+    .testimonial-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+    .testimonial-card{flex:0 1 calc((100% - 54px)/4);min-width:250px;min-height:300px;display:flex;flex-direction:column;padding:24px;border:1px solid #d9e8f1;border-radius:24px;background:#fff;box-shadow:var(--shadow-sm)}
+    .testimonial-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
     .testimonial-rating{color:#f3a928;font-size:19px;letter-spacing:2px}
     .verified-pill,.result-label{padding:7px 9px;border-radius:999px;color:var(--blue-600);background:var(--blue-100);font-size:14px;font-weight:850;line-height:1.2}
-    .testimonial-card blockquote{margin:34px 0 28px;color:var(--navy-900);font-family:var(--display);font-size:23px;font-weight:750;line-height:1.48;letter-spacing:-.025em}
+    .testimonial-card blockquote{margin:26px 0 24px;color:var(--navy-900);font-family:var(--display);font-size:19px;font-weight:750;line-height:1.48;letter-spacing:-.025em}
     .testimonial-person{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:12px;margin-top:auto;padding-top:20px;border-top:1px solid var(--line)}
     .person-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;color:#fff;background:linear-gradient(135deg,var(--navy-800),var(--blue-500));font-size:15px;font-weight:900}
     .testimonial-person strong,.testimonial-person span{display:block}
@@ -338,14 +339,14 @@
     @media(max-width:1040px){
       .nav-links{gap:18px}.logo-grid{grid-template-columns:repeat(4,1fr)}
       .system-grid,.platform-layout{grid-template-columns:1fr}.platform-copy{order:-1}
-      .program-card{padding:25px}.visibility-panel{max-width:760px;margin-inline:auto}.industries-wrap{gap:35px}.testimonial-grid{grid-template-columns:1fr 1fr}
+      .program-card{padding:25px}.visibility-panel{max-width:760px;margin-inline:auto}.industries-wrap{gap:35px}
     }
     @media(max-width:820px){
       .nav-links,.nav-actions>.btn{display:none}.menu-btn{display:block}.mobile-menu{position:fixed;left:0;right:0;top:78px;z-index:99;padding:12px 20px 22px;border-bottom:1px solid var(--line);background:#fff;box-shadow:0 25px 45px rgba(8,21,33,.12)}
       .mobile-menu.open{display:grid;gap:6px}.mobile-menu a{padding:13px 10px;border-radius:10px;color:#344d5c;font-size:16px;font-weight:800}.mobile-menu .btn{margin-top:7px;color:#06141e}
       .hero-grid{min-height:clamp(560px,74vh,760px);padding:96px 0 104px}.hero-copy{max-width:720px}
       .proof-grid{grid-template-columns:1fr 1fr}.section-head{grid-template-columns:1fr;gap:18px}.aces-grid{grid-template-columns:1fr 1fr}.aces-grid::before{display:none}
-      .program-grid{grid-template-columns:1fr}.program-card{min-height:auto}.program-card.featured{transform:none}.program-card>p{min-height:auto}.testimonial-grid{grid-template-columns:1fr}.testimonial-card{min-height:0}
+      .program-grid{grid-template-columns:1fr}.program-card{min-height:auto}.program-card.featured{transform:none}.program-card>p{min-height:auto}.testimonial-card{flex-basis:calc(50% - 9px)}.testimonial-card{min-height:0}
       .calculator{grid-template-columns:1fr}.calc-controls{border-right:0;border-bottom:1px solid var(--line)}
       .industries-wrap{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.footer-brand{grid-column:1/-1}
     }
@@ -357,7 +358,7 @@
       .system-main{min-height:auto;padding:27px}.system-side{grid-template-columns:1fr}.bento:nth-child(3){grid-column:auto}.data-map{grid-template-columns:1fr;margin-top:28px}.data-arrow{transform:rotate(90deg);text-align:center}
       .aces-grid{grid-template-columns:1fr}.aces-card{min-height:auto}.aces-num{width:62px;height:62px;border-width:7px}.program-card{padding:25px}
       .visibility-panel{padding:18px;border-radius:18px}.visibility-head{align-items:flex-start}.access-label{display:none}.visibility-brand{grid-template-columns:38px 1fr}.visibility-mark{width:38px;height:38px}.visibility-step{grid-template-columns:38px 1fr;padding:12px}.visibility-number{width:36px;height:36px}
-      .testimonial-card{padding:23px}.testimonial-card blockquote{margin:30px 0;font-size:21px}.reported-result strong{font-size:34px}.calculator-wrap{padding:5px}.calc-controls,.calc-results{padding:22px}.result-grid{grid-template-columns:1fr}.result.roi{grid-column:auto}.region-grid,.faq-grid{grid-template-columns:1fr}.region-card{min-height:430px;padding:26px}.text-link{left:26px;right:26px;bottom:27px}
+      .testimonial-card{flex-basis:100%;padding:23px}.testimonial-card blockquote{margin:24px 0;font-size:19px}.reported-result strong{font-size:34px}.calculator-wrap{padding:5px}.calc-controls,.calc-results{padding:22px}.result-grid{grid-template-columns:1fr}.result.roi{grid-column:auto}.region-grid,.faq-grid{grid-template-columns:1fr}.region-card{min-height:430px;padding:26px}.text-link{left:26px;right:26px;bottom:27px}
       .industry-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr;gap:32px}.footer-brand{grid-column:auto}.footer-bottom{align-items:flex-start;flex-direction:column}
     }
     @media(max-width:360px){
@@ -503,22 +504,10 @@ fbq('track', 'PageView');
 
     <section class="section section-soft" id="reviews">
       <div class="shell">
-        <div class="section-head reveal">
-          <div><p class="kicker">Verified client proof</p><h2>Client feedback tied to real engagements.</h2></div>
-          <p class="lead">BPO Hive is rated 4.9 out of 5 across 11 Clutch reviews. These examples connect the work to appointment quality, B2B qualification, and the ability to scale.</p>
-        </div>
+        <div class="reviews-head reveal"><h2>Client feedback tied to real engagements.</h2></div>
         <div class="testimonial-grid reveal">
-          <article class="testimonial-card">
-            <div class="testimonial-top"><span class="testimonial-rating">★★★★★</span><span class="verified-pill">Verified on Clutch</span></div>
-            <blockquote>“I was impressed with their ability to scale with us as we grow.”</blockquote>
-            <div class="testimonial-person"><span class="person-mark">SW</span><div><strong>Sarah Wessel</strong><span>VP Sales · Bitcoin Depot</span></div></div>
-          </article>
-          <article class="testimonial-card">
-            <div class="testimonial-top"><span class="testimonial-rating">★★★★★</span><span class="verified-pill">Verified on Clutch</span></div>
-            <blockquote>“They’re easy to approach and committed.”</blockquote>
-            <div class="reported-result"><strong>≈15%</strong><span>Conversion rate reported for outbound MQL-to-SQL qualification.</span></div>
-            <div class="testimonial-person"><span class="person-mark">OB</span><div><strong>Osama Boghdady</strong><span>Regional Marketing Manager · ZWSOFT</span></div></div>
-          </article>
+<!-- BPO-HIVE-REVIEWS:START -->
+<!-- BPO-HIVE-REVIEWS:END -->
         </div>
         <a class="reviews-link" href="https://clutch.co/profile/bpo-hive" target="_blank" rel="noopener">Read all 11 BPO Hive reviews on Clutch →</a>
       </div>
@@ -677,7 +666,7 @@ fbq('track', 'PageView');
   var cards=[].slice.call(root.querySelectorAll('.aces-card')),nodes=[].slice.call(root.querySelectorAll('.aces-node')),raf=0;
   function update(){
     raf=0;
-    var mid=window.innerHeight*.5,centers=cards.map(function(c){var r=c.getBoundingClientRect();return r.top+r.height/2;}),n=cards.length,pos=0;
+    var mid=78+(window.innerHeight-78)*.36,centers=cards.map(function(c){var r=c.getBoundingClientRect();return r.top+r.height/2;}),n=cards.length,pos=0;
     /* position along the steps: 0 = first step centred on screen, n-1 = last step centred */
     if(mid<=centers[0])pos=0;else if(mid>=centers[n-1])pos=n-1;else for(var i=0;i<n-1;i++){if(mid>=centers[i]&&mid<centers[i+1]){pos=i+(mid-centers[i])/(centers[i+1]-centers[i]);break;}}
     var active=Math.round(pos);
@@ -686,7 +675,7 @@ fbq('track', 'PageView');
     nodes.forEach(function(b,i){b.classList.toggle('active',i===active);b.classList.toggle('done',i<active);if(i===active)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
   }
   function queue(){if(!raf)raf=requestAnimationFrame(update);}
-  nodes.forEach(function(b,i){b.addEventListener('click',function(){cards[i].scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});});});
+  nodes.forEach(function(b,i){b.addEventListener('click',function(){var r=cards[i].getBoundingClientRect();window.scrollTo({top:window.scrollY+r.top+r.height/2-(78+(window.innerHeight-78)*.36),behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});});});
   window.addEventListener('scroll',queue,{passive:true});window.addEventListener('resize',queue);update();
 })();
 </script>
