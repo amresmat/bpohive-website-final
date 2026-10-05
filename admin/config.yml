@@ -502,6 +502,46 @@
               ]
             }
           ]
+        },
+        {
+          "name": "reviews",
+          "label": "Client reviews (homepage)",
+          "file": "content/site/reviews.json",
+          "fields": [
+            {
+              "name": "reviews",
+              "label": "Reviews",
+              "label_singular": "review",
+              "widget": "list",
+              "summary": "{{fields.name}}",
+              "fields": [
+                {
+                  "name": "quote",
+                  "label": "Quote",
+                  "widget": "text",
+                  "hint": "Keep it short: one or two sentences. Quotation marks are added for you."
+                },
+                {
+                  "name": "name",
+                  "label": "Person's name",
+                  "widget": "string"
+                },
+                {
+                  "name": "role",
+                  "label": "Job title and company",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "e.g. VP Sales \u00b7 Bitcoin Depot"
+                },
+                {
+                  "name": "verified",
+                  "label": "Show the Verified on Clutch badge",
+                  "widget": "boolean",
+                  "default": true
+                }
+              ]
+            }
+          ]
         }
       ]
     }
