@@ -44,7 +44,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-footer a{color:#c7d6df;text-decoration:none;transition:color .2s ease}
 .bh-footer a:hover{color:#fff}
 .bh-footer-grid{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,.8fr)) minmax(0,1.45fr);gap:36px;align-items:start}
-.bh-footer-brand img{display:block;width:170px;height:auto;max-width:none;padding:8px 12px;border-radius:12px;background:#fff}
+.bh-footer-brand img{display:block;width:176px;height:auto;max-width:none;margin-left:-4px}
 .bh-footer-brand p{max-width:300px;margin:18px 0 0;color:#aebfca;font-size:16px;line-height:1.65}
 .bh-footer-brand .bh-footer-regions{margin-top:12px;font-size:15px;color:#8ea4b3}
 .bh-footer-brand .bh-footer-regions a{text-decoration:underline;text-underline-offset:3px}
