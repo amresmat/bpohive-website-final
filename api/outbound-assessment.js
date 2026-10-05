@@ -3,7 +3,12 @@ const recentRequests = new Map();
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
 
-const {budgetLabels,qualifiedBudget,scope,portal,insights,exceptionCopy}=require('../lib/campaign-policy.cjs');
+const budgetLabels = {
+  under_4000: 'Not ready to invest $4,000 yet',
+  '4000_4999': '$4,000–$4,999',
+  '5000_9999': '$5,000–$9,999',
+  '10000_plus': '$10,000+'
+};
 
 function escapeHtml(value = '') {
   return String(value)
@@ -55,7 +60,7 @@ function normalizeUrl(value) {
 function forecastFor(averageSale) {
   const ranges = {
     'Under $5,000': '20–30',
-    '$7,000–$9,999': '15–22',
+    '$5,000–$9,999': '15–22',
     '$10,000–$24,999': '8–15',
     '$25,000–$49,999': '5–8',
     '$50,000+': '5–8'
@@ -104,9 +109,6 @@ function qualifiedEmail(lead, forecast, bookingUrl) {
           </ul>
         </div>
         <p>These numbers are planning estimates—not guarantees. Before launching, we’ll validate your audience size, offer, prospect data, and qualification criteria.</p>
-        <p>${escapeHtml(scope)}</p>
-        <p>${escapeHtml(portal)}</p>
-        <p>${escapeHtml(insights)}</p>
         <p>The next step is a short strategy call. We’ll turn this initial forecast into a practical campaign plan for your business.</p>
         <p style="margin:28px 0"><a href="${escapeHtml(bookingUrl)}" style="display:inline-block;padding:14px 20px;border-radius:10px;color:#07131d;background:#68bfff;font-weight:bold;text-decoration:none">Book My Strategy Call</a></p>
         <p>Your information will already be filled in. You’ll only need to choose a time.</p>
@@ -117,20 +119,19 @@ function qualifiedEmail(lead, forecast, bookingUrl) {
 
 function nurtureEmail(lead) {
   return {
-    subject: `Your BPO Hive scope-review request for ${lead.companyName.replace(/[\r\n]+/g, ' ')}`,
+    subject: `Your outbound readiness plan for ${lead.companyName.replace(/[\r\n]+/g, ' ')}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#102534;line-height:1.6">
-        <h1 style="font-size:28px;color:#0d1d2b">Your request is pending individual review</h1>
+        <h1 style="font-size:28px;color:#0d1d2b">Your outbound readiness plan</h1>
         <p>Hi ${escapeHtml(lead.firstName)},</p>
         <p>Thanks for completing the BPO Hive outbound assessment.</p>
-        <p>Our full managed service starts at $4,000 per month. Your request will be reviewed to determine whether an appropriate scope is practical.</p>
-        <p>${escapeHtml(exceptionCopy)}</p>
+        <p>Based on your current investment level, a fully managed campaign probably is not the right next step yet—and we do not want you spending before the foundations are ready.</p>
         <ol>
           <li><strong>Define one narrow buyer profile</strong> instead of targeting everyone.</li>
           <li><strong>Build a starter list of 100 companies</strong> that closely match that profile.</li>
           <li><strong>Test two messaging angles</strong> through email and LinkedIn before increasing volume.</li>
         </ol>
-        <p>If we can support an appropriate scope, we’ll email you the next step. You can reply with any additional context about your goals and available budget.</p>
+        <p>Once you are ready to invest at least $4,000 in a managed Validation Sprint, reply to this email with <strong>READY</strong>.</p>
         <p>Best,<br>The BPO Hive Team</p>
       </div>`
   };
@@ -153,11 +154,11 @@ function ownerNotificationEmail(lead, qualified, budgetLabel, bookingUrl) {
   ];
   const safeCompanyName = lead.companyName.replace(/[\r\n]+/g, ' ');
   return {
-    subject: `${qualified ? 'Qualified' : 'Scope review'} assessment: ${safeCompanyName} — ${budgetLabel}`,
+    subject: `${qualified ? 'Qualified' : 'Nurture'} assessment: ${safeCompanyName} — ${budgetLabel}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#102534;line-height:1.6">
-        <h1 style="font-size:26px;color:#0d1d2b">${qualified ? 'Qualified' : 'Scope review'} BPO Hive assessment</h1>
-        <p><strong>Status:</strong> ${qualified ? 'Qualified for a $4,000+ Validation Sprint' : 'Pending individual review'}</p>
+        <h1 style="font-size:26px;color:#0d1d2b">${qualified ? 'Qualified' : 'Nurture'} BPO Hive assessment</h1>
+        <p><strong>Status:</strong> ${qualified ? 'Qualified for a $4,000+ Validation Sprint' : 'Readiness-plan nurture'}</p>
         <table style="width:100%;border-collapse:collapse">
           ${rows.map(([label, value]) => `<tr><th style="padding:9px;border:1px solid #dbe6ec;text-align:left;background:#f5f9fb">${escapeHtml(label)}</th><td style="padding:9px;border:1px solid #dbe6ec">${escapeHtml(value)}</td></tr>`).join('')}
         </table>
@@ -211,7 +212,7 @@ module.exports = async function handler(req, res) {
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email);
   if (!emailOk || required.some(key => !lead[key]) || !budgetLabels[lead.budget]) return res.status(400).json({ error: 'Please complete all required fields.' });
 
-  const qualified = qualifiedBudget(lead.budget);
+  const qualified = lead.budget !== 'under_4000';
   const budgetLabel = budgetLabels[lead.budget];
   const forecast = forecastFor(lead.averageSale);
   const bookingUrl = qualified ? calendlyLink(lead, budgetLabel) : '';
@@ -222,7 +223,7 @@ module.exports = async function handler(req, res) {
     type: 'outbound_assessment_submitted',
     source: 'BPO Hive outbound assessment',
     submitted_at: lead.submittedAt,
-    qualification_status: qualified ? 'Qualified' : 'Pending individual review',
+    qualification_status: qualified ? 'Qualified' : 'Readiness plan',
     qualified,
     first_name: lead.firstName,
     last_name: lead.lastName,
@@ -257,7 +258,6 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({
     accepted: true,
     qualified,
-    reviewPending: !qualified && zapier.delivered,
     budgetLabel,
     forecast,
     bookingUrl,

@@ -221,11 +221,11 @@
               <section class="step" data-step="2" hidden>
                 <p class="step-kicker">Campaign readiness</p>
                 <h2>Set your budget and timing.</h2>
-                <p class="step-intro">Managed campaigns start at $4,000. Smaller-budget or undecided requests receive an individual scope review before any booking invitation.</p>
+                <p class="step-intro">Managed campaigns start at $4,000. If you’re not ready yet, you’ll receive a practical readiness plan.</p>
                 <div class="fields">
-                  <div class="field"><label for="averageSale">Average revenue from one closed sale</label><select id="averageSale" name="averageSale" required><option value="">Select a range</option><option>Under $5,000</option><option>$7,000–$9,999</option><option>$10,000–$24,999</option><option>$25,000–$49,999</option><option>$50,000+</option></select></div>
+                  <div class="field"><label for="averageSale">Average revenue from one closed sale</label><select id="averageSale" name="averageSale" required><option value="">Select a range</option><option>Under $5,000</option><option>$5,000–$9,999</option><option>$10,000–$24,999</option><option>$25,000–$49,999</option><option>$50,000+</option></select></div>
                   <div class="field"><label for="service">Which support do you need most?</label><select id="service" name="service" required><option value="">Select one</option><option>Full omnichannel campaign</option><option>Appointment setting</option><option>Cold calling</option><option>Cold email outreach</option><option>LinkedIn lead generation</option><option>B2B prospect data</option></select></div>
-                  <div class="field"><label for="budget">Monthly campaign investment</label><select id="budget" name="budget" required><option value="">Select a range</option><option value="4000_6999">$4,000–$6,999 — starting campaign range</option><option value="7000_9999">$7,000–$9,999</option><option value="10000_plus">$10,000+</option><option value="under_4000">Below $4,000 — request an individual review</option><option value="not_sure">Not sure — help me assess the investment</option></select><small>Managed BPO Hive campaigns begin at $4,000.</small></div>
+                  <div class="field"><label for="budget">Available initial campaign investment</label><select id="budget" name="budget" required><option value="">Select a range</option><option value="under_4000">Not ready to invest $4,000 yet</option><option value="4000_4999">$4,000–$4,999</option><option value="5000_9999">$5,000–$9,999</option><option value="10000_plus">$10,000+</option></select><small>Managed BPO Hive campaigns begin at $4,000.</small></div>
                   <div class="field"><label for="timeline">When would you want to launch?</label><select id="timeline" name="timeline" required><option value="">Select a timeline</option><option>Within 30 days</option><option>Within 1–3 months</option><option>More than 3 months</option><option>Still exploring</option></select></div>
                 </div>
                 <div class="step-actions"><button class="btn btn-secondary" type="button" data-back>← Back</button><button class="btn btn-primary" type="button" data-next>Continue to contact details →</button></div>
@@ -270,15 +270,15 @@
 
             <section class="result" id="nurture-result" aria-live="polite" hidden>
               <div class="result-badge">✓</div>
-              <p class="step-kicker">Individual scope review</p>
-              <h2>Your request needs an individual review.</h2>
-              <p class="result-summary">The full managed service starts at $4,000 per month. Smaller budgets are considered only for a smaller scope, case by case. Acceptance is limited and subject to review.</p>
+              <p class="step-kicker">Your readiness plan is ready</p>
+              <h2>Build the foundation before buying managed outreach.</h2>
+              <p class="result-summary">A fully managed campaign probably is not the right next step yet. We do not want you spending before the commercial foundations are ready.</p>
               <div class="readiness">
                 <div class="readiness-item"><b>1</b><div><strong>Narrow the ICP</strong><span>Choose one company profile and one buyer role instead of targeting everyone.</span></div></div>
                 <div class="readiness-item"><b>2</b><div><strong>Build a starter account list</strong><span>Prepare 100 companies that closely match that profile.</span></div></div>
                 <div class="readiness-item"><b>3</b><div><strong>Prove one message</strong><span>Test two sales angles manually before increasing outreach volume.</span></div></div>
               </div>
-              <div class="email-confirm" id="nurture-email-confirm">Your request is subject to individual review. If an appropriate smaller scope is available, we’ll email the next step.</div>
+              <div class="email-confirm" id="nurture-email-confirm">We’re sending this readiness plan to your work email. When a $4,000 Validation Sprint becomes realistic, reply with <strong>READY</strong>.</div>
               <button class="btn btn-secondary" id="restart-button" type="button">Review my answers</button>
             </section>
           </div>
@@ -397,7 +397,7 @@
           qualifiedResult.hidden=false;
           loadCalendly(result.bookingUrl,payload);
         }else{
-          document.getElementById('nurture-email-confirm').textContent=result.workflowDelivered?'Your request was received for individual review. If an appropriate scope is available, we’ll email the next step.':'We could not confirm delivery of your review request. Please email info@bpohive.com with your goals and budget.';
+          document.getElementById('nurture-email-confirm').innerHTML=result.emailConfigured?'We’re sending this readiness plan to <strong>'+escapeHtml(payload.email)+'</strong>. When a $4,000 Validation Sprint becomes realistic, reply with <strong>READY</strong>.':'Save these three readiness steps. When a $4,000 Validation Sprint becomes realistic, contact <strong>info@bpohive.com</strong>.';
           nurtureResult.hidden=false;
         }
         const destination=result.qualified?document.getElementById('calendar-heading'):document.querySelector('.assessment-wrap');
@@ -424,8 +424,8 @@
           window.dataLayer.push({event:'outbound_assessment_completed',qualified:result.qualified,budget:result.budgetLabel});
         }catch(error){
           if(location.hostname==='localhost'||location.hostname==='127.0.0.1'){
-            const labels={not_sure:'Not sure — help me assess the investment',under_4000:'Below $4,000 — request an individual review','4000_6999':'$4,000–$6,999','7000_9999':'$7,000–$9,999','10000_plus':'$10,000+'};
-            showResult({qualified:['4000_6999','7000_9999','10000_plus'].includes(latestPayload.budget),budgetLabel:labels[latestPayload.budget],forecast:{touchpoints:10000,meetingRange:'10–15'},emailConfigured:false},latestPayload);
+            const labels={under_4000:'Not ready to invest $4,000 yet','4000_4999':'$4,000–$4,999','5000_9999':'$5,000–$9,999','10000_plus':'$10,000+'};
+            showResult({qualified:latestPayload.budget!=='under_4000',budgetLabel:labels[latestPayload.budget],forecast:{touchpoints:10000,meetingRange:'10–15'},emailConfigured:false},latestPayload);
           }else{
             errorBox.textContent='We could not send your assessment. Please try again or email info@bpohive.com.';
             errorBox.hidden=false;
