@@ -65,10 +65,32 @@ function footer(rel) {
         ${cta(rel)}
       </div>
     </div>
-    <div class="bh-footer-bottom"><span>© ${YEAR} BPO Hive. All rights reserved.</span><nav aria-label="Legal links"><a href="/privacy-policy">Privacy</a><a href="/terms-of-service">Terms</a><a href="/accessibility">Accessibility</a><a href="/cookie-policy">Cookies</a></nav></div>
+    <div class="bh-footer-bottom"><span>© ${YEAR} BPO Hive LLC. All rights reserved.</span><nav aria-label="Legal links"><a href="/privacy-policy">Privacy</a><a href="/terms-of-service">Terms</a><a href="/accessibility">Accessibility</a><a href="/cookie-policy">Cookies</a></nav></div>
   </div>
 </footer>`;
 }
+
+// Fade content in as it scrolls into view. Only content below the first screen is affected,
+// nothing is hidden unless this script runs, and reduced-motion visitors are left alone.
+const REVEAL = `<script>(function(){
+if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+var SEL='[class*="card"],.bento,.panel,article,details,.section-head,.aces-intro,.hero-proof,.logo-grid,.calculator-wrap,.visibility-panel,.platform-copy,.rounded-2xl,.rounded-3xl,.growth .content>*,.growth-links,main section h2,main section>div>h2+p';
+var SKIP='.bh-header,.bh-footer,.aces-timeline,[role="dialog"],.scroll-animate,.hidden,[hidden],.leaflet-container,iframe';
+function init(){var vh=window.innerHeight,chosen=[];
+[].forEach.call(document.querySelectorAll(SEL),function(el){
+if(el.closest(SKIP)||el.querySelector('.scroll-animate,.aces-rail,.leaflet-container'))return;
+for(var i=0;i<chosen.length;i++)if(chosen[i].contains(el))return;
+var r=el.getBoundingClientRect();if(!r.height||!r.width||r.height>vh*1.25||r.top<vh*.92)return;
+var pos=getComputedStyle(el).position;if(pos==='fixed'||pos==='sticky')return;
+chosen.push(el);});
+if(!chosen.length)return;
+var rows={};
+chosen.forEach(function(el){var key=Math.round(el.getBoundingClientRect().top+window.scrollY);rows[key]=(rows[key]||0);el.style.transitionDelay=Math.min(rows[key]*80,320)+'ms';rows[key]++;el.classList.add('bh-reveal');});
+function done(el){el.classList.remove('bh-reveal','bh-in');el.style.transitionDelay='';}
+var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(!en.isIntersecting)return;var el=en.target;io.unobserve(el);el.classList.add('bh-in');setTimeout(function(){done(el);},1300);});},{rootMargin:'0px 0px -8% 0px',threshold:.08});
+chosen.forEach(function(el){io.observe(el);});}
+if(document.readyState==='complete')init();else window.addEventListener('load',init);
+})();</script>`;
 
 function applyShell(html, rel) {
   const $ = cheerio.load(html);
@@ -84,7 +106,13 @@ function applyShell(html, rel) {
   if (skip.length) skip.after(header(rel)); else body.prepend(header(rel));
   // Footer goes before trailing scripts so page scripts still run after the content exists.
   const firstTrailing = body.children().filter((i, e) => e.tagName !== 'script' && e.tagName !== 'noscript' && e.tagName !== 'style' && e.tagName !== 'link').last();
-  if (firstTrailing.length) firstTrailing.after(footer(rel)); else body.append(footer(rel));
+  if (firstTrailing.length) firstTrailing.after(footer(rel) + REVEAL); else body.append(footer(rel) + REVEAL);
+  // One font source for every page: drop the old Google Fonts links and preload our own files
+  // so text is drawn in the right font from the first frame.
+  $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
+  const preload = ['inter-latin-wght-normal.woff2', 'nunito-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
+  const charset = $('head meta[charset]').first();
+  if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
   body.addClass('bh-has-shell');
   return $.html();
