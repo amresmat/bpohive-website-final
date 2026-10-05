@@ -50,7 +50,7 @@ function footer(rel) {
   <div class="bh-shell">
     <div class="bh-footer-grid">
       <div class="bh-footer-brand">
-        <img src="/assets/logo/bpohivelogo.png" alt="BPO Hive" width="400" height="130">
+        <img src="/assets/logo/bpohivelogo-white.png" alt="BPO Hive" width="400" height="130">
         <p>Managed B2B appointment setting, lead generation, omnichannel execution, and live campaign reporting.</p>
         <p class="bh-footer-regions">Serving <a href="/appointment-setting-usa">USA</a>, <a href="/appointment-setting-canada">Canada</a> &amp; <a href="/gcc">GCC</a></p>
       </div>
