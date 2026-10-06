@@ -113,12 +113,9 @@ function applyShell(html, rel) {
   // One font source for every page: drop the old Google Fonts links and preload our own files
   // so text is drawn in the right font from the first frame.
   $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
-  const preload = ['inter-latin-wght-normal.woff2', 'nunito-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
-  // Headlines use Avenir Next where the device has it (Apple devices) and Nunito Sans elsewhere.
-  // This tiny check runs before the page is drawn so the right letter-spacing is applied from the start.
-  const fontCheck = `<script>(function(){try{var c=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmlliWQ';c.font='700 72px monospace';var a=c.measureText(t).width;c.font='700 72px "Avenir Next",monospace';if(c.measureText(t).width!==a)document.documentElement.classList.add('has-avenir');}catch(e){}})();</script>`;
+  const preload = ['inter-latin-wght-normal.woff2', 'dm-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
   const charset = $('head meta[charset]').first();
-  if (charset.length) charset.after(preload + fontCheck); else $('head').prepend(preload + fontCheck);
+  if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
   body.addClass('bh-has-shell');
   return $.html();
@@ -139,6 +136,13 @@ function noLongDashes(html) {
   });
 }
 
+// House style: crisp corners. Large radii in each page's own <style> blocks are tightened here so
+// every page follows the same rule (circles, written as 50%, are left alone).
+function sharpCorners(html) {
+  const radius = px => { const v = parseFloat(px); return v >= 999 ? '4px' : v >= 20 ? '10px' : v >= 13 ? '8px' : v >= 9 ? '6px' : px + 'px'; };
+  return html.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/gi, (m, open, css, close) => open + css.replace(/border-radius:\s*(\d+(?:\.\d+)?)px/g, (x, px) => 'border-radius:' + radius(px)) + close);
+}
+
 function shell(out) {
   const walk = dir => {
     for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -147,11 +151,11 @@ function shell(out) {
       if (!f.name.endsWith('.html')) continue;
       const rel = path.relative(out, p).split(path.sep).join('/');
       const html = fs.readFileSync(p, 'utf8');
-      const next = noLongDashes(applyShell(html, rel) || html);
+      const next = sharpCorners(noLongDashes(applyShell(html, rel) || html));
       if (next !== html) fs.writeFileSync(p, next);
     }
   };
   walk(out);
 }
 
-module.exports = { noLongDashes, shell, applyShell, header, footer };
+module.exports = { sharpCorners, noLongDashes, shell, applyShell, header, footer };
