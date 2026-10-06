@@ -1,9 +1,6 @@
-# BPO Hive Robots.txt
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
-# Sitemap location
-Sitemap: https://bpohive.com/sitemap.xml
-
-# Disallow admin or private areas (add as needed)
-# Disallow: /admin/
+Sitemap: https://www.bpohive.com/sitemap.xml
