@@ -5,6 +5,7 @@ const path = require('node:path');
 const cheerio = require('cheerio');
 
 const LINKS = [
+  ['Home', '/', rel => rel === 'index.html'],
   ['Services', '/services', rel => rel === 'services.html' || rel.startsWith('services/')],
   ['Industries', '/industries', rel => rel === 'industries.html' || rel.startsWith('industries/')],
   ['About', '/about', rel => rel === 'about.html'],
@@ -104,6 +105,8 @@ function applyShell(html, rel) {
   // No author/date lines anywhere on the site.
   $('.byline').remove();
   $('p,span,div').filter((i, e) => !$(e).children('p,div,section,ul,h1,h2,h3').length && /^\s*By\s+Amr Abdelrazzak\b/.test($(e).text())).remove();
+  // The plain "Featured and listed" link block is not shown on any page.
+  $('section.growth').filter((i, e) => /^\s*Featured and listed\s*$/i.test($(e).children('h2').first().text())).remove();
   $('footer').remove();
   const skip = body.children('.skip-link,a[href="#main"]').first();
   if (skip.length) skip.after(header(rel)); else body.prepend(header(rel));
