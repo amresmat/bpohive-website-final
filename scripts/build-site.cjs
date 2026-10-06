@@ -63,6 +63,7 @@ function build(out=path.join(root,'dist')) {
   require('./growth-site.cjs').generate(out);
   require('./growth-funnel.cjs').funnel(out);
   require('./site-shell.cjs').shell(out);
+  require('./seo-finalize.cjs').finalize(out);
   const livechat = '<script src="https://d1svrfmyhkyg8q.cloudfront.net/livechat/prod/livechat.js" data-site-key="lc_site_omfmLsDbq3qE4OCnnnm1uQebn0Dh_NKQ-YFI77UheWY" async></script>';
   const addLivechat = dir => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

@@ -178,7 +178,7 @@ function renderReviews(html, data) {
 }
 
 // ---------- Site-wide settings ----------
-const DEFAULTS = { signin_url: 'https://analytics.bpohive.com', contact_email: 'info@bpohive.com', calendly_url: 'https://calendly.com/d/cxkp-cvw-qyg' };
+const DEFAULTS = { signin_url: 'https://analytics.bpohive.com', contact_email: 'info@bpohive.com', calendly_url: 'https://calendly.com/d/43h-5tz-rkf/discovery-call' };
 
 function settingsReplacer(settings) {
   const pairs = [];

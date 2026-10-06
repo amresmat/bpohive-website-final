@@ -1,8 +1,8 @@
 # BPO Hive
 
-> Managed B2B outbound and appointment setting for the USA, Canada and GCC. Campaigns start at USD 4,000 per month. Last updated 2026-10-04.
+> Managed B2B outbound and appointment setting for the USA, Canada and GCC. Campaigns start at USD 4,000 per month. Last updated 2026-10-06.
 
-ACES means Analyze, Contrive, Execute, Scale. A touchpoint is an outreach action, not a unique prospect or meeting. Company-reported cumulative results are 21,200+ appointments and $25M+ client revenue; they are not forecasts or guarantees.
+ACES means Analyze, Craft, Execute, Scale. A touchpoint is an outreach action, not a unique prospect or meeting. Cumulative results: 21,200+ appointments booked and $25M+ in client-attributed revenue. Founded in 2020, with operations in Cairo, Egypt and Dubai, UAE.
 
 ## Company and scope
 - [About BPO Hive](https://www.bpohive.com/about)
@@ -22,4 +22,4 @@ ACES means Analyze, Contrive, Execute, Scale. A touchpoint is an outreach action
 - [Book a strategy call or build an outbound plan](https://www.bpohive.com/outbound-assessment)
 - [Contact](https://www.bpohive.com/contact): info@bpohive.com; US/Canada +1 502 677 3800; UAE WhatsApp +971 56 375 5110.
 
-Illustrative scenarios are labelled and must not be cited as client results. This file is an optional navigation summary, not an endorsement or a claim of AI-search inclusion.
+Examples on service and industry pages show how campaigns are structured. Verified client reviews: [Clutch](https://clutch.co/profile/bpo-hive) (4.9/5).

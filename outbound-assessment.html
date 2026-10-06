@@ -397,7 +397,7 @@
           qualifiedResult.hidden=false;
           loadCalendly(result.bookingUrl,payload);
         }else{
-          document.getElementById('nurture-email-confirm').innerHTML=result.emailConfigured?'We’re sending this readiness plan to <strong>'+escapeHtml(payload.email)+'</strong>. When a $4,000 Validation Sprint becomes realistic, reply with <strong>READY</strong>.':'Save these three readiness steps. When a $4,000 Validation Sprint becomes realistic, contact <strong>info@bpohive.com</strong>.';
+          document.getElementById('nurture-email-confirm').innerHTML=result.emailConfigured?'We’re sending this readiness plan to <strong>'+escapeHtml(payload.email)+'</strong>. When a $4,000 Validation Sprint becomes realistic, reply with <strong>READY</strong>.':'Save these three readiness steps. When a $4,000 Validation Sprint becomes realistic, email <a href="mailto:info@bpohive.com">info@bpohive.com</a> or message us on <a href="https://wa.me/971563755110">WhatsApp</a>.';
           nurtureResult.hidden=false;
         }
         const destination=result.qualified?document.getElementById('calendar-heading'):document.querySelector('.assessment-wrap');

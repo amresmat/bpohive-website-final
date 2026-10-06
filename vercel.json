@@ -21,6 +21,41 @@
       "source": "/services/customer-support.html",
       "destination": "/services",
       "permanent": true
+    },
+    {
+      "source": "/elementor-1417",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/category/:path*",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/feed",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/contact-us",
+      "destination": "/contact",
+      "permanent": true
     }
   ],
   "buildCommand": "npm run build",
