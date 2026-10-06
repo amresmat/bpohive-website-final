@@ -168,20 +168,38 @@ function ownerNotificationEmail(lead, qualified, budgetLabel, bookingUrl) {
 }
 
 async function sendZapierEvent(event) {
-  if (!process.env.ZAPIER_WEBHOOK_URL) return { configured: false, delivered: false };
-  try {
-    const response = await fetch(process.env.ZAPIER_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!response.ok) throw new Error(`Zapier returned ${response.status}`);
-    return { configured: true, delivered: true };
-  } catch (error) {
-    console.error('Zapier assessment workflow failed');
-    return { configured: true, delivered: false };
+  if (!process.env.ZAPIER_WEBHOOK_URL) {
+    console.error('LEAD NOT DELIVERED (ZAPIER_WEBHOOK_URL missing):', leadSummary(event));
+    return { configured: false, delivered: false };
   }
+  // Two attempts, so a brief Zapier hiccup does not lose a lead.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!response.ok) throw new Error(`Zapier returned ${response.status}`);
+      return { configured: true, delivered: true };
+    } catch (error) {
+      if (attempt === 2) {
+        // Logged in full so the lead can be recovered from the Vercel logs.
+        console.error('LEAD NOT DELIVERED (Zapier failed twice):', leadSummary(event));
+        return { configured: true, delivered: false };
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+function leadSummary(event) {
+  return JSON.stringify({
+    submitted_at: event.submitted_at, qualified: event.qualified, name: `${event.first_name} ${event.last_name}`,
+    email: event.work_email, phone: event.phone_number, company: event.company_name, website: event.company_website,
+    budget: event.initial_campaign_budget, average_sale: event.average_sale_value, target_market: event.target_market
+  });
 }
 
 module.exports = async function handler(req, res) {
