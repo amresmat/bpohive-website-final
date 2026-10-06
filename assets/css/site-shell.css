@@ -19,7 +19,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-header .bh-btn,.bh-footer .bh-btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 21px;border:1px solid transparent;border-radius:6px;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1;letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
 
 .bh-header .bh-actions>.bh-btn-solid{min-width:136px}
-.bh-header a.bh-btn-outline{color:#0d1d2b;border-color:#dbe8f0;background:#fff;box-shadow:none}
+.bh-header a.bh-btn-outline{color:#0d1d2b;border-color:#dbe8f0;background:#fff;box-shadow:0 6px 16px rgba(13,29,43,.13),0 1px 3px rgba(13,29,43,.08)}
 .bh-header a.bh-btn-solid,.bh-footer a.bh-btn-solid{color:#fff;background:#0f7ac4;box-shadow:none}
 .bh-header a.bh-btn-solid:hover,.bh-footer a.bh-btn-solid:hover{background:#0c6cae}
 .bh-header .bh-menu-btn{display:none;width:46px;height:46px;padding:0;border:1px solid #dbe8f0;border-radius:8px;background:#fff;cursor:pointer}
@@ -33,6 +33,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-header .bh-mobile-menu nav a{display:block;padding:13px 10px;border-radius:6px;color:#344d5c;font-size:17px;font-weight:600;line-height:22px;text-decoration:none}
 .bh-header .bh-mobile-menu nav a[aria-current="page"]{color:#0d1d2b;background:#f1f9ff}
 .bh-header .bh-mobile-menu .bh-btn{width:100%;margin-top:10px}
+@media (max-width:1200px){.bh-header .bh-links{gap:20px}.bh-header-inner{gap:20px}.bh-header .bh-brand img{width:146px}}
 @media (max-width:1020px){
   .bh-header .bh-links,.bh-header .bh-actions>.bh-btn{display:none}
   .bh-header .bh-menu-btn{display:block}
