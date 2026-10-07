@@ -463,26 +463,67 @@ fbq('track', 'PageView');
       </div>
     </section>
 
-    <section class="section" id="system">
-      <div class="shell">
-        <div class="section-head reveal">
-          <div><p class="kicker">What BPO Hive delivers</p><h2>Everything needed to turn a market into qualified conversations.</h2></div>
-          <p class="lead">Market intelligence, B2B prospect data, coordinated outreach, qualification, booking, and live reporting work as one managed system—not disconnected services.</p>
+    <section class="section dl" id="system">
+      <style>
+        .dl{background:linear-gradient(180deg,#fff 0%,var(--blue-50) 100%)}
+        .dl-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:72px;align-items:center}
+        .dl h2{margin:0 0 18px;color:var(--navy-950);font-size:clamp(34px,3.6vw,50px);line-height:1.05;letter-spacing:-.03em}
+        .dl-lead{max-width:470px;margin:0 0 34px;color:var(--muted,#5d7280);font-size:18px;line-height:1.65}
+        .dl-steps{list-style:none;margin:0;padding:0;border-top:1px solid #d8e7f1}
+        .dl-steps li{display:grid;grid-template-columns:44px 1fr;gap:6px 14px;padding:20px 0;border-bottom:1px solid #d8e7f1}
+        .dl-steps .n{grid-row:span 2;color:var(--blue-600);font-family:var(--display);font-weight:800;font-size:15px;line-height:1.9;font-variant-numeric:tabular-nums}
+        .dl-steps strong{color:var(--navy-950);font-family:var(--display);font-size:19px;line-height:1.3}
+        .dl-steps span{color:#4f6575;font-size:15.5px;line-height:1.55}
+        .dl-stage{position:relative;padding:58px 0 8px 28px}
+        .dl-back{position:absolute;inset:6px 46px 70px 0;border-radius:22px;background:#e3f1fb;border:1px solid #cfe5f4;transform:rotate(-2.5deg)}
+        .dl-back span{position:absolute;left:22px;top:16px;color:#5b87a6;font-size:13px;font-weight:700}
+        .dl-card{position:relative;border-radius:22px;color:#dbe8f2;background:var(--navy-950);box-shadow:0 30px 70px rgba(8,21,33,.28);overflow:hidden}
+        .dl-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 26px;border-bottom:1px solid rgba(255,255,255,.08)}
+        .dl-status{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:15px}
+        .dl-status i{width:9px;height:9px;border-radius:50%;background:#3ddc97;box-shadow:0 0 0 5px rgba(61,220,151,.15)}
+        .dl-when{color:var(--blue-300);font-size:14px;font-weight:600;white-space:nowrap}
+        .dl-rows{margin:0;padding:8px 26px 4px}
+        .dl-row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+        .dl-row:last-child{border-bottom:0}
+        .dl-row dt{color:#7f9bb0;font-size:13px;font-weight:600;letter-spacing:.02em}
+        .dl-row dd{margin:0;color:#fff;font-size:15.5px;line-height:1.5}
+        .dl-row dd em{font-style:normal;color:var(--blue-300)}
+        .dl-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:16px 26px;background:rgba(255,255,255,.04);color:#9fb6c7;font-size:13.5px}
+        .dl-foot b{color:#fff;font-weight:600}
+        .dl-note{position:relative;margin:16px 0 0 4px;color:#6f8797;font-size:13px}
+        @media(max-width:980px){.dl-grid{grid-template-columns:1fr;gap:44px}.dl-stage{padding:50px 0 8px 12px}}
+        @media(max-width:560px){.dl-row{grid-template-columns:1fr;gap:4px}.dl-top{flex-direction:column;align-items:flex-start}.dl-back{inset:4px 16px 64px 0}}
+      </style>
+      <div class="shell dl-grid">
+        <div class="reveal">
+          <p class="kicker">What you get</p>
+          <h2>You take the meeting. We handle everything before it.</h2>
+          <p class="dl-lead">One team researches your market, runs the outreach and books the meeting. You watch every step live in your client portal.</p>
+          <ol class="dl-steps">
+            <li><span class="n">01</span><strong>Your market, mapped</strong><span>We find the companies that fit your offer and the people who actually buy.</span></li>
+            <li><span class="n">02</span><strong>Outreach that sounds human</strong><span>Our callers lead on the phone. Email and LinkedIn back them up.</span></li>
+            <li><span class="n">03</span><strong>Qualified before it is booked</strong><span>Every prospect is checked against your criteria before a meeting lands on your calendar.</span></li>
+            <li><span class="n">04</span><strong>Nothing hidden</strong><span>Calls, replies, objections and meetings show up live in your portal.</span></li>
+          </ol>
         </div>
-        <div class="system-grid reveal">
-          <article class="system-main">
-            <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg></div>
-            <h3>Define the market before contacting it.</h3>
-            <p>We examine your offer, previous outreach, customer profile, buyer roles, audience size, qualification requirements, and sales process. Then we prepare the B2B prospect data around the ICPs approved for testing.</p>
-            <div class="data-map">
-              <div class="data-node"><small>Your strongest fit</small><strong>Offer + customer evidence</strong></div><div class="data-arrow">→</div><div class="data-node"><small>Campaign-ready ICP</small><strong>Companies + decision-makers</strong></div>
+        <div class="dl-stage reveal" aria-label="Example of a meeting handoff">
+          <div class="dl-back" aria-hidden="true"><span>Thu · 2:00 PM GST · Dubai</span></div>
+          <article class="dl-card">
+            <div class="dl-top">
+              <span class="dl-status"><i></i>New meeting booked</span>
+              <span class="dl-when">Tue · 10:30 AM ET · 30 min</span>
             </div>
+            <dl class="dl-rows">
+              <div class="dl-row"><dt>Prospect</dt><dd>VP of Operations</dd></div>
+              <div class="dl-row"><dt>Company</dt><dd>Logistics firm · 240 employees · Dallas, TX</dd></div>
+              <div class="dl-row"><dt>Why they said yes</dt><dd>Missed delivery windows are putting <em>two key accounts</em> at risk.</dd></div>
+              <div class="dl-row"><dt>Current setup</dt><dd>In-house dispatch team working from spreadsheets</dd></div>
+              <div class="dl-row"><dt>Objection heard</dt><dd>“We’re already talking to another vendor.”</dd></div>
+              <div class="dl-row"><dt>Agreed next step</dt><dd>Live demo with the decision-maker on the call</dd></div>
+            </dl>
+            <div class="dl-foot"><span><b>Qualified</b> against your criteria</span><span><b>Call recording</b> in your portal</span></div>
           </article>
-          <div class="system-side">
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg></div><h3>Own prospect data</h3><p>B2B lists built around approved company, market, and buyer criteria.</p></article>
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h7M7 16h4"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div><h3>Qualified booking</h3><p>Interested prospects are qualified and booked directly on your calendar.</p></article>
-            <article class="bento"><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v6M18 2v6M3 10h18M5 5h14a2 2 0 0 1 2 2v14H3V7a2 2 0 0 1 2-2Z"/></svg></div><h3>Omnichannel execution with live visibility</h3><p>Phone creates conversations. Email and LinkedIn support the sequence. Your dedicated client login shows activity, conversations, objections, qualified interest, and meetings as the campaign develops.</p><div class="channel-pills"><span>Phone</span><span>Email</span><span>LinkedIn</span><span>Client platform</span><span>Reporting</span></div></article>
-          </div>
+          <p class="dl-note">Example of the handoff your sales team receives with every meeting.</p>
         </div>
       </div>
     </section>
