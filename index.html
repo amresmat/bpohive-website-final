@@ -584,28 +584,84 @@ fbq('track', 'PageView');
       </div>
     </section>
 
-    <section class="section section-dark" id="platform">
-      <div class="shell platform-layout">
-        <div class="visibility-panel reveal" aria-label="What clients can monitor in the BPO Hive platform">
-          <div class="visibility-head">
-            <div class="visibility-brand"><i class="visibility-mark">BH</i><div><strong>BPO Hive Client Platform</strong><span>Your private campaign workspace</span></div></div>
-            <span class="access-label">Dedicated login</span>
-          </div>
-          <div class="visibility-path">
-            <div class="visibility-step"><i class="visibility-number">01</i><div><strong>Outreach activity</strong><span>Calls, emails, and LinkedIn touchpoints completed by the campaign team.</span></div></div>
-            <div class="visibility-step"><i class="visibility-number">02</i><div><strong>Connections</strong><span>Prospects reached and the activity that moved them into a real exchange.</span></div></div>
-            <div class="visibility-step"><i class="visibility-number">03</i><div><strong>Conversations and feedback</strong><span>Prospect interest, objections, and the context your sales team needs.</span></div></div>
-            <div class="visibility-step"><i class="visibility-number">04</i><div><strong>Qualified meetings</strong><span>Interested prospects booked directly onto your calendar.</span></div></div>
-          </div>
-          <p class="visibility-foot">The platform gives your team a direct view of campaign progress. It is reporting access—not a separate service clients need to operate.</p>
+    <section class="section section-dark pf" id="platform">
+      <style>
+        .pf-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:72px;align-items:center}
+        .pf h2{margin:0 0 18px;color:#fff;font-size:clamp(34px,3.6vw,50px);line-height:1.05;letter-spacing:-.03em}
+        .pf .lead{max-width:500px}
+        .pf-points{list-style:none;margin:30px 0 0;padding:0}
+        .pf-points li{display:grid;grid-template-columns:28px 1fr;gap:4px 14px;padding:16px 0;border-top:1px solid rgba(255,255,255,.08)}
+        .pf-points li::before{content:"";grid-row:span 2;width:22px;height:22px;margin-top:2px;border-radius:50%;background:rgba(104,191,255,.16) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239bd5ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
+        .pf-points strong{color:#fff;font-family:var(--display);font-size:19px;line-height:1.3}
+        .pf-points span{color:#aebfca;font-size:15.5px;line-height:1.55}
+        .pf-link{display:inline-flex;gap:8px;margin-top:22px;color:var(--blue-300);font-weight:700}
+        .pf-link:hover{color:#fff}
+        .pf-app{border-radius:20px;background:#fff;color:var(--navy-950);box-shadow:0 40px 90px rgba(0,0,0,.35);overflow:hidden}
+        .pf-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;background:#eef4f8;border-bottom:1px solid #dde8ef}
+        .pf-bar i{width:10px;height:10px;border-radius:50%;background:#cfdbe3}
+        .pf-bar span{margin-left:10px;padding:4px 12px;border-radius:7px;background:#fff;color:#6a8090;font-size:12px}
+        .pf-body{padding:22px 24px 24px}
+        .pf-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:18px}
+        .pf-head strong{font-family:var(--display);font-size:18px}
+        .pf-head small{color:#6a8090;font-size:13px}
+        .pf-live{display:inline-flex;align-items:center;gap:7px;color:#15935f;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+        .pf-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fcf8a;box-shadow:0 0 0 4px rgba(47,207,138,.18)}
+        .pf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+        .pf-kpi{padding:14px 14px 12px;border:1px solid #e1ebf2;border-radius:14px;background:#f7fbfe}
+        .pf-kpi small{display:block;color:#6a8090;font-size:12px;font-weight:700}
+        .pf-kpi b{display:block;margin-top:6px;font-family:var(--display);font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+        .pf-kpi.hl{border-color:#bfe2fb;background:var(--blue-50)}
+        .pf-kpi.hl b{color:var(--blue-600)}
+        .pf-kpi em{display:block;margin-top:6px;color:#15935f;font-style:normal;font-size:12px;font-weight:700}
+        .pf-feed{margin-top:18px;border:1px solid #e1ebf2;border-radius:14px}
+        .pf-feed h4{margin:0;padding:12px 16px;border-bottom:1px solid #e1ebf2;color:#6a8090;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+        .pf-item{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #eef3f7}
+        .pf-item:last-child{border-bottom:0}
+        .pf-play{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--navy-900);color:#fff;font-size:11px}
+        .pf-play.mail{background:#e6f2fb;color:var(--blue-600);font-size:15px}
+        .pf-item p{margin:0;font-size:14px;line-height:1.4}
+        .pf-item p b{font-family:var(--display)}
+        .pf-item p span{display:block;color:#6a8090;font-size:13px}
+        .pf-tag{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+        .pf-tag.booked{background:#e3f8ee;color:#127a4f}
+        .pf-tag.warm{background:#e6f2fb;color:#0f6fae}
+        .pf-tag.later{background:#f1f3f5;color:#5c6b76}
+        .pf-note{margin:14px 4px 0;color:#8ea5b5;font-size:13px}
+        @media(max-width:980px){.pf-grid{grid-template-columns:1fr;gap:44px}}
+        @media(max-width:560px){.pf-kpis{grid-template-columns:repeat(2,1fr)}.pf-item{grid-template-columns:34px 1fr}.pf-tag{grid-column:2;justify-self:start}.pf-head{flex-direction:column}.pf-body{padding:18px}}
+      </style>
+      <div class="shell pf-grid">
+        <div class="reveal">
+          <p class="kicker">Your client portal</p>
+          <h2>Watch it happen. Hear every call.</h2>
+          <p class="lead">Every client gets a private login to the BPO Hive portal. You see the outreach as it happens, listen to the calls and learn what your market is really saying, without waiting for a monthly report.</p>
+          <ul class="pf-points">
+            <li><strong>See the numbers live</strong><span>Calls, connections, conversations and meetings, updated as the team works.</span></li>
+            <li><strong>Hear the real conversations</strong><span>Every call is recorded, so you hear how your buyers talk about their problems.</span></li>
+            <li><strong>Walk into every meeting prepared</strong><span>Each booking comes with the prospect’s comments and the full call context.</span></li>
+          </ul>
+          <a class="pf-link" href="/outbound-assessment">Ask for a portal walkthrough <span aria-hidden="true">→</span></a>
         </div>
-        <div class="platform-copy reveal">
-          <p class="kicker">Your own platform and login</p><h2>See campaign performance as it happens.</h2><p class="lead">Every client receives dedicated access to the BPO Hive platform. Follow activity from outbound attempts to connections, real conversations, qualified interest, and meetings—without waiting for an end-of-month summary.</p>
-          <div class="platform-points">
-            <div class="platform-point"><i class="point-icon">01</i><div><strong>Live campaign visibility</strong><span>See the work in motion, including activity levels and campaign outcomes.</span></div></div>
-            <div class="platform-point"><i class="point-icon">02</i><div><strong>Conversation-to-meeting context</strong><span>Give your sales team the information needed to enter each booked call prepared.</span></div></div>
-            <div class="platform-point"><i class="point-icon">03</i><div><strong>A learning loop, not a vanity report</strong><span>Use connections, objections, conversation quality, and booking data to decide what to improve and scale.</span></div></div>
+        <div class="reveal" aria-label="Example of the BPO Hive client portal">
+          <div class="pf-app">
+            <div class="pf-bar"><i></i><i></i><i></i><span>analytics.bpohive.com</span></div>
+            <div class="pf-body">
+              <div class="pf-head"><div><strong>US Logistics Campaign</strong><br><small>Week 3 · updated a few minutes ago</small></div><span class="pf-live">Live</span></div>
+              <div class="pf-kpis">
+                <div class="pf-kpi"><small>Calls</small><b>1,284</b></div>
+                <div class="pf-kpi"><small>Connections</small><b>212</b></div>
+                <div class="pf-kpi"><small>Conversations</small><b>96</b></div>
+                <div class="pf-kpi hl"><small>Meetings</small><b>14</b><em>+3 this week</em></div>
+              </div>
+              <div class="pf-feed">
+                <h4>Latest activity</h4>
+                <div class="pf-item"><span class="pf-play" aria-hidden="true">▶</span><p><b>Call recording · 4:07</b><span>VP Supply Chain · distributor · Ohio</span></p><span class="pf-tag booked">Meeting booked</span></div>
+                <div class="pf-item"><span class="pf-play" aria-hidden="true">▶</span><p><b>Call recording · 2:41</b><span>“Send me pricing for our three depots.” · Texas</span></p><span class="pf-tag warm">Interested</span></div>
+                <div class="pf-item"><span class="pf-play mail" aria-hidden="true">✉</span><p><b>Email reply</b><span>“Not this quarter. Check back in January.” · Georgia</span></p><span class="pf-tag later">Follow up</span></div>
+              </div>
+            </div>
           </div>
+          <p class="pf-note">Example dashboard. Your portal shows your own campaign data.</p>
         </div>
       </div>
     </section>
