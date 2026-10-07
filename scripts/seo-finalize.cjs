@@ -140,7 +140,7 @@ function finalize(out) {
     else if (desc) head.append(`<meta name="description" content="${desc.replace(/"/g, '&quot;')}">`);
 
     const canonical = $('link[rel="canonical"]').attr('href') || '';
-    const socialTitle = title.endsWith(BRAND) ? title : title + BRAND;
+    const socialTitle = title.includes('BPO Hive') ? title : title + BRAND;
     const set = (attr, key, value) => {
       if (!value) return;
       const el = $(`meta[${attr}="${key}"]`);

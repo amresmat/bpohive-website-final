@@ -53,7 +53,7 @@ function funnel(out){
   }
   if(rel.startsWith('blog-')){const target=$('article').first();target.append('<aside class="growth-links"><a href="/services/appointment-setting">Explore appointment setting</a><a href="/services/sales-development">Explore sales development</a></aside>');}
   if(rel==='index.html'){
-   $('title').text('B2B Appointment Setting: USA, Canada & GCC | BPO Hive');
+   $('title').text('BPO Hive | B2B Lead Generation & Appointment Setting');
    $('footer').before(`<section class="bh-featured" aria-labelledby="bh-featured-title">
     <style>
      .bh-featured{max-width:1200px;margin:0 auto;padding:56px 24px 64px}
