@@ -17,6 +17,7 @@ const SIGN_IN = 'https://analytics.bpohive.com';
 const BOOK = '/outbound-assessment';
 const EMAIL = 'info@bpohive.com';
 const YEAR = '2026';
+const HOME_TITLE = 'BPO Hive | B2B Lead Generation & Appointment Setting';
 
 // The Careers page is for job applicants, so it carries no sales call, phone or WhatsApp links.
 // Its main button keeps the same size and position but points at the open roles instead.
@@ -120,6 +121,8 @@ function applyShell(html, rel) {
   const charset = $('head meta[charset]').first();
   if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
+  // The homepage title is set here, last, so an earlier build step cannot replace it.
+  if (rel === 'index.html') $('title').text(HOME_TITLE);
   body.addClass('bh-has-shell');
   return $.html();
 }
