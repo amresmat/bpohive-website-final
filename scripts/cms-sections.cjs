@@ -167,11 +167,10 @@ function renderReviews(html, data) {
     const where = `Review ${i + 1}`;
     const name = str(r, 'name', where), quote = opt(r, 'quote').replace(/^[“"']+|[”"']+$/g, ''), role = opt(r, 'role');
     const rating = Math.min(5, Math.max(1, Math.round(Number(r.rating)) || 5));
-    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
     return `          <article class="testimonial-card">
             <div class="testimonial-top"><span class="testimonial-rating" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}<i>${'★'.repeat(5 - rating)}</i></span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>
             <blockquote>“${esc(quote)}”</blockquote>
-            <div class="testimonial-person"><span class="person-mark">${esc(initials)}</span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
+            <div class="testimonial-person"><span class="person-mark person-clutch"><img src="/assets/logo/trust-badges/Clutch-Logo.png" alt="Clutch" width="150" height="83" loading="lazy"></span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
           </article>`;
   });
   return between(html, 'REVIEWS', cards.join('\n'));
