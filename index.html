@@ -499,11 +499,12 @@ fbq('track', 'PageView');
         .dl-steps .n{grid-row:span 2;color:var(--blue-600);font-family:var(--display);font-weight:800;font-size:15px;line-height:1.9;font-variant-numeric:tabular-nums}
         .dl-steps strong{color:var(--navy-950);font-family:var(--display);font-size:19px;line-height:1.3}
         .dl-steps span{color:#4f6575;font-size:15.5px;line-height:1.55}
-        .dl-stage{position:relative;display:flex;flex-direction:column;justify-content:flex-start;min-height:560px;padding:26px;border-radius:10px;overflow:hidden;isolation:isolate;background:radial-gradient(circle at 82% 12%,rgba(49,165,246,.55),transparent 40%),radial-gradient(circle at 12% 88%,rgba(104,191,255,.32),transparent 46%),radial-gradient(circle at 60% 60%,rgba(22,143,220,.22),transparent 38%),linear-gradient(160deg,#0f2e48 0%,#081521 70%)}
-        .dl-stage::before{content:"";position:absolute;inset:0;z-index:-1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.12;mix-blend-mode:soft-light}
-        .dl-card{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;border-radius:10px;color:#dbe8f2;background:rgba(14,22,32,.4);-webkit-backdrop-filter:blur(26px) saturate(170%);backdrop-filter:blur(26px) saturate(170%);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.03);will-change:clip-path,transform,opacity}
+        .dl-stage{position:relative;display:flex;flex-direction:column;min-height:560px}
+        .dl-shadow{flex:1;display:flex;flex-direction:column;filter:drop-shadow(0 24px 40px rgba(8,21,33,.28)) drop-shadow(0 4px 10px rgba(8,21,33,.14))}
+        .dl-card{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;border-radius:1.25rem;color:#dbe8f2;background:linear-gradient(165deg,rgba(40,54,70,.9) 0%,rgba(14,22,32,.92) 55%,rgba(10,17,26,.94) 100%);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04)}
+        .dl-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 60% at 15% 0%,rgba(255,255,255,.10),transparent 55%)}
         .dl-top{display:flex;align-items:center;gap:13px;padding:16px 18px}
-        .dl-app{flex:none;display:block;width:38px;height:38px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+        .dl-app{flex:none;display:block;width:38px;height:38px;border-radius:.6rem;box-shadow:0 2px 6px rgba(0,0,0,.3)}
         .dl-note{min-width:0;line-height:1.3}
         .dl-note small{display:block;color:#9fb6c7;font-size:12px}
         .dl-note small b{color:#dbe8f2;font-weight:600}
@@ -518,11 +519,23 @@ fbq('track', 'PageView');
         .dl-row dd em{font-style:normal;color:var(--blue-300)}
         .dl-foot{display:flex;flex-wrap:wrap;gap:8px 18px;padding:14px 22px;border-top:1px solid rgba(255,255,255,.09);color:#9fb6c7;font-size:13.5px}
         .dl-foot b{color:#fff;font-weight:600}
-        .dl-cursor{position:absolute;left:0;top:0;z-index:3;width:46px;height:46px;opacity:0;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));transform-origin:7px 4px;will-change:transform,opacity}
-        .dl-click{position:absolute;left:0;top:0;z-index:2;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:2px solid rgba(255,255,255,.7);opacity:0;pointer-events:none}
+        .dl-cursor{position:absolute;left:0;top:0;z-index:3;width:46px;height:46px;opacity:0;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(8,21,33,.3));transform-origin:7px 4px}
+        .dl-click{position:absolute;left:0;top:0;z-index:2;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:2px solid rgba(15,122,196,.55);opacity:0;pointer-events:none}
+        .dl-anim .dl-card{transition:clip-path .85s cubic-bezier(.34,1.45,.5,1),transform .85s cubic-bezier(.34,1.45,.5,1),opacity .4s ease}
+        .dl-anim .dl-more{transition:opacity .5s ease .25s,transform .7s cubic-bezier(.34,1.56,.64,1) .2s}
+        .dl-anim[data-s="0"] .dl-card{opacity:0;clip-path:inset(0 var(--cw) var(--ch) 0 round 1.25rem);transform:translate3d(calc(var(--cw) + 90px),0,0)}
+        .dl-anim[data-s="1"] .dl-card,.dl-anim[data-s="2"] .dl-card{opacity:1;clip-path:inset(0 var(--cw) var(--ch) 0 round 1.25rem);transform:translate3d(var(--cw),0,0)}
+        .dl-anim[data-s="2"] .dl-card{transform:translate3d(var(--cw),0,0) scale(.97)}
+        .dl-anim[data-s="3"] .dl-card{opacity:1;clip-path:inset(0 0 0 0 round 1.25rem);transform:none}
+        .dl-anim:not([data-s="3"]) .dl-more{opacity:0;transform:translateY(-12px)}
+        .dl-anim .dl-cursor{transition:transform 1s cubic-bezier(.22,1.2,.36,1),opacity .35s ease}
+        .dl-anim .dl-cursor.press{animation:dl-press .42s cubic-bezier(.34,1.56,.64,1)}
+        .dl-anim .dl-click.go{animation:dl-ring .6s ease-out}
+        @keyframes dl-press{0%{scale:1}35%{scale:.78}100%{scale:1}}
+        @keyframes dl-ring{0%{opacity:.9;transform:var(--ring) scale(.3)}100%{opacity:0;transform:var(--ring) scale(1.6)}}
         .dl-six{margin-top:22px;border-top:0}.dl-six li{border-bottom:0;padding-bottom:0}
-        @media(max-width:980px){.dl-grid{grid-template-columns:1fr;gap:44px}.dl-stage{min-height:620px}}
-        @media(max-width:560px){.dl-stage{padding:14px;min-height:700px}.dl-row{grid-template-columns:1fr;gap:3px;padding:11px 0}.dl-rows{padding:2px 16px 4px}.dl-foot{padding:12px 16px}.dl-top{padding:14px}}
+        @media(max-width:980px){.dl-grid{grid-template-columns:1fr;gap:44px}.dl-stage{min-height:0}}
+        @media(max-width:560px){.dl-row{grid-template-columns:1fr;gap:3px;padding:11px 0}.dl-rows{padding:2px 16px 4px}.dl-foot{padding:12px 16px}.dl-top{padding:14px}}
       </style>
       <div class="shell dl-grid">
         <div class="reveal">
@@ -537,7 +550,7 @@ fbq('track', 'PageView');
           </ol>
         </div>
         <div class="dl-stage" aria-label="Example of a meeting notification">
-          <article class="dl-card">
+          <div class="dl-shadow"><article class="dl-card">
             <div class="dl-top">
               <img class="dl-app" src="/assets/logo/apple-touch-icon.png" alt="" width="38" height="38">
               <div class="dl-note"><small><b>BPO Hive</b> · now</small><strong>New meeting booked</strong><span>VP of Operations · Logistics firm</span></div>
@@ -553,42 +566,32 @@ fbq('track', 'PageView');
               </dl>
               <div class="dl-foot"><span><b>Added to your calendar</b> live</span><span><b>Call recording</b> in your portal</span></div>
             </div>
-          </article>
+          </article></div>
           <span class="dl-click" aria-hidden="true"></span>
           <svg class="dl-cursor" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 3.5v22.2l5.4-5.2 3.6 8.3 3.9-1.7-3.6-8.2h7.5z" fill="#fff" stroke="#0b1622" stroke-width="1.6" stroke-linejoin="round"/></svg>
         </div>
       </div>
           <script>(function(){
-var st=document.querySelector('.dl-stage');if(!st)return;
-var card=st.querySelector('.dl-card'),top=st.querySelector('.dl-top'),cur=st.querySelector('.dl-cursor'),ring=st.querySelector('.dl-click');
+var st=document.querySelector('.dl-stage');if(!st||!('IntersectionObserver' in window))return;
 if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-function cl(v){return v<0?0:v>1?1:v}function seg(p,a,b){return cl((p-a)/(b-a))}
-function ease(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}
-var cur_p=0,tgt=0,run=false;
-function target(){var r=st.getBoundingClientRect(),vh=window.innerHeight;return cl((vh*.72-r.top)/(vh*.62))}
-function draw(p){
-  var W=card.offsetWidth,H=card.offsetHeight,w0=Math.min(360,W),h0=top.offsetHeight;
-  var b=ease(seg(p,0,.16)),c=ease(seg(p,.16,.44)),k=seg(p,.44,.54),x=ease(seg(p,.52,.82));
-  var dx=(1-x)*(W-w0),cx=dx+(1-b)*70;
-  card.style.clipPath='inset(0 '+((1-x)*(W-w0)).toFixed(1)+'px '+((1-x)*(H-h0)).toFixed(1)+'px 0 round 10px)';
-  card.style.transform='translate3d('+cx.toFixed(1)+'px,0,0)';
-  card.style.opacity=b.toFixed(3);
-  card.style.setProperty('--rows',seg(p,.62,.86).toFixed(3));
-  var ox=card.offsetLeft,oy=card.offsetTop;
-  var sx=st.clientWidth*.18,sy=st.clientHeight*.9;
-  var tx=ox+(W-w0)+w0*.5,ty=oy+h0*.55;
-  var px=sx+(tx-sx)*c,py=sy+(ty-sy)*c+Math.sin(c*Math.PI)*-40;
-  var ax=ox+W*.86,ay=oy+H*.93,d=ease(seg(p,.56,.9));px+=(ax-px)*d;py+=(ay-py)*d;
-  var press=k>0&&k<1?1-.16*Math.sin(k*Math.PI):1;
-  cur.style.transform='translate3d('+px.toFixed(1)+'px,'+py.toFixed(1)+'px,0) scale('+press.toFixed(3)+')';
-  cur.style.opacity=(seg(p,.14,.22)*(1-seg(p,.84,.96))).toFixed(3);
-  ring.style.transform='translate3d('+(tx+4).toFixed(1)+'px,'+(ty+2).toFixed(1)+'px,0) scale('+(.4+k*1.4).toFixed(3)+')';
-  ring.style.opacity=(k>0&&k<1?(1-k)*.9:0).toFixed(3);
-}
-function loop(){cur_p+=(tgt-cur_p)*.12;if(Math.abs(tgt-cur_p)<.0008)cur_p=tgt;draw(cur_p);if(cur_p!==tgt)requestAnimationFrame(loop);else run=false}
-function kick(){tgt=target();if(!run){run=true;requestAnimationFrame(loop)}}
-cur_p=tgt=target();draw(cur_p);
-window.addEventListener('scroll',kick,{passive:true});window.addEventListener('resize',function(){draw(cur_p)});
+var card=st.querySelector('.dl-card'),top=st.querySelector('.dl-top'),cur=st.querySelector('.dl-cursor'),ring=st.querySelector('.dl-click');
+var timers=[],state=0,busy=false;
+function geo(){var W=card.offsetWidth,H=card.offsetHeight,w0=Math.min(360,W),h0=top.offsetHeight;st.style.setProperty('--cw',(W-w0)+'px');st.style.setProperty('--ch',(H-h0)+'px');
+var ox=card.parentNode.offsetLeft,oy=card.parentNode.offsetTop;return{bx:ox+W-w0*.45,by:oy+h0*.55,sx:ox+W*.15,sy:oy+H*.95,ex:ox+W*.88,ey:oy+H*.9}}
+function at(x,y){cur.style.transform='translate3d('+x+'px,'+y+'px,0)'}
+function later(f,ms){timers.push(setTimeout(f,ms))}
+function reset(){timers.forEach(clearTimeout);timers=[];var g=geo();st.dataset.s='0';cur.style.transition='none';cur.style.opacity=0;at(g.sx,g.sy);cur.offsetWidth;cur.style.transition='';state=0}
+function play(){if(state)return;state=1;var g=geo();
+st.dataset.s='1';
+later(function(){cur.style.opacity=1;at(g.bx,g.by)},650);
+later(function(){cur.classList.remove('press');cur.offsetWidth;cur.classList.add('press');st.dataset.s='2';ring.style.setProperty('--ring','translate3d('+(g.bx+4)+'px,'+(g.by+3)+'px,0)');ring.classList.remove('go');ring.offsetWidth;ring.classList.add('go')},1700);
+later(function(){st.dataset.s='3'},1950);
+later(function(){at(g.ex,g.ey)},2500);
+later(function(){cur.style.opacity=0},3300);}
+st.classList.add('dl-anim');reset();
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>=.45)play();else if(!e.isIntersecting)reset();})},{threshold:[0,.45]});
+io.observe(st);
+window.addEventListener('resize',function(){if(state===0)reset();else geo()});
 })();</script>
     </section>
 
