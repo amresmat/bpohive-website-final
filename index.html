@@ -298,6 +298,7 @@
     .person-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;color:#fff;background:linear-gradient(135deg,var(--navy-800),var(--blue-500));font-size:15px;font-weight:900}
     .testimonial-person strong,.testimonial-person span{display:block}
     .testimonial-person .person-mark{display:grid}
+    .testimonial-person:has(.person-clutch){grid-template-columns:72px minmax(0,1fr)}.person-mark.person-clutch{width:72px;height:44px;padding:0 10px;border:1px solid #d9e8f1;border-radius:6px;background:#fff}.person-clutch img{display:block;width:100%;height:auto}
     .testimonial-person strong{font-size:16px}
     .testimonial-person div span{margin-top:3px;color:#718794;font-size:14px;line-height:1.35}
     .reported-result{display:flex;align-items:center;gap:18px;margin:0 0 28px;padding:16px 20px;border:1px solid var(--blue-100);border-radius:16px;background:var(--blue-50)}
@@ -490,25 +491,25 @@ fbq('track', 'PageView');
     <section class="section dl" id="system">
       <style>
         .dl{background:linear-gradient(180deg,#fff 0%,var(--blue-50) 100%)}
-        .dl-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:72px;align-items:center}
-        .dl h2{margin:0 0 18px;color:var(--navy-950);font-size:clamp(34px,3.6vw,50px);line-height:1.05;letter-spacing:-.03em}
+        .dl-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:72px;align-items:stretch}
+        .dl h2{margin:0 0 30px;color:var(--navy-950);font-size:clamp(34px,3.6vw,50px);line-height:1.05;letter-spacing:-.03em}
         .dl-lead{max-width:470px;margin:0 0 34px;color:var(--muted,#5d7280);font-size:18px;line-height:1.65}
         .dl-steps{list-style:none;margin:0;padding:0;border-top:1px solid #d8e7f1}
         .dl-steps li{display:grid;grid-template-columns:44px 1fr;gap:6px 14px;padding:20px 0;border-bottom:1px solid #d8e7f1}
         .dl-steps .n{grid-row:span 2;color:var(--blue-600);font-family:var(--display);font-weight:800;font-size:15px;line-height:1.9;font-variant-numeric:tabular-nums}
         .dl-steps strong{color:var(--navy-950);font-family:var(--display);font-size:19px;line-height:1.3}
         .dl-steps span{color:#4f6575;font-size:15.5px;line-height:1.55}
-        .dl-stage{position:relative}
-        .dl-card{position:relative;border-radius:22px;color:#dbe8f2;background:var(--navy-950);box-shadow:0 30px 70px rgba(8,21,33,.28);overflow:hidden}
+        .dl-stage{position:relative;display:flex}
+        .dl-card{position:relative;flex:1;display:flex;flex-direction:column;border-radius:22px;color:#dbe8f2;background:var(--navy-950);box-shadow:0 30px 70px rgba(8,21,33,.28);overflow:hidden}
         .dl-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 26px;border-bottom:1px solid rgba(255,255,255,.08)}
         .dl-status{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--display);font-weight:700;font-size:16px}
         .dl-status i{width:9px;height:9px;border-radius:50%;background:#3ddc97;box-shadow:0 0 0 5px rgba(61,220,151,.15)}
         .dl-when{color:var(--blue-300);font-size:14px;font-weight:600;white-space:nowrap}
-        .dl-rows{margin:0;padding:8px 26px 4px}
-        .dl-row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+        .dl-rows{flex:1;display:flex;flex-direction:column;margin:0;padding:4px 26px}
+        .dl-row{flex:1;display:grid;grid-template-columns:150px 1fr;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06)}
         .dl-row:last-child{border-bottom:0}
         .dl-row dt{color:#7f9bb0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;line-height:1.9}
-        .dl-row dd{margin:0;color:#fff;font-family:var(--display);font-weight:600;font-size:16px;line-height:1.5}
+        .dl-row dd{margin:0;color:#fff;font-family:var(--display);font-weight:600;font-size:17px;line-height:1.5}
         .dl-row dd em{font-style:normal;color:var(--blue-300)}
         .dl-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:16px 26px;background:rgba(255,255,255,.04);color:#9fb6c7;font-size:13.5px}
         .dl-foot b{color:#fff;font-weight:600}
@@ -518,15 +519,14 @@ fbq('track', 'PageView');
       </style>
       <div class="shell dl-grid">
         <div class="reveal">
-          <p class="kicker">What you get</p>
           <h2>You close the deal. We handle everything before it.</h2>
-          <p class="dl-lead">We get to know your business, find your ideal buyers and call them for you. You watch and listen to every step, and qualified meetings land on your calendar.</p>
           <ol class="dl-steps">
             <li><span class="n">01</span><strong>We learn your business</strong><span>Who you are, what you sell and who already buys from you.</span></li>
             <li><span class="n">02</span><strong>We define your ICP</strong><span>The exact companies and decision-makers worth calling.</span></li>
             <li><span class="n">03</span><strong>We build the strategy with you</strong><span>Message, channels and qualification rules, agreed together before we start.</span></li>
             <li><span class="n">04</span><strong>We call your ICP</strong><span>Our callers reach your buyers by phone, backed by email and LinkedIn.</span></li>
             <li><span class="n">05</span><strong>You see and hear everything</strong><span>Live reports and call recordings, so you hear the real conversations and understand your market.</span></li>
+            <li><span class="n">06</span><strong>Qualified meetings land on your calendar</strong><span>Each booking also appears in your portal with the prospect’s own comments.</span></li>
           </ol>
         </div>
         <div class="dl-stage reveal" aria-label="Example of a meeting handoff">
@@ -545,7 +545,6 @@ fbq('track', 'PageView');
             </dl>
             <div class="dl-foot"><span><b>Added to your calendar</b> live</span><span><b>Call recording</b> in your portal</span></div>
           </article>
-          <ol class="dl-steps dl-six"><li><span class="n">06</span><strong>Qualified meetings land on your calendar</strong><span>Each booking also appears in your portal with the prospect’s own comments. Example shown above.</span></li></ol>
         </div>
       </div>
     </section>
@@ -554,7 +553,7 @@ fbq('track', 'PageView');
       <div class="shell">
         <div class="aces-timeline">
           <div class="aces-rail">
-            <div class="aces-intro reveal"><p class="kicker">The BPO Hive ACES system</p><h2>Analyze. Craft. Execute. Scale.</h2><p class="lead">A structured operating system that turns outbound activity into a campaign you can test, understand, improve, and grow.</p></div>
+            <div class="aces-intro reveal"><h2>Analyze. Craft. Execute. Scale.</h2></div>
             <ol class="aces-nav" aria-label="ACES steps"><li class="aces-track" aria-hidden="true"><span class="aces-fill"></span></li><li><button type="button" class="aces-node" data-step="0" aria-controls="aces-step-1"><span class="aces-dot">A</span><span class="aces-label"><strong>Analyze</strong><small>the market</small></span></button></li><li><button type="button" class="aces-node" data-step="1" aria-controls="aces-step-2"><span class="aces-dot">C</span><span class="aces-label"><strong>Craft</strong><small>the strategy</small></span></button></li><li><button type="button" class="aces-node" data-step="2" aria-controls="aces-step-3"><span class="aces-dot">E</span><span class="aces-label"><strong>Execute</strong><small>the outreach</small></span></button></li><li><button type="button" class="aces-node" data-step="3" aria-controls="aces-step-4"><span class="aces-dot">S</span><span class="aces-label"><strong>Scale</strong><small>what works</small></span></button></li></ol>
           </div>
           <div class="aces-steps">
@@ -587,7 +586,7 @@ fbq('track', 'PageView');
 
     <section class="section" id="calculator">
       <div class="shell">
-        <div class="section-head reveal"><div><p class="kicker">Campaign planning</p><h2>Model the activity and potential return.</h2></div><p class="lead">Use your campaign scope, average revenue per sale, and close rate to explore directional outcomes. The model adjusts expected conversations and meetings by offer value.</p></div>
+        <div class="section-head section-head-solo reveal"><h2>Model the activity and potential return.</h2></div>
         <div class="calculator-wrap reveal">
           <div class="calculator">
             <div class="calc-controls"><h3>Your assumptions</h3><p class="calc-sub">Adjust the campaign and your sales economics.</p>
@@ -605,7 +604,7 @@ fbq('track', 'PageView');
 
     <section class="section section-soft" id="programs">
       <div class="shell">
-        <div class="section-head reveal"><div><p class="kicker">Campaign programs</p><h2>Validate first. Grow with evidence. Scale with control.</h2></div><p class="lead">Every program follows the Analyze–Craft–Execute–Scale system. The right scope depends on the audience, market, sales cycle, offer, and expansion goal—not a generic package formula.</p></div>
+        <div class="section-head section-head-solo reveal"><h2>Validate first. Grow with evidence. Scale with control.</h2></div>
         <div class="program-grid reveal">
           <article class="program-card"><span class="tag">Starting point</span><h3>Validation Sprint</h3><div class="volume">10,000 touchpoints</div><p>Test the ICP, data, messaging, qualification criteria, and channel mix before increasing volume.</p><ul class="program-list"><li>Market and ICP analysis</li><li>B2B prospect data prepared by BPO Hive</li><li>Phone, email, and LinkedIn execution</li><li>Dedicated reporting login</li><li>End-of-sprint validation review</li></ul><a class="btn btn-light-outline" href="outbound-assessment.html">Discuss validation</a></article>
           <article class="program-card featured"><span class="tag">Validated growth</span><h3>Growth</h3><div class="volume">20,000–50,000 touchpoints</div><p>Expand the ICPs, messages, and sequences supported by campaign evidence while continuously optimizing delivery.</p><ul class="program-list"><li>Everything learned during validation</li><li>Higher-volume omnichannel execution</li><li>ICP and message optimization</li><li>Live platform visibility</li><li>Ongoing sales-feedback loop</li></ul><a class="btn btn-primary" href="outbound-assessment.html">Build a growth campaign <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></article>
@@ -627,45 +626,34 @@ fbq('track', 'PageView');
         .pf-points span{color:#aebfca;font-size:15.5px;line-height:1.55}
         .pf-link{display:inline-flex;gap:8px;margin-top:22px;color:var(--blue-300);font-weight:700}
         .pf-link:hover{color:#fff}
-        .pf-app{border-radius:20px;background:#fff;color:var(--navy-950);box-shadow:0 40px 90px rgba(0,0,0,.35);overflow:hidden}
-        .pf-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;background:#eef4f8;border-bottom:1px solid #dde8ef}
-        .pf-bar i{width:10px;height:10px;border-radius:50%;background:#cfdbe3}
-        .pf-bar span{margin-left:10px;padding:4px 12px;border-radius:7px;background:#fff;color:#6a8090;font-size:12px}
-        .pf-body{padding:22px 24px 24px}
-        .pf-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:18px}
-        .pf-head strong{font-family:var(--display);font-size:18px}
-        .pf-head small{color:#6a8090;font-size:13px}
+        .pf-app{border-radius:10px;background:#fff;color:var(--navy-950);box-shadow:0 30px 70px rgba(0,0,0,.3);overflow:hidden}
+        .pf-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;background:#f3f7fa;border-bottom:1px solid #e3ecf2}
+        .pf-bar i{width:9px;height:9px;border-radius:50%;background:#d3dee6}
+        .pf-bar span{margin-left:10px;padding:4px 12px;border-radius:4px;background:#fff;border:1px solid #e3ecf2;color:#4f6575;font-size:12.5px;font-weight:600}
+        .pf-body{padding:26px 28px 10px}
+        .pf-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+        .pf-head small{display:block;color:#6a8090;font-size:13px;font-weight:600}
+        .pf-head strong{display:block;margin-top:6px;font-family:var(--display);font-size:46px;font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--navy-950)}
         .pf-live{display:inline-flex;align-items:center;gap:7px;color:#15935f;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-        .pf-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fcf8a;box-shadow:0 0 0 4px rgba(47,207,138,.18)}
-        .pf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-        .pf-kpi{padding:14px 14px 12px;border:1px solid #e1ebf2;border-radius:14px;background:#f7fbfe}
-        .pf-kpi small{display:block;color:#6a8090;font-size:12px;font-weight:700}
-        .pf-kpi b{display:block;margin-top:6px;font-family:var(--display);font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
-        .pf-kpi.hl{border-color:#bfe2fb;background:var(--blue-50)}
-        .pf-kpi.hl b{color:var(--blue-600)}
-        .pf-kpi em{display:block;margin-top:6px;color:#15935f;font-style:normal;font-size:12px;font-weight:700}
-        .pf-feed{margin-top:18px;border:1px solid #e1ebf2;border-radius:14px}
-        .pf-feed h4{margin:0;padding:12px 16px;border-bottom:1px solid #e1ebf2;color:#6a8090;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-        .pf-item{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #eef3f7}
-        .pf-item:last-child{border-bottom:0}
-        .pf-play{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--navy-900);color:#fff;font-size:11px}
-        .pf-play.mail{background:#e6f2fb;color:var(--blue-600);font-size:15px}
-        .pf-item p{margin:0;font-size:14px;line-height:1.4}
-        .pf-item p b{font-family:var(--display)}
-        .pf-item p span{display:block;color:#6a8090;font-size:13px}
-        .pf-tag{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
-        .pf-tag.booked{background:#e3f8ee;color:#127a4f}
-        .pf-tag.warm{background:#e6f2fb;color:#0f6fae}
-        .pf-tag.later{background:#f1f3f5;color:#5c6b76}
+        .pf-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fcf8a}
+        .pf-sub{margin:10px 0 18px;padding-bottom:18px;border-bottom:1px solid #e8eff4;color:#4f6575;font-size:14px}
+        .pf-calls{list-style:none;margin:0;padding:0}
+        .pf-call{display:grid;grid-template-columns:38px minmax(0,1fr) 150px;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #eef3f7}
+        .pf-call:last-child{border-bottom:0}
+        .pf-play{position:relative;width:38px;height:38px;padding:0;border:0;border-radius:50%;background:var(--navy-900);cursor:default}
+        .pf-play::after{content:"";position:absolute;left:15px;top:12px;border-style:solid;border-width:7px 0 7px 11px;border-color:transparent transparent transparent #fff}
+        .pf-who b{display:block;font-family:var(--display);font-size:15.5px;line-height:1.3}
+        .pf-who span{display:block;color:#6a8090;font-size:13px;line-height:1.4}
+        .pf-rec{display:flex;align-items:center;gap:10px}
+        .pf-wave{flex:1;height:20px;fill:#9fc9e8}
+        .pf-rec small{color:#4f6575;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
         .pf-note{margin:14px 4px 0;color:#8ea5b5;font-size:13px}
         @media(max-width:980px){.pf-grid{grid-template-columns:1fr;gap:44px}}
-        @media(max-width:560px){.pf-kpis{grid-template-columns:repeat(2,1fr)}.pf-item{grid-template-columns:34px 1fr}.pf-tag{grid-column:2;justify-self:start}.pf-head{flex-direction:column}.pf-body{padding:18px}}
+        @media(max-width:560px){.pf-body{padding:20px 18px 6px}.pf-call{grid-template-columns:34px minmax(0,1fr);gap:4px 12px}.pf-play{width:34px;height:34px;grid-row:span 2}.pf-play::after{left:13px;top:10px}.pf-rec{grid-column:2}}
       </style>
       <div class="shell pf-grid">
         <div class="reveal">
-          <p class="kicker">Your client portal</p>
           <h2>Watch it happen. Hear every call.</h2>
-          <p class="lead">Every client gets a private login to the BPO Hive portal. You see the outreach as it happens, listen to the calls and learn what your market is really saying, without waiting for a monthly report.</p>
           <ul class="pf-points">
             <li><strong>See the numbers live</strong><span>Calls, connections, conversations and meetings, updated as the team works.</span></li>
             <li><strong>Hear the real conversations</strong><span>Every call is recorded, so you hear how your buyers talk about their problems.</span></li>
@@ -677,19 +665,13 @@ fbq('track', 'PageView');
           <div class="pf-app">
             <div class="pf-bar"><i></i><i></i><i></i><span>analytics.bpohive.com</span></div>
             <div class="pf-body">
-              <div class="pf-head"><div><strong>SaaS Outbound Campaign</strong><br><small>Week 3 · updated a few minutes ago</small></div><span class="pf-live">Live</span></div>
-              <div class="pf-kpis">
-                <div class="pf-kpi"><small>Calls</small><b>1,284</b></div>
-                <div class="pf-kpi"><small>Connections</small><b>212</b></div>
-                <div class="pf-kpi"><small>Conversations</small><b>96</b></div>
-                <div class="pf-kpi hl"><small>Meetings</small><b>14</b><em>+3 this week</em></div>
-              </div>
-              <div class="pf-feed">
-                <h4>Latest activity</h4>
-                <div class="pf-item"><span class="pf-play" aria-hidden="true">▶</span><p><b>Call recording · 4:07</b><span>VP of Sales · B2B software company, 300 employees</span></p><span class="pf-tag booked">Meeting booked</span></div>
-                <div class="pf-item"><span class="pf-play" aria-hidden="true">▶</span><p><b>Call recording · 2:41</b><span>“Can you walk our RevOps lead through this next week?”</span></p><span class="pf-tag warm">Interested</span></div>
-                <div class="pf-item"><span class="pf-play mail" aria-hidden="true">✉</span><p><b>Email reply</b><span>“Not this quarter. Check back in January.” · Head of Growth</span></p><span class="pf-tag later">Follow up</span></div>
-              </div>
+              <div class="pf-head"><div><small>Meetings booked this month</small><strong>14</strong></div><span class="pf-live">Live</span></div>
+              <p class="pf-sub">Decision-makers booked, with every call recorded</p>
+              <ul class="pf-calls">
+                <li class="pf-call"><button class="pf-play" type="button" tabindex="-1" aria-hidden="true"></button><div class="pf-who"><b>VP of Sales</b><span>B2B software · 300 employees</span></div><div class="pf-rec"><svg class="pf-wave" viewBox="0 0 134 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="2.0" width="2" height="16.0" rx="1"/><rect x="4" y="6.0" width="2" height="8.0" rx="1"/><rect x="8" y="1.0" width="2" height="18.0" rx="1"/><rect x="12" y="8.0" width="2" height="4.0" rx="1"/><rect x="16" y="7.0" width="2" height="6.0" rx="1"/><rect x="20" y="6.5" width="2" height="7.0" rx="1"/><rect x="24" y="7.0" width="2" height="6.0" rx="1"/><rect x="28" y="2.0" width="2" height="16.0" rx="1"/><rect x="32" y="7.5" width="2" height="5.0" rx="1"/><rect x="36" y="8.0" width="2" height="4.0" rx="1"/><rect x="40" y="6.5" width="2" height="7.0" rx="1"/><rect x="44" y="5.0" width="2" height="10.0" rx="1"/><rect x="48" y="8.0" width="2" height="4.0" rx="1"/><rect x="52" y="7.0" width="2" height="6.0" rx="1"/><rect x="56" y="1.0" width="2" height="18.0" rx="1"/><rect x="60" y="1.0" width="2" height="18.0" rx="1"/><rect x="64" y="7.0" width="2" height="6.0" rx="1"/><rect x="68" y="5.0" width="2" height="10.0" rx="1"/><rect x="72" y="7.0" width="2" height="6.0" rx="1"/><rect x="76" y="6.5" width="2" height="7.0" rx="1"/><rect x="80" y="1.0" width="2" height="18.0" rx="1"/><rect x="84" y="8.0" width="2" height="4.0" rx="1"/><rect x="88" y="7.5" width="2" height="5.0" rx="1"/><rect x="92" y="7.0" width="2" height="6.0" rx="1"/><rect x="96" y="5.0" width="2" height="10.0" rx="1"/><rect x="100" y="7.5" width="2" height="5.0" rx="1"/><rect x="104" y="8.0" width="2" height="4.0" rx="1"/><rect x="108" y="7.5" width="2" height="5.0" rx="1"/><rect x="112" y="7.5" width="2" height="5.0" rx="1"/><rect x="116" y="1.0" width="2" height="18.0" rx="1"/><rect x="120" y="8.0" width="2" height="4.0" rx="1"/><rect x="124" y="5.0" width="2" height="10.0" rx="1"/><rect x="128" y="8.0" width="2" height="4.0" rx="1"/><rect x="132" y="6.5" width="2" height="7.0" rx="1"/></svg><small>4:07</small></div></li>
+                <li class="pf-call"><button class="pf-play" type="button" tabindex="-1" aria-hidden="true"></button><div class="pf-who"><b>Head of Operations</b><span>Logistics firm · 240 employees</span></div><div class="pf-rec"><svg class="pf-wave" viewBox="0 0 134 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="6.0" width="2" height="8.0" rx="1"/><rect x="4" y="3.5" width="2" height="13.0" rx="1"/><rect x="8" y="1.0" width="2" height="18.0" rx="1"/><rect x="12" y="6.0" width="2" height="8.0" rx="1"/><rect x="16" y="6.5" width="2" height="7.0" rx="1"/><rect x="20" y="7.0" width="2" height="6.0" rx="1"/><rect x="24" y="7.5" width="2" height="5.0" rx="1"/><rect x="28" y="3.5" width="2" height="13.0" rx="1"/><rect x="32" y="6.5" width="2" height="7.0" rx="1"/><rect x="36" y="6.0" width="2" height="8.0" rx="1"/><rect x="40" y="7.0" width="2" height="6.0" rx="1"/><rect x="44" y="7.5" width="2" height="5.0" rx="1"/><rect x="48" y="7.5" width="2" height="5.0" rx="1"/><rect x="52" y="5.0" width="2" height="10.0" rx="1"/><rect x="56" y="2.0" width="2" height="16.0" rx="1"/><rect x="60" y="7.0" width="2" height="6.0" rx="1"/><rect x="64" y="6.5" width="2" height="7.0" rx="1"/><rect x="68" y="7.0" width="2" height="6.0" rx="1"/><rect x="72" y="7.5" width="2" height="5.0" rx="1"/><rect x="76" y="8.0" width="2" height="4.0" rx="1"/><rect x="80" y="7.5" width="2" height="5.0" rx="1"/><rect x="84" y="5.0" width="2" height="10.0" rx="1"/><rect x="88" y="4.0" width="2" height="12.0" rx="1"/><rect x="92" y="6.5" width="2" height="7.0" rx="1"/><rect x="96" y="1.0" width="2" height="18.0" rx="1"/><rect x="100" y="2.0" width="2" height="16.0" rx="1"/><rect x="104" y="4.0" width="2" height="12.0" rx="1"/><rect x="108" y="7.5" width="2" height="5.0" rx="1"/><rect x="112" y="4.0" width="2" height="12.0" rx="1"/><rect x="116" y="2.0" width="2" height="16.0" rx="1"/><rect x="120" y="3.5" width="2" height="13.0" rx="1"/><rect x="124" y="5.0" width="2" height="10.0" rx="1"/><rect x="128" y="6.0" width="2" height="8.0" rx="1"/><rect x="132" y="5.0" width="2" height="10.0" rx="1"/></svg><small>3:12</small></div></li>
+                <li class="pf-call"><button class="pf-play" type="button" tabindex="-1" aria-hidden="true"></button><div class="pf-who"><b>Chief Financial Officer</b><span>Healthcare group · 1,100 employees</span></div><div class="pf-rec"><svg class="pf-wave" viewBox="0 0 134 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="7.0" width="2" height="6.0" rx="1"/><rect x="4" y="7.5" width="2" height="5.0" rx="1"/><rect x="8" y="3.5" width="2" height="13.0" rx="1"/><rect x="12" y="6.5" width="2" height="7.0" rx="1"/><rect x="16" y="4.0" width="2" height="12.0" rx="1"/><rect x="20" y="2.0" width="2" height="16.0" rx="1"/><rect x="24" y="4.0" width="2" height="12.0" rx="1"/><rect x="28" y="3.5" width="2" height="13.0" rx="1"/><rect x="32" y="7.5" width="2" height="5.0" rx="1"/><rect x="36" y="7.0" width="2" height="6.0" rx="1"/><rect x="40" y="7.0" width="2" height="6.0" rx="1"/><rect x="44" y="6.5" width="2" height="7.0" rx="1"/><rect x="48" y="1.0" width="2" height="18.0" rx="1"/><rect x="52" y="6.0" width="2" height="8.0" rx="1"/><rect x="56" y="2.0" width="2" height="16.0" rx="1"/><rect x="60" y="6.0" width="2" height="8.0" rx="1"/><rect x="64" y="4.0" width="2" height="12.0" rx="1"/><rect x="68" y="1.0" width="2" height="18.0" rx="1"/><rect x="72" y="8.0" width="2" height="4.0" rx="1"/><rect x="76" y="7.0" width="2" height="6.0" rx="1"/><rect x="80" y="6.5" width="2" height="7.0" rx="1"/><rect x="84" y="7.5" width="2" height="5.0" rx="1"/><rect x="88" y="2.0" width="2" height="16.0" rx="1"/><rect x="92" y="2.0" width="2" height="16.0" rx="1"/><rect x="96" y="2.0" width="2" height="16.0" rx="1"/><rect x="100" y="7.5" width="2" height="5.0" rx="1"/><rect x="104" y="4.0" width="2" height="12.0" rx="1"/><rect x="108" y="7.5" width="2" height="5.0" rx="1"/><rect x="112" y="4.0" width="2" height="12.0" rx="1"/><rect x="116" y="7.0" width="2" height="6.0" rx="1"/><rect x="120" y="7.0" width="2" height="6.0" rx="1"/><rect x="124" y="3.5" width="2" height="13.0" rx="1"/><rect x="128" y="4.0" width="2" height="12.0" rx="1"/><rect x="132" y="7.0" width="2" height="6.0" rx="1"/></svg><small>5:26</small></div></li>
+              </ul>
             </div>
           </div>
           <p class="pf-note">Example dashboard. Your portal shows your own campaign data.</p>
@@ -699,7 +681,7 @@ fbq('track', 'PageView');
 
     <section class="section section-soft" id="markets">
       <div class="shell">
-        <div class="section-head reveal"><div><p class="kicker">USA, Canada and GCC coverage</p><h2>One system. Market-specific execution.</h2></div><p class="lead">Research, strategy, outreach, qualification, booking, and reporting stay connected—while the data, message, language, and campaign design adapt to each market.</p></div>
+        <div class="section-head section-head-solo reveal"><h2>One system. Market-specific execution.</h2></div>
         <div class="region-grid reveal">
           <article class="region-card" data-region="USA"><span class="region-tag">United States</span><h3>Reach the right U.S. decision-makers with a defined campaign.</h3><p>We build prospect data around the selected industry, company profile, location, and buyer role. Phone, email, and LinkedIn then work together around consistent messaging and qualification criteria.</p><a class="text-link" href="/appointment-setting-usa">Appointment setting in the USA →</a></article>
           <article class="region-card" data-region="GCC"><span class="region-tag">Gulf countries</span><h3>Run country-specific outreach across the GCC.</h3><p>We do not treat the Gulf as one identical audience. Campaigns can be segmented for Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain, and Oman, with English or Arabic messaging where appropriate.</p><a class="text-link" href="/gcc">Appointment setting in the GCC →</a></article>
@@ -709,13 +691,13 @@ fbq('track', 'PageView');
 
     <section class="section section-dark">
       <div class="shell industries-wrap">
-        <div class="reveal"><p class="kicker">Built for B2B growth</p><h2>Experience across markets and industries.</h2><p class="lead" style="margin-top:19px">BPO Hive supports founder-led companies, established sales teams, and selected vertical campaigns across North America, the Gulf, and international markets.</p></div>
+        <div class="reveal"><h2>Experience across markets and industries.</h2></div>
         <div class="industry-grid reveal"><div class="industry"><i></i>SaaS &amp; software</div><div class="industry"><i></i>Professional services</div><div class="industry"><i></i>Recruitment &amp; staffing</div><div class="industry"><i></i>Finance</div><div class="industry"><i></i>Solar</div><div class="industry"><i></i>Roofing &amp; HVAC</div><div class="industry"><i></i>Real estate</div><div class="industry"><i></i>Consulting</div><div class="industry"><i></i>United States</div><div class="industry"><i></i>Canada &amp; GCC</div></div>
       </div>
     </section>
 
     <section class="section" id="faq">
-      <div class="shell"><div class="section-head reveal"><div><p class="kicker">Frequently asked questions</p><h2>What companies ask before starting.</h2></div><p class="lead">Clear answers about data, touchpoints, validation, visibility, and expected outcomes.</p></div>
+      <div class="shell"><div class="section-head section-head-solo reveal"><h2>What companies ask before starting.</h2></div>
         <div class="faq-grid reveal">
           <details><summary>Does BPO Hive provide the prospect data?</summary><p>Yes, for B2B campaigns. We define the ICP and prepare prospect data around the approved company, market, and decision-maker criteria.</p></details>
           <details><summary>What is a touchpoint?</summary><p>One outbound call, email, LinkedIn connection request, or LinkedIn message delivered as part of the campaign strategy.</p></details>
