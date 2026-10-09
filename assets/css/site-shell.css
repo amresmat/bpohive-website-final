@@ -16,13 +16,13 @@ body.bh-has-shell{padding-top:78px}
 .bh-header .bh-links a:hover::after,.bh-header .bh-links a[aria-current="page"]::after{right:0}
 .bh-header .bh-links a[aria-current="page"]{color:#0d1d2b}
 .bh-header .bh-actions{flex:none;display:flex;align-items:center;gap:10px}
-.bh-header .bh-btn,.bh-footer .bh-btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 21px;border:1px solid transparent;border-radius:13px;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1;letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
-.bh-header .bh-btn:hover,.bh-footer .bh-btn:hover{transform:translateY(-2px)}
+.bh-header .bh-btn,.bh-footer .bh-btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 21px;border:1px solid transparent;border-radius:6px;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1;letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+
 .bh-header .bh-actions>.bh-btn-solid{min-width:136px}
-.bh-header a.bh-btn-outline{color:#0d1d2b;border-color:#dbe8f0;background:#fff;box-shadow:none}
-.bh-header a.bh-btn-solid,.bh-footer a.bh-btn-solid{color:#fff;background:#0f7ac4;box-shadow:0 10px 24px rgba(15,122,196,.22)}
+.bh-header a.bh-btn-outline{color:#0d1d2b;border-color:#dbe8f0;background:#fff;box-shadow:0 6px 16px rgba(13,29,43,.13),0 1px 3px rgba(13,29,43,.08)}
+.bh-header a.bh-btn-solid,.bh-footer a.bh-btn-solid{color:#fff;background:#0f7ac4;box-shadow:none}
 .bh-header a.bh-btn-solid:hover,.bh-footer a.bh-btn-solid:hover{background:#0c6cae}
-.bh-header .bh-menu-btn{display:none;width:46px;height:46px;padding:0;border:1px solid #dbe8f0;border-radius:13px;background:#fff;cursor:pointer}
+.bh-header .bh-menu-btn{display:none;width:46px;height:46px;padding:0;border:1px solid #dbe8f0;border-radius:8px;background:#fff;cursor:pointer}
 .bh-header .bh-menu-btn span{display:block;width:20px;height:2px;margin:4px auto;border-radius:2px;background:#0d1d2b;transition:transform .2s ease,opacity .2s ease}
 .bh-header .bh-menu-btn.is-open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
 .bh-header .bh-menu-btn.is-open span:nth-child(2){opacity:0}
@@ -30,9 +30,10 @@ body.bh-has-shell{padding-top:78px}
 .bh-header .bh-mobile-menu{position:absolute;left:0;right:0;top:100%;padding:12px 20px 22px;border-bottom:1px solid #dbe8f0;background:#fff;box-shadow:0 25px 45px rgba(8,21,33,.12)}
 .bh-header .bh-mobile-menu[hidden]{display:none}
 .bh-header .bh-mobile-menu nav{display:grid;gap:4px;margin:0;padding:0;border:0;box-shadow:none;background:none}
-.bh-header .bh-mobile-menu nav a{display:block;padding:13px 10px;border-radius:10px;color:#344d5c;font-size:17px;font-weight:600;line-height:22px;text-decoration:none}
+.bh-header .bh-mobile-menu nav a{display:block;padding:13px 10px;border-radius:6px;color:#344d5c;font-size:17px;font-weight:600;line-height:22px;text-decoration:none}
 .bh-header .bh-mobile-menu nav a[aria-current="page"]{color:#0d1d2b;background:#f1f9ff}
 .bh-header .bh-mobile-menu .bh-btn{width:100%;margin-top:10px}
+@media (max-width:1200px){.bh-header .bh-links{gap:20px}.bh-header-inner{gap:20px}.bh-header .bh-brand img{width:146px}}
 @media (max-width:1020px){
   .bh-header .bh-links,.bh-header .bh-actions>.bh-btn{display:none}
   .bh-header .bh-menu-btn{display:block}
@@ -51,7 +52,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-footer-col{display:grid;gap:11px;align-content:start}
 .bh-footer-col strong,.bh-contact strong{display:block;margin:0 0 6px;color:#fff;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .bh-footer-col a{font-size:16px;line-height:1.4}
-.bh-contact{display:grid;gap:12px;padding:26px;border:1px solid rgba(155,213,255,.18);border-radius:20px;background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.bh-contact{display:grid;gap:12px;padding:26px;border:1px solid rgba(155,213,255,.18);border-radius:10px;background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
 .bh-footer .bh-contact-row{display:block;color:#fff;font-size:17px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
 .bh-footer .bh-contact-row span{display:block;margin-bottom:2px;color:#8ea4b3;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .bh-footer .bh-contact-row:hover{color:#9bd5ff}
@@ -87,3 +88,19 @@ body.bh-has-shell{padding-top:78px}
 /* ---------- Fade in on scroll ---------- */
 .bh-reveal.bh-reveal{opacity:0!important;transform:translateY(28px)!important;transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)!important;will-change:opacity,transform}
 .bh-reveal.bh-reveal.bh-in{opacity:1!important;transform:none!important}
+
+/* ---------- House style: crisp corners, flat buttons, no decorative blur ---------- */
+:root{--radius-sm:8px;--radius:10px;--radius-lg:10px}
+.btn,a.btn,button.btn,.bh-btn,.growth-button,.growth-book,a.growth-book.growth-book{border-radius:6px!important}
+.btn:hover,.bh-btn:hover,.logo-card:hover{transform:none!important}
+.btn-primary,a.btn-primary,button.btn-primary,.btn.btn-primary{color:#fff!important;background:#0f7ac4!important;background-image:none!important;box-shadow:none!important}
+.btn-primary:hover{background:#0c6cae!important;transform:none!important;box-shadow:none!important}
+.btn.btn-primary:hover{background:#0c6cae!important;box-shadow:none!important}
+.btn.btn-dark{box-shadow:none!important}
+.rounded-xl,.rounded-2xl,.rounded-3xl{border-radius:10px!important}
+.rounded-lg{border-radius:6px!important}
+a.rounded-full,button.rounded-full,[class*="px-"].rounded-full{border-radius:6px!important}
+.blur-3xl,.blur-2xl{display:none!important}
+.gradient-text{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:currentColor!important;color:#168fdc!important}
+.ind-hero h1 .gradient-text{-webkit-text-fill-color:#9bd5ff!important;color:#9bd5ff!important}
+.transform.hover\:-translate-y-1:hover,.hover\:-translate-y-1:hover,.hover\:-translate-y-2:hover{transform:none!important}

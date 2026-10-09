@@ -334,7 +334,7 @@
       "files": [
         {
           "name": "home",
-          "label": "Homepage text and stats",
+          "label": "Homepage text",
           "file": "content/site/home.json",
           "fields": [
             {
@@ -348,6 +348,11 @@
               "widget": "string"
             },
             {
+              "name": "hero_tagline",
+              "label": "Hero tagline (grey line under the headline)",
+              "widget": "string"
+            },
+            {
               "name": "final_title",
               "label": "Final title",
               "widget": "string"
@@ -356,46 +361,6 @@
               "name": "final_copy",
               "label": "Final copy",
               "widget": "text"
-            },
-            {
-              "name": "stat1_value",
-              "label": "Stat 1: number",
-              "widget": "string"
-            },
-            {
-              "name": "stat1_label",
-              "label": "Stat 1: label",
-              "widget": "string"
-            },
-            {
-              "name": "stat2_value",
-              "label": "Stat 2: number",
-              "widget": "string"
-            },
-            {
-              "name": "stat2_label",
-              "label": "Stat 2: label",
-              "widget": "string"
-            },
-            {
-              "name": "stat3_value",
-              "label": "Stat 3 (Clutch rating): number",
-              "widget": "string"
-            },
-            {
-              "name": "stat3_label",
-              "label": "Stat 3 (Clutch rating): label",
-              "widget": "string"
-            },
-            {
-              "name": "stat4_value",
-              "label": "Stat 4: number",
-              "widget": "string"
-            },
-            {
-              "name": "stat4_label",
-              "label": "Stat 4: label",
-              "widget": "string"
             }
           ]
         },
