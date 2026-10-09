@@ -5,6 +5,7 @@ const path = require('node:path');
 const cheerio = require('cheerio');
 
 const LINKS = [
+  ['Home', '/', rel => rel === 'index.html'],
   ['Services', '/services', rel => rel === 'services.html' || rel.startsWith('services/')],
   ['Industries', '/industries', rel => rel === 'industries.html' || rel.startsWith('industries/')],
   ['About', '/about', rel => rel === 'about.html'],
@@ -16,6 +17,7 @@ const SIGN_IN = 'https://analytics.bpohive.com';
 const BOOK = '/outbound-assessment';
 const EMAIL = 'info@bpohive.com';
 const YEAR = '2026';
+const HOME_TITLE = 'BPO Hive | B2B Lead Generation & Appointment Setting';
 
 // The Careers page is for job applicants, so it carries no sales call, phone or WhatsApp links.
 // Its main button keeps the same size and position but points at the open roles instead.
@@ -104,6 +106,8 @@ function applyShell(html, rel) {
   // No author/date lines anywhere on the site.
   $('.byline').remove();
   $('p,span,div').filter((i, e) => !$(e).children('p,div,section,ul,h1,h2,h3').length && /^\s*By\s+Amr Abdelrazzak\b/.test($(e).text())).remove();
+  // The plain "Featured and listed" link block is not shown on any page.
+  $('section.growth').filter((i, e) => /^\s*Featured and listed\s*$/i.test($(e).children('h2').first().text())).remove();
   $('footer').remove();
   const skip = body.children('.skip-link,a[href="#main"]').first();
   if (skip.length) skip.after(header(rel)); else body.prepend(header(rel));
@@ -113,13 +117,12 @@ function applyShell(html, rel) {
   // One font source for every page: drop the old Google Fonts links and preload our own files
   // so text is drawn in the right font from the first frame.
   $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
-  const preload = ['inter-latin-wght-normal.woff2', 'nunito-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
-  // Headlines use Avenir Next where the device has it (Apple devices) and Nunito Sans elsewhere.
-  // This tiny check runs before the page is drawn so the right letter-spacing is applied from the start.
-  const fontCheck = `<script>(function(){try{var c=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmlliWQ';c.font='700 72px monospace';var a=c.measureText(t).width;c.font='700 72px "Avenir Next",monospace';if(c.measureText(t).width!==a)document.documentElement.classList.add('has-avenir');}catch(e){}})();</script>`;
+  const preload = ['inter-latin-wght-normal.woff2', 'dm-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
   const charset = $('head meta[charset]').first();
-  if (charset.length) charset.after(preload + fontCheck); else $('head').prepend(preload + fontCheck);
+  if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
+  // The homepage title is set here, last, so an earlier build step cannot replace it.
+  if (rel === 'index.html') $('title').text(HOME_TITLE);
   body.addClass('bh-has-shell');
   return $.html();
 }
@@ -139,6 +142,13 @@ function noLongDashes(html) {
   });
 }
 
+// House style: crisp corners. Large radii in each page's own <style> blocks are tightened here so
+// every page follows the same rule (circles, written as 50%, are left alone).
+function sharpCorners(html) {
+  const radius = px => { const v = parseFloat(px); return v >= 999 ? '4px' : v >= 20 ? '10px' : v >= 13 ? '8px' : v >= 9 ? '6px' : px + 'px'; };
+  return html.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/gi, (m, open, css, close) => open + css.replace(/border-radius:\s*(\d+(?:\.\d+)?)px/g, (x, px) => 'border-radius:' + radius(px)) + close);
+}
+
 function shell(out) {
   const walk = dir => {
     for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -147,11 +157,11 @@ function shell(out) {
       if (!f.name.endsWith('.html')) continue;
       const rel = path.relative(out, p).split(path.sep).join('/');
       const html = fs.readFileSync(p, 'utf8');
-      const next = noLongDashes(applyShell(html, rel) || html);
+      const next = sharpCorners(noLongDashes(applyShell(html, rel) || html));
       if (next !== html) fs.writeFileSync(p, next);
     }
   };
   walk(out);
 }
 
-module.exports = { noLongDashes, shell, applyShell, header, footer };
+module.exports = { sharpCorners, noLongDashes, shell, applyShell, header, footer };
