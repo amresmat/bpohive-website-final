@@ -77,7 +77,7 @@ function footer(rel) {
 const REVEAL = `<script>(function(){
 if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
 var SEL='.scroll-animate,[class*="card"],.bento,.panel,article,details,.section-head,.aces-intro,.hero-proof,.logo-grid,.calculator-wrap,.visibility-panel,.platform-copy,.rounded-2xl,.rounded-3xl,.growth .content>*,.growth-links,main section h2,main section>div>h2+p';
-var SKIP='.bh-header,.bh-footer,.aces-timeline,[role="dialog"],.hidden,[hidden],.leaflet-container,iframe';
+var SKIP='.bh-header,.bh-footer,.aces-timeline,.dl-stage,[role="dialog"],.hidden,[hidden],.leaflet-container,iframe';
 function init(){var vh=window.innerHeight,chosen=[];
 [].forEach.call(document.querySelectorAll(SEL),function(el){
 if(el.closest(SKIP)||el.querySelector('.aces-rail,.leaflet-container'))return;
