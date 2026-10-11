@@ -57,8 +57,9 @@ function footer(rel) {
         <p class="bh-footer-regions">Serving <a href="/appointment-setting-usa">USA</a>, <a href="/appointment-setting-canada">Canada</a> &amp; <a href="/gcc">GCC</a></p>
       </div>
       ${col('Company', [['About us', '/about'], ['Case studies', '/case-studies'], ['Blogs', '/blogs'], ['Careers', '/careers']])}
-      ${col('Services', [['Appointment setting', '/services/appointment-setting'], ['Cold calling', '/services/cold-calling'], ['Email outreach', '/services/cold-email-outreach'], ['LinkedIn outreach', '/services/linkedin-lead-generation'], ['B2B data', '/services/lead-research']])}
-      ${col('Resources', [['Industries', '/industries'], ['ROI calculator', '/roi-calculator'], ['LinkedIn', 'https://www.linkedin.com/company/bpohive', true], ['YouTube', 'https://www.youtube.com/@bpohive', true]])}
+      ${col('Services', [['Appointment setting', '/services/appointment-setting'], ['Cold calling', '/services/cold-calling'], ['Email outreach', '/services/cold-email-outreach'], ['LinkedIn outreach', '/services/linkedin-lead-generation'], ['B2B data', '/services/lead-research'], ['Sales development', '/services/sales-development'], ['CRM services', '/services/crm-services'], ['Email deliverability', '/services/email-deliverability']])}
+      ${col('Compare', [['Pricing', '/pricing'], ['Cost guide', '/appointment-setting-cost'], ['vs Belkins', '/vs/belkins'], ['vs SalesRoads', '/vs/salesroads'], ['vs In-house SDR', '/vs/in-house-sdr']])}
+      ${col('Resources', [['Resources', '/resources'], ['Industries', '/industries'], ['ROI calculator', '/roi-calculator'], ['Saudi Arabia', '/appointment-setting-saudi-arabia'], ['UAE & Dubai', '/appointment-setting-uae-dubai'], ['LinkedIn', 'https://www.linkedin.com/company/bpohive', true], ['YouTube', 'https://www.youtube.com/@bpohive', true]])}
       <div class="bh-contact" id="contact-us">
         <strong>Contact us</strong>
         <a class="bh-contact-row" href="mailto:${EMAIL}"><span>Email</span>${EMAIL}</a>
