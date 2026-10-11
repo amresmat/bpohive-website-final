@@ -4,6 +4,7 @@ const CALENDLY = 'https://calendly.com/d/43h-5tz-rkf/discovery-call';
 const BUDGETS = { '5000_plus': '$5,000+', '0_5000': '$0 to $5,000', unsure: 'Unsure' };
 const SIZES = ['1-10', '11-50', '51-200', '201-500', '501-1,000', '1,000+'];
 const recent = new Map();
+const { saveEntry } = require('../lib/entries.cjs');
 
 const text = (v, n = 200) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -97,6 +98,7 @@ module.exports = async (req, res) => {
     owner_email_reply_to: lead.email,
     summary: { name: `${lead.firstName} ${lead.lastName}`, email: lead.email, phone: lead.phone, company: lead.company, budget: budgetLabel, hq: lead.hq }
   };
+  await saveEntry('Build my campaign', { firstName: lead.firstName, lastName: lead.lastName, email: lead.email, budget: budgetLabel, jobTitle: lead.jobTitle, company: lead.company, size: lead.size, phone: lead.phone, industry: lead.industry, hq: lead.hq }, { page: lead.pageUrl, referrer: lead.referrer, draftId: text(b.draftId, 40) });
   const delivered = await deliver(event);
   return res.status(200).json({ accepted: true, qualified, bookingUrl, delivered });
 };
