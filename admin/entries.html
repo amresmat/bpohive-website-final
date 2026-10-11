@@ -50,6 +50,7 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
 .dl{padding:26px}.dl h2{margin:0 0 4px;font-family:"DM Sans",Inter,sans-serif;font-size:22px}
 .dl dl{display:grid;grid-template-columns:170px 1fr;gap:8px 16px;margin:18px 0 0}
 .dl dt{color:var(--muted);font-size:13px;font-weight:600}.dl dd{margin:0;word-break:break-word}
+.dl-del{margin-top:22px;padding:10px 16px;border:1px solid #f1c7c2;border-radius:6px;background:#fff;color:#c0392b;font-weight:600;cursor:pointer}.dl-del:hover{background:#fdf1ef}
 .dl .x{float:right;width:34px;height:34px;border:0;border-radius:50%;background:#f1f5f8;cursor:pointer;font-size:18px}
 [hidden]{display:none!important}
 @media(max-width:640px){.top nav{display:none}.dl dl{grid-template-columns:1fr}}
@@ -88,7 +89,7 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
   </main>
 </div>
 
-<dialog id="detail"><div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2 id="d-title"></h2><div id="d-sub" style="color:#5d7280"></div><dl id="d-body"></dl></div></dialog>
+<dialog id="detail"><div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2 id="d-title"></h2><div id="d-sub" style="color:#5d7280"></div><dl id="d-body"></dl><button class="dl-del" id="d-del" type="button">Delete this entry</button></div></dialog>
 
 <script>
 (function(){
@@ -120,6 +121,7 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
     var extra={Page:r.page,Referrer:r.referrer};
     if(view==='abandoned'&&r.first)extra['Started']=fmt(new Date(r.first));
     $('d-body').innerHTML=Object.keys(f).map(function(k){return'<dt>'+esc(k)+'</dt><dd>'+esc(f[k])+'</dd>'}).join('')+Object.keys(extra).filter(function(k){return extra[k]}).map(function(k){return'<dt>'+k+'</dt><dd>'+esc(extra[k])+'</dd>'}).join('');
+    $('d-del').onclick=function(){if(!r.id||!confirm('Delete this entry for good? This cannot be undone.'))return;fetch('/api/admin/entries?view='+view+'&id='+encodeURIComponent(r.id),{method:'DELETE',credentials:'same-origin'}).then(function(x){return x.json().then(function(j){if(!x.ok)throw new Error(j.error||'Could not delete.');})}).then(function(){$('detail').close();data[view]=data[view].filter(function(y){return y!==r});render();}).catch(function(e){alert(e.message)})};
     $('detail').showModal();
   }
   function csv(){
