@@ -4,7 +4,9 @@
     "repo": "amresmat/bpohive-website-final",
     "branch": "main",
     "base_url": "https://www.bpohive.com",
-    "auth_endpoint": "api/cms/auth"
+    "auth_endpoint": "api/cms/auth",
+    "api_root": "/api/gh",
+    "use_graphql": false
   },
   "site_url": "https://www.bpohive.com",
   "display_url": "https://www.bpohive.com",
