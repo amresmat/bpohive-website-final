@@ -44,7 +44,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-footer{padding:68px 0 28px;border-top:1px solid #dbe8f0;background:#081521;font-family:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;letter-spacing:0;text-align:left;color:#aebfca}
 .bh-footer a{color:#c7d6df;text-decoration:none;transition:color .2s ease}
 .bh-footer a:hover{color:#fff}
-.bh-footer-grid{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,.8fr)) minmax(0,1.45fr);gap:36px;align-items:start}
+.bh-footer-grid{display:grid;grid-template-columns:minmax(0,1.2fr) repeat(4,minmax(0,.82fr)) minmax(0,1.35fr);gap:30px;align-items:start}
 .bh-footer-brand img{display:block;width:176px;height:auto;max-width:none;margin-left:-4px}
 .bh-footer-brand p{max-width:300px;margin:18px 0 0;color:#aebfca;font-size:16px;line-height:1.65}
 .bh-footer-brand .bh-footer-regions{margin-top:12px;font-size:15px;color:#8ea4b3}
@@ -60,7 +60,7 @@ body.bh-has-shell{padding-top:78px}
 .bh-footer-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px;margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);color:#8ea4b3;font-size:15px}
 .bh-footer-bottom nav{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0;padding:0;border:0;box-shadow:none;background:none}
 .bh-footer-bottom nav a{font-size:15px;font-weight:500}
-@media (max-width:1080px){.bh-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bh-footer-brand{grid-column:1/-1}.bh-contact{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center}.bh-contact strong{grid-column:1/-1}.bh-contact .bh-btn{grid-column:1/-1;justify-self:start;margin-top:4px}}
+@media (max-width:1180px){.bh-footer-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.bh-footer-brand{grid-column:1/-1}.bh-contact{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center}.bh-contact strong{grid-column:1/-1}.bh-contact .bh-btn{grid-column:1/-1;justify-self:start;margin-top:4px}}
 @media (max-width:640px){.bh-footer{padding-top:52px}.bh-footer-grid{grid-template-columns:1fr 1fr;gap:30px 22px}.bh-contact{grid-template-columns:1fr}.bh-contact .bh-btn{justify-self:stretch}.bh-footer-bottom{display:grid}}
 @media (prefers-reduced-motion:reduce){.bh-header *,.bh-footer *{transition:none!important}}
 
