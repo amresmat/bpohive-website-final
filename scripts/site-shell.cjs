@@ -122,6 +122,8 @@ function applyShell(html, rel) {
   const charset = $('head meta[charset]').first();
   if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
+  // Records unfinished forms for the admin "Abandoned forms" list.
+  $('head').append('<script src="/assets/js/form-capture.js" defer></script>');
   // The homepage title is set here, last, so an earlier build step cannot replace it.
   if (rel === 'index.html') $('title').text(HOME_TITLE);
   body.addClass('bh-has-shell');
