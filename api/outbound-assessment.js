@@ -1,3 +1,4 @@
+const { saveEntry } = require('../lib/entries.cjs');
 const CALENDLY_EVENT_URL = 'https://calendly.com/d/43h-5tz-rkf/discovery-call';
 const recentRequests = new Map();
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -270,6 +271,7 @@ module.exports = async function handler(req, res) {
     owner_email_html: ownerEmail.html,
     owner_email_reply_to: lead.email
   };
+  await saveEntry('Book a call', { firstName: lead.firstName, lastName: lead.lastName, email: lead.email, phone: lead.phone, jobTitle: lead.jobTitle, company: lead.companyName, website: lead.website, offer: lead.offer, targetMarket: lead.targetMarket, averageSale: lead.averageSale, service: lead.service, budget: budgetLabel, timeline: lead.timeline, qualified: qualified ? 'Yes' : 'No' }, { page: lead.pageUrl, referrer: lead.referrer, draftId: requiredText(body.draftId, 40) });
   const zapier = await sendZapierEvent(event);
   const emailConfigured = zapier.delivered && process.env.ZAPIER_SENDS_EMAIL === 'true';
 

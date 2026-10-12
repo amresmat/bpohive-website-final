@@ -1,3 +1,4 @@
+const { saveEntry } = require('../lib/entries.cjs');
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (process.env.VERCEL_ENV === 'production') {
@@ -22,6 +23,8 @@ module.exports = async function handler(req, res) {
     calendly: body.calendly || {},
     recordedAt: new Date().toISOString()
   };
+  const c = event.calendly || {};
+  await saveEntry('Calendly booking', { email: event.email, company: event.companyName, event: typeof c.event === 'string' ? c.event : JSON.stringify(c).slice(0, 500) }, { page: req.headers.referer });
   if (process.env.ZAPIER_BOOKING_WEBHOOK_URL) {
     try {
       await fetch(process.env.ZAPIER_BOOKING_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(event) });

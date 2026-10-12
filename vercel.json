@@ -64,6 +64,10 @@
     {
       "source": "/admin",
       "destination": "/admin/index.html"
+    },
+    {
+      "source": "/api/gh/:path*",
+      "destination": "/api/gh?path=:path*"
     }
   ],
   "headers": [

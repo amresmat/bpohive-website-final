@@ -220,7 +220,7 @@
     .aces-node.active .aces-label{opacity:1}
     .aces-node:hover .aces-label{opacity:1}
     .aces-node:focus-visible{outline:2px solid var(--blue-300);outline-offset:6px;border-radius:12px}
-    .aces-steps{display:grid;gap:26px;padding:6vh 0 26vh}
+    .aces-steps{display:grid;gap:26px;padding:6vh 0 16vh}
     .aces-steps .aces-card{min-height:230px;display:flex;gap:24px;align-items:flex-start;padding:34px;opacity:.42;transform:translateY(10px) scale(.985);transition:opacity .45s ease,transform .45s ease,border-color .45s ease,background .45s ease}
     .aces-steps .aces-card h3{margin:6px 0 11px;font-size:24px}
     .aces-steps .aces-card p{font-size:16.5px}
@@ -298,7 +298,8 @@
     .person-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;color:#fff;background:linear-gradient(135deg,var(--navy-800),var(--blue-500));font-size:15px;font-weight:900}
     .testimonial-person strong,.testimonial-person span{display:block}
     .testimonial-person .person-mark{display:grid}
-    .testimonial-person:has(.person-clutch){grid-template-columns:72px minmax(0,1fr)}.person-mark.person-clutch{width:72px;height:44px;padding:0 10px;border:1px solid #d9e8f1;border-radius:6px;background:#fff}.person-clutch img{display:block;width:100%;height:auto}
+    .person-mark.person-clutch{width:44px;height:44px;padding:0;border:1px solid #d9e8f1;border-radius:50%;background:#fff;overflow:hidden}.person-clutch img{display:block;width:100%;height:100%}
+    .testimonial-person{height:84px;align-content:center}.testimonial-person>div{min-width:0}.testimonial-person strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.testimonial-person span:not(.person-mark){display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .testimonial-person strong{font-size:16px}
     .testimonial-person div span{margin-top:3px;color:#718794;font-size:14px;line-height:1.35}
     .reported-result{display:flex;align-items:center;gap:18px;margin:0 0 28px;padding:16px 20px;border:1px solid var(--blue-100);border-radius:16px;background:var(--blue-50)}
@@ -495,8 +496,8 @@ fbq('track', 'PageView');
         .dl h2{margin:0 0 30px;color:var(--navy-950);font-size:clamp(34px,3.6vw,50px);line-height:1.05;letter-spacing:-.03em}
         .dl-lead{max-width:470px;margin:0 0 34px;color:var(--muted,#5d7280);font-size:18px;line-height:1.65}
         .dl-steps{list-style:none;margin:0;padding:0;border-top:1px solid #d8e7f1}
-        .dl-steps li{display:grid;grid-template-columns:44px 1fr;gap:6px 14px;padding:20px 0;border-bottom:1px solid #d8e7f1}
-        .dl-steps .n{grid-row:span 2;color:var(--blue-600);font-family:var(--display);font-weight:800;font-size:15px;line-height:1.9;font-variant-numeric:tabular-nums}
+        .dl-steps li{display:grid;grid-template-columns:46px 1fr;gap:6px 16px;padding:20px 0;border-bottom:1px solid #d8e7f1}
+        .dl-steps .n{grid-row:span 2;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;color:#fff;background:#0f7ac4;font-family:var(--display);font-weight:800;font-size:17px;line-height:1;font-variant-numeric:tabular-nums;box-shadow:0 0 0 5px rgba(15,122,196,.12)}
         .dl-steps strong{color:var(--navy-950);font-family:var(--display);font-size:19px;line-height:1.3}
         .dl-steps span{color:#4f6575;font-size:15.5px;line-height:1.55}
         .dl-stage{position:relative;display:flex;flex-direction:column;min-height:560px}
@@ -541,12 +542,12 @@ fbq('track', 'PageView');
         <div class="reveal">
           <h2>We engineer, so you can close.</h2>
           <ol class="dl-steps">
-            <li><span class="n">01</span><strong>We learn your business</strong><span>Who you are, what you sell and who already buys from you.</span></li>
-            <li><span class="n">02</span><strong>We define your ICP</strong><span>The exact companies and decision-makers worth calling.</span></li>
-            <li><span class="n">03</span><strong>We build the strategy with you</strong><span>Message, channels and qualification rules, agreed together before we start.</span></li>
-            <li><span class="n">04</span><strong>We call your ICP</strong><span>Our callers reach your buyers by phone, backed by email and LinkedIn.</span></li>
-            <li><span class="n">05</span><strong>You see and hear everything</strong><span>Live reports and call recordings, so you hear the real conversations and understand your market.</span></li>
-            <li><span class="n">06</span><strong>Qualified meetings land on your calendar</strong><span>Each booking also appears in your portal with the prospect’s own comments.</span></li>
+            <li><span class="n">1</span><strong>We learn your business</strong><span>Who you are, what you sell and who already buys from you.</span></li>
+            <li><span class="n">2</span><strong>We define your ICP</strong><span>The exact companies and decision-makers worth calling.</span></li>
+            <li><span class="n">3</span><strong>We build the strategy with you</strong><span>Message, channels and qualification rules, agreed together before we start.</span></li>
+            <li><span class="n">4</span><strong>We call your ICP</strong><span>Our callers reach your buyers by phone, backed by email and LinkedIn.</span></li>
+            <li><span class="n">5</span><strong>You see and hear everything</strong><span>Live reports and call recordings, so you hear the real conversations and understand your market.</span></li>
+            <li><span class="n">6</span><strong>Qualified meetings land on your calendar</strong><span>Each booking also appears in your portal with the prospect’s own comments.</span></li>
           </ol>
         </div>
         <div class="dl-stage" aria-label="Example of a meeting notification">
@@ -673,15 +674,19 @@ window.addEventListener('resize',function(){if(state===0)reset();else geo()});
         .pf-link{display:inline-flex;gap:8px;margin-top:22px;color:var(--blue-300);font-weight:700}
         .pf-link:hover{color:#fff}
         .pf-app{border-radius:10px;background:#fff;color:var(--navy-950);box-shadow:0 30px 70px rgba(0,0,0,.3);overflow:hidden}
-        .pf-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;background:#f3f7fa;border-bottom:1px solid #e3ecf2}
-        .pf-bar i{width:9px;height:9px;border-radius:50%;background:#d3dee6}
-        .pf-bar span{margin-left:10px;padding:4px 12px;border-radius:4px;background:#fff;border:1px solid #e3ecf2;color:#4f6575;font-size:12.5px;font-weight:600}
+        .pf-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:linear-gradient(#f6f6f7,#ececee);border-bottom:1px solid #dcdce0}
+        .pf-lights{display:flex;gap:7px}.pf-lights i{width:11px;height:11px;border-radius:50%;background:#ff5f57;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)}.pf-lights i:nth-child(2){background:#febc2e}.pf-lights i:nth-child(3){background:#28c840}
+        .pf-navb{display:flex;gap:10px;color:#9a9aa0}.pf-navb svg,.pf-tools svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .pf-url{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:28px;padding:0 10px;border-radius:7px;background:#e3e3e6;color:#2b2b30;font-size:13px;font-weight:500;letter-spacing:-.01em}.pf-url svg{width:11px;height:11px;fill:#6d6d73}.pf-url .pf-reload{margin-left:auto;width:13px;height:13px;fill:none;stroke:#6d6d73;stroke-width:2.2;stroke-linecap:round}.pf-url b{font-weight:500;color:#2b2b30}.pf-url em{font-style:normal;color:#8a8a90}
+        .pf-tools{display:flex;gap:12px;color:#8a8a90}
         .pf-body{padding:26px 28px 10px}
         .pf-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
         .pf-head small{display:block;color:#6a8090;font-size:13px;font-weight:600}
         .pf-head strong{display:block;margin-top:6px;font-family:var(--display);font-size:46px;font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--navy-950)}
         .pf-live{display:inline-flex;align-items:center;gap:7px;color:#15935f;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-        .pf-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fcf8a}
+        .pf-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fcf8a;animation:pf-pulse 1s ease-out infinite}
+        @keyframes pf-pulse{0%{box-shadow:0 0 0 0 rgba(47,207,138,.65)}100%{box-shadow:0 0 0 8px rgba(47,207,138,0)}}
+        @media (prefers-reduced-motion:reduce){.pf-live::before{animation:none}}
         .pf-sub{margin:10px 0 18px;padding-bottom:18px;border-bottom:1px solid #e8eff4;color:#4f6575;font-size:14px}
         .pf-calls{list-style:none;margin:0;padding:0}
         .pf-call{display:grid;grid-template-columns:38px minmax(0,1fr) 150px;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #eef3f7}
@@ -709,7 +714,7 @@ window.addEventListener('resize',function(){if(state===0)reset();else geo()});
         </div>
         <div class="reveal" aria-label="Example of the BPO Hive client portal">
           <div class="pf-app">
-            <div class="pf-bar"><i></i><i></i><i></i><span>analytics.bpohive.com</span></div>
+            <div class="pf-bar"><span class="pf-lights"><i></i><i></i><i></i></span><span class="pf-navb" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span><span class="pf-url"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z"/></svg><span><em>https://</em><b>analytics.bpohive.com</b><em>/campaigns/meetings</em></span><svg class="pf-reload" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></span><span class="pf-tools" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></div>
             <div class="pf-body">
               <div class="pf-head"><div><small>Meetings booked this month</small><strong>14</strong></div><span class="pf-live">Live</span></div>
               <p class="pf-sub">Decision-makers booked, with every call recorded</p>
@@ -756,7 +761,7 @@ window.addEventListener('resize',function(){if(state===0)reset();else geo()});
     </section>
 
     <section class="cta" id="contact">
-      <div class="shell reveal"><p class="kicker">Build the right outbound system</p><h2><!--cms:final_title-->Start filling your pipeline now!<!--/cms:final_title--></h2><p><!--cms:final_copy-->Let’s map your exact ICP, audience, offer, and campaign opportunity, then define the right first campaign.<!--/cms:final_copy--></p><a class="btn btn-primary btn-shoot" href="outbound-assessment.html">Fill My Calendar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="shell reveal"><h2><!--cms:final_title-->Start filling your pipeline now!<!--/cms:final_title--></h2><p><!--cms:final_copy-->Let’s map your exact ICP, audience, offer, and campaign opportunity, then define the right first campaign.<!--/cms:final_copy--></p><a class="btn btn-primary btn-shoot" href="outbound-assessment.html">Fill My Calendar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
     </section>
   </main>
 

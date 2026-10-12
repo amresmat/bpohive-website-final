@@ -170,7 +170,7 @@ function renderReviews(html, data) {
     return `          <article class="testimonial-card">
             <div class="testimonial-top"><span class="testimonial-rating" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}<i>${'★'.repeat(5 - rating)}</i></span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>
             <blockquote>“${esc(quote)}”</blockquote>
-            <div class="testimonial-person"><span class="person-mark person-clutch"><img src="/assets/logo/trust-badges/Clutch-Logo.png" alt="Clutch" width="150" height="83" loading="lazy"></span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
+            <div class="testimonial-person"><span class="person-mark person-clutch"><img src="/assets/logo/trust-badges/clutch-mark.png" alt="Clutch" width="44" height="44" loading="lazy"></span><div><strong>${esc(name)}</strong>${role ? `<span>${esc(role)}</span>` : ''}</div></div>
           </article>`;
   });
   return between(html, 'REVIEWS', cards.join('\n'));
