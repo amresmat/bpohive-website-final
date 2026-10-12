@@ -1,25 +1,316 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>BPO Hive Content Manager</title><link href="/admin/config.yml" type="text/yaml" rel="cms-config-url">
-<style>#bh-gate{position:fixed;inset:0;display:grid;place-items:center;background:#f5f9fc;font:15px/1.5 Inter,"Helvetica Neue",Arial,sans-serif;color:#0d1d2b;z-index:10000}#bh-gate .box{width:min(380px,calc(100% - 32px));padding:28px;border:1px solid #dbe8f0;border-radius:12px;background:#fff;text-align:center}#bh-gate img{height:32px;margin-bottom:14px}#bh-gate p{color:#5d7280}#bh-gate a{display:inline-flex;align-items:center;justify-content:center;height:46px;margin-top:8px;padding:0 20px;border-radius:6px;background:#0f7ac4;color:#fff;font-weight:600;text-decoration:none}</style>
-</head><body>
-<div id="bh-gate"><div class="box"><img src="/assets/logo/bpohivelogo.png" alt="BPO Hive"><p id="bh-msg">Loading…</p><a id="bh-act" href="#" hidden></a></div></div>
-<a href="/admin/entries.html" style="position:fixed;right:18px;bottom:18px;z-index:10001;padding:10px 16px;border-radius:6px;background:#0f7ac4;color:#fff;font:600 14px/1 Inter,Arial,sans-serif;text-decoration:none;box-shadow:0 6px 18px rgba(8,21,33,.25)">Form entries</a>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>BPO Hive Admin</title>
+<link rel="icon" href="/assets/logo/apple-touch-icon.png">
+<style>
+@font-face{font-family:Inter;src:url(/assets/fonts/inter-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"DM Sans";src:url(/assets/fonts/dm-sans-latin-wght-normal.woff2) format("woff2");font-weight:100 1000;font-display:swap}
+:root{--navy:#081521;--ink:#0d1d2b;--muted:#5d7280;--line:#dbe8f0;--soft:#f5f9fc;--blue:#0f7ac4;--red:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);font:15px/1.5 Inter,"Helvetica Neue",Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+[hidden]{display:none!important}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;height:62px;padding:0 22px;background:var(--navy);color:#fff}
+.top img{height:28px;display:block}
+.top .out{margin-left:auto;padding:8px 14px;border:1px solid rgba(255,255,255,.25);border-radius:6px;background:none;color:#fff;cursor:pointer}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:calc(100vh - 62px)}
+.side{padding:18px 12px;border-right:1px solid var(--line);background:#fff}
+.side h4{margin:16px 10px 6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.side a{display:block;padding:9px 10px;border-radius:6px;color:var(--ink);font-weight:600;text-decoration:none}
+.side a:hover{background:var(--soft)}.side a.on{background:#e8f3fb;color:#0f6fae}
+main{min-width:0;padding:28px 30px 70px}
+h1{margin:0 0 4px;font-family:"DM Sans",Inter,sans-serif;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.sub{margin:0 0 20px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.pri{border-color:var(--blue);background:var(--blue);color:#fff}.btn.pri:hover{background:#0c6cae}
+.btn.del{border-color:#f1c7c2;color:var(--red)}.btn.del:hover{background:#fdf1ef}
+.btn[disabled]{opacity:.55;cursor:wait}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.bar input,.bar select{height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.bar input{flex:1;min-width:200px}
+.card{border:1px solid var(--line);border-radius:10px;background:#fff}
+.list .item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #edf3f7;cursor:pointer}
+.list .item:last-child{border-bottom:0}.list .item:hover{background:#f7fbfe}
+.list .item b{font-weight:600}.list .item small{margin-left:auto;color:var(--muted)}
+.tag{padding:2px 9px;border-radius:12px;background:#e8f3fb;color:#0f6fae;font-size:12px;font-weight:700;white-space:nowrap}
+.tag.off{background:#f1f3f5;color:#5c6b76}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:860px}
+th,td{padding:11px 14px;border-bottom:1px solid #edf3f7;text-align:left;vertical-align:top}
+th{background:#fff;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfe}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{padding:9px 16px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;cursor:pointer}
+.tab.on{border-color:var(--blue);background:var(--blue);color:#fff}
+.tab b{margin-left:6px;padding:1px 7px;border-radius:10px;background:rgba(0,0,0,.08);font-size:12px}.tab.on b{background:rgba(255,255,255,.2)}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.form{max-width:820px;padding:24px}
+.f{display:grid;gap:6px;margin-bottom:18px}
+.f>label{font-size:13px;font-weight:700;color:#344d5c}
+.f .hint{color:var(--muted);font-size:13px}
+.f input[type=text],.f input[type=number],.f input[type=date],.f select,.f textarea{width:100%;min-height:42px;padding:9px 12px;border:1px solid #d3e0e8;border-radius:6px;background:#fff}
+.f textarea{min-height:110px;resize:vertical}.f textarea.md{min-height:380px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid rgba(15,122,196,.3);border-color:var(--blue)}
+.f.bad input,.f.bad textarea,.f.bad select{border-color:var(--red)}.f .err{color:var(--red);font-size:13px}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600}
+.img{display:flex;gap:12px;align-items:center}.img img{width:72px;height:72px;object-fit:cover;border:1px solid var(--line);border-radius:6px;background:var(--soft)}
+.img input[type=text]{flex:1}
+.group{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--soft);margin-bottom:10px}
+.group .gh{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-weight:700}
+.group .gh span{margin-right:auto}
+.mini{height:30px;padding:0 10px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer;font-size:13px}
+.actions{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;margin:0 -24px -24px;padding:14px 24px;border-top:1px solid var(--line);background:#fff;border-radius:0 0 10px 10px}
+.actions .msg{margin-left:auto;color:var(--muted);font-size:14px}
+.note{padding:14px 16px;border:1px solid #f3dfae;border-radius:8px;background:#fff8e6;color:#6b5414;margin-bottom:16px}
+.login{max-width:380px;margin:12vh auto;padding:32px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.login img{height:34px;margin-bottom:18px}.login label{display:grid;gap:6px;font-size:13px;font-weight:600;color:#344d5c}
+.login input{height:46px;padding:0 12px;border:1px solid var(--line);border-radius:6px}
+.login button{width:100%;height:48px;margin-top:16px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-weight:600;cursor:pointer}
+.lerr{min-height:20px;margin:10px 0 0;color:var(--red);font-size:14px}
+dialog{width:min(640px,calc(100% - 28px));padding:0;border:0;border-radius:12px;box-shadow:0 30px 80px rgba(8,21,33,.35)}
+dialog::backdrop{background:rgba(8,21,33,.5)}
+.dl{padding:26px}.dl h2{margin:0 0 4px;font-family:"DM Sans",Inter,sans-serif;font-size:22px}
+.dl dl{display:grid;grid-template-columns:170px 1fr;gap:8px 16px;margin:18px 0 0}.dl dt{color:var(--muted);font-size:13px;font-weight:600}.dl dd{margin:0;word-break:break-word}
+.dl .x{float:right;width:34px;height:34px;border:0;border-radius:50%;background:#f1f5f8;cursor:pointer;font-size:18px}
+.menu{display:none}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}.side{display:none;position:fixed;top:62px;left:0;right:0;bottom:0;z-index:15;overflow:auto}.side.open{display:block}.menu{display:inline-flex}main{padding:20px 16px 60px}.dl dl{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<section class="login" id="login" hidden>
+  <img src="/assets/logo/bpohivelogo.png" alt="BPO Hive">
+  <form id="login-form">
+    <label>Admin password<input type="password" name="password" autocomplete="current-password" required autofocus></label>
+    <button type="submit">Sign in</button>
+    <p class="lerr" id="login-err" role="alert"></p>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="top">
+    <button class="btn menu" id="menu" type="button">Menu</button>
+    <img src="/assets/logo/bpohivelogo-white.png" alt="BPO Hive">
+    <button class="out" id="logout" type="button">Sign out</button>
+  </header>
+  <div class="wrap">
+    <nav class="side" id="side"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<dialog id="detail"><div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2 id="d-title"></h2><div id="d-sub" style="color:#5d7280"></div><dl id="d-body"></dl><button class="btn del" id="d-del" type="button" style="margin-top:22px">Delete this entry</button></div></dialog>
+
 <script>
-// Signs editors in with the shared admin password. GitHub works behind the scenes, so the
-// content editor opens straight away without its own GitHub sign-in screen.
 (function(){
-  var gate=document.getElementById('bh-gate'),msg=document.getElementById('bh-msg'),act=document.getElementById('bh-act');
-  function show(text,label,href){msg.textContent=text;if(label){act.textContent=label;act.href=href;act.hidden=false}}
+var REPO='amresmat/bpohive-website-final',BRANCH='main',API='/api/gh/repos/'+REPO;
+var CFG=null,SESSION={},$=function(id){return document.getElementById(id)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var main=$('main');
+
+/* ---------- GitHub file helpers (through the website's server) ---------- */
+function b64enc(str){var bytes=new TextEncoder().encode(str),bin='';for(var i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(bin)}
+function b64dec(b){var bin=atob(b.replace(/\n/g,'')),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes)}
+function gh(path,opt){opt=opt||{};return fetch(API+path,{method:opt.method||'GET',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/vnd.github+json'},body:opt.body?JSON.stringify(opt.body):undefined,cache:'no-store'}).then(function(r){return r.text().then(function(t){var j={};try{j=t?JSON.parse(t):{}}catch(e){}if(r.status===401){showLogin();throw new Error('Please sign in again.')}if(!r.ok)throw new Error(j.message||('GitHub error '+r.status));return j})})}
+function readFile(path){return gh('/contents/'+path+'?ref='+BRANCH).then(function(j){return{sha:j.sha,data:JSON.parse(b64dec(j.content))}})}
+function writeFile(path,data,sha,message){return gh('/contents/'+path,{method:'PUT',body:{message:message,content:b64enc(JSON.stringify(data,null,2)+'\n'),sha:sha||undefined,branch:BRANCH}})}
+function removeFile(path,sha,message){return gh('/contents/'+path,{method:'DELETE',body:{message:message,sha:sha,branch:BRANCH}})}
+function listFolder(folder){return gh('/contents/'+folder+'?ref='+BRANCH).then(function(arr){return(arr||[]).filter(function(f){return f.type==='file'&&/\.json$/.test(f.name)})})}
+
+/* ---------- Navigation ---------- */
+function buildNav(){
+  var h='<h4>Leads</h4><a href="#entries">Form entries</a><h4>Content</h4>';
+  CFG.collections.forEach(function(c){if(c.folder)h+='<a href="#c/'+c.name+'">'+esc(c.label)+'</a>'});
+  CFG.collections.forEach(function(c){if(c.files){h+='<h4>'+esc(c.label)+'</h4>';c.files.forEach(function(f){h+='<a href="#f/'+c.name+'/'+f.name+'">'+esc(f.label||f.name)+'</a>'})}});
+  h+='<h4>Website</h4><a href="/" target="_blank" rel="noopener">View live site ↗</a>';
+  $('side').innerHTML=h;
+}
+function markNav(){var h=location.hash||'#entries';[].forEach.call($('side').querySelectorAll('a'),function(a){var href=a.getAttribute('href');a.classList.toggle('on',href===h||(href.length>1&&h.indexOf(href+'/')===0))});$('side').classList.remove('open')}
+function route(){
+  var h=(location.hash||'#entries').slice(1).split('/');markNav();
+  if(h[0]==='c'){var col=CFG.collections.find(function(c){return c.name===h[1]});if(!col)return entries();return h[2]?editItem(col,decodeURIComponent(h[2])):listCollection(col)}
+  if(h[0]==='f'){var c2=CFG.collections.find(function(c){return c.name===h[1]});var file=c2&&c2.files.find(function(f){return f.name===h[2]});if(file)return editSettingsFile(c2,file)}
+  entries();
+}
+function needsGitHub(){
+  if(SESSION.connected)return false;
+  var live=/(^|\.)bpohive\.com$/.test(location.hostname);
+  main.innerHTML='<h1>One-time setup</h1><div class="note">'+(live?'Content editing needs a one-time connection to the GitHub account that stores the website. Click below while signed into GitHub as amresmat. After this, the admin password is all anyone needs.':'Content editing needs a one-time GitHub connection, which can only be done on www.bpohive.com/admin.')+'</div><a class="btn pri" href="'+(live?'/api/cms/auth?connect=1':'https://www.bpohive.com/admin/')+'">'+(live?'Connect GitHub':'Open www.bpohive.com/admin')+'</a>';
+  return true;
+}
+
+/* ---------- Content lists ---------- */
+function slugify(s){return String(s||'').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'item'}
+function titleOf(col,d){var k=col.identifier_field||'title';return d[k]||d.name||d.title||'(untitled)'}
+function listCollection(col){
+  if(needsGitHub())return;
+  main.innerHTML='<h1>'+esc(col.label)+'</h1><p class="sub">'+esc(col.description||'')+'</p><div class="bar"><input id="q" type="search" placeholder="Search">'+(col.create?'<a class="btn pri" href="#c/'+col.name+'/new">New '+esc(col.label_singular||'item')+'</a>':'')+'</div><div class="card list" id="items"><div class="empty">Loading…</div></div>';
+  listFolder(col.folder).then(function(files){
+    return Promise.all(files.map(function(f){return readFile(col.folder+'/'+f.name).then(function(x){return{slug:f.name.replace(/\.json$/,''),data:x.data}}).catch(function(){return{slug:f.name.replace(/\.json$/,''),data:{}}})}));
+  }).then(function(items){
+    items.sort(function(a,b){return(a.data.order==null?1e9:a.data.order)-(b.data.order==null?1e9:b.data.order)||String(b.data.date||'').localeCompare(String(a.data.date||''))||String(titleOf(col,a.data)).localeCompare(titleOf(col,b.data))});
+    function draw(){var q=($('q').value||'').toLowerCase();var rows=items.filter(function(i){return!q||JSON.stringify(i.data).toLowerCase().indexOf(q)>-1});
+      $('items').innerHTML=rows.length?rows.map(function(i){var d=i.data,extra=col.name==='jobs'?(d.open===false?'<span class="tag off">Hidden</span>':'<span class="tag">Open</span>'):'';return'<div class="item" data-s="'+esc(i.slug)+'"><b>'+esc(titleOf(col,d))+'</b>'+(d.title&&col.identifier_field==='name'?'<span style="color:#5d7280">'+esc(d.title)+'</span>':'')+extra+'<small>'+esc(d.date||'')+'</small></div>'}).join(''):'<div class="empty">Nothing here yet.</div>';
+      [].forEach.call($('items').querySelectorAll('.item'),function(el){el.onclick=function(){location.hash='#c/'+col.name+'/'+encodeURIComponent(el.dataset.s)}})}
+    $('q').oninput=draw;draw();
+  }).catch(function(e){$('items').innerHTML='<div class="empty">'+esc(e.message)+'</div>'});
+}
+
+/* ---------- Form builder ---------- */
+function req(f){return f.required!==false}
+function defaultsFor(fields){var o={};fields.forEach(function(f){if(f.default!==undefined)o[f.name]=f.default;else if(f.widget==='boolean')o[f.name]=false;else if(f.widget==='list')o[f.name]=[]});return o}
+function fieldHTML(f,val,path){
+  var id='f_'+path.replace(/[^a-z0-9_]/gi,'_'),w=f.widget||'string',hint=f.hint?'<div class="hint">'+esc(f.hint)+'</div>':'',lab='<label for="'+id+'">'+esc(f.label||f.name)+(req(f)?'':' <span style="color:#8ea4b3;font-weight:500">(optional)</span>')+'</label>';
+  if(val==null)val='';
+  if(w==='boolean')return'<div class="f" data-path="'+path+'" data-w="boolean"><label class="chk"><input type="checkbox" id="'+id+'"'+(val?' checked':'')+'> '+esc(f.label||f.name)+'</label>'+hint+'</div>';
+  if(w==='text'||w==='markdown')return'<div class="f" data-path="'+path+'" data-w="'+w+'">'+lab+'<textarea id="'+id+'"'+(w==='markdown'?' class="md"':'')+'>'+esc(val)+'</textarea>'+(w==='markdown'?'<div class="hint">Markdown: ## for headings, **bold**, - for bullet points, [text](link) for links.</div>':'')+hint+'</div>';
+  if(w==='number')return'<div class="f" data-path="'+path+'" data-w="number" data-vt="'+(f.value_type||'int')+'">'+lab+'<input type="number" id="'+id+'" step="'+(f.step||(f.value_type==='float'?'any':1))+'" value="'+esc(val)+'">'+hint+'</div>';
+  if(w==='datetime')return'<div class="f" data-path="'+path+'" data-w="datetime">'+lab+'<input type="date" id="'+id+'" value="'+esc(String(val).slice(0,10))+'">'+hint+'</div>';
+  if(w==='select'){var opts=(f.options||[]).map(function(o){var v=typeof o==='object'?o.value:o,l=typeof o==='object'?o.label:o;return'<option value="'+esc(v)+'"'+(String(v)===String(val)?' selected':'')+'>'+esc(l)+'</option>'}).join('');return'<div class="f" data-path="'+path+'" data-w="select">'+lab+'<select id="'+id+'">'+(req(f)?'':'<option value=""></option>')+opts+'</select>'+hint+'</div>'}
+  if(w==='image')return'<div class="f" data-path="'+path+'" data-w="image">'+lab+'<div class="img"><img alt="" src="'+esc(val||'')+'"'+(val?'':' hidden')+'><input type="text" id="'+id+'" value="'+esc(val)+'" placeholder="/assets/uploads/photo.jpg"><label class="btn">Upload<input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" hidden></label></div>'+hint+'</div>';
+  if(w==='list'&&f.fields){var items=Array.isArray(val)?val:[];return'<div class="f" data-path="'+path+'" data-w="list">'+lab+hint+'<div class="items">'+items.map(function(it,i){return groupHTML(f,it,path,i,items.length)}).join('')+'</div><button type="button" class="mini add">+ Add '+esc(f.label_singular||'item')+'</button></div>'}
+  return'<div class="f" data-path="'+path+'" data-w="string">'+lab+'<input type="text" id="'+id+'" value="'+esc(val)+'">'+hint+'</div>';
+}
+function groupHTML(f,it,path,i,n){var name=(it&&(it.name||it.title||it.quote||'')).toString().slice(0,60);return'<div class="group" data-i="'+i+'"><div class="gh"><span>'+esc(f.label_singular||'Item')+' '+(i+1)+(name?' · '+esc(name):'')+'</span><button type="button" class="mini up"'+(i?'':' disabled')+'>↑</button><button type="button" class="mini down"'+(i<n-1?'':' disabled')+'>↓</button><button type="button" class="mini rm">Remove</button></div>'+f.fields.map(function(sf){return fieldHTML(sf,it?it[sf.name]:undefined,path+'.'+i+'.'+sf.name)}).join('')+'</div>'}
+function renderForm(box,fields,data){
+  box.innerHTML=fields.map(function(f){return fieldHTML(f,data[f.name],f.name)}).join('');
+  wire(box,fields,data);
+}
+function wire(box,fields,data){
+  [].forEach.call(box.querySelectorAll('.f[data-w=image]'),function(el){var inp=el.querySelector('input[type=text]'),img=el.querySelector('img'),file=el.querySelector('input[type=file]');
+    inp.oninput=function(){img.src=inp.value;img.hidden=!inp.value};
+    file.onchange=function(){var fl=file.files[0];if(!fl)return;if(fl.size>3.5*1024*1024){alert('Please use an image under 3.5 MB.');return}
+      var r=new FileReader();r.onload=function(){var b64=String(r.result).split(',')[1],ext=(fl.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z]/g,''),name=Date.now()+'-'+slugify(fl.name.replace(/\.[^.]+$/,''))+'.'+(ext==='jpeg'?'jpg':ext),path=(CFG.media_folder||'assets/uploads')+'/'+name;
+        inp.disabled=true;gh('/contents/'+path,{method:'PUT',body:{message:'Admin: upload '+name,content:b64,branch:BRANCH}}).then(function(){inp.value=(CFG.public_folder||'/assets/uploads')+'/'+name;inp.oninput()}).catch(function(e){alert(e.message)}).then(function(){inp.disabled=false})};r.readAsDataURL(fl)}});
+  [].forEach.call(box.querySelectorAll('.f[data-w=list]'),function(el){
+    var path=el.dataset.path,f=findField(fields,path);if(!f)return;
+    function current(){return collect(box,fields)}
+    function redraw(arr){var d=current();setPath(d,path,arr);renderForm(box,fields,d)}
+    el.querySelector(':scope>.add').onclick=function(){var arr=getPath(current(),path)||[];if(f.max&&arr.length>=f.max)return alert('Up to '+f.max+' allowed.');arr.push(defaultsFor(f.fields));redraw(arr)};
+    [].forEach.call(el.querySelectorAll(':scope>.items>.group'),function(g){var i=+g.dataset.i;
+      g.querySelector('.rm').onclick=function(){var arr=getPath(current(),path)||[];if(f.min&&arr.length<=f.min)return alert('At least '+f.min+' required.');if(!confirm('Remove this '+(f.label_singular||'item')+'?'))return;arr.splice(i,1);redraw(arr)};
+      g.querySelector('.up').onclick=function(){var arr=getPath(current(),path);arr.splice(i-1,0,arr.splice(i,1)[0]);redraw(arr)};
+      g.querySelector('.down').onclick=function(){var arr=getPath(current(),path);arr.splice(i+1,0,arr.splice(i,1)[0]);redraw(arr)};
+    });
+  });
+}
+function findField(fields,path){var parts=path.split('.'),f=null,list=fields;for(var i=0;i<parts.length;i++){if(/^\d+$/.test(parts[i]))continue;f=(list||[]).find(function(x){return x.name===parts[i]});if(!f)return null;list=f.fields}return f}
+function getPath(o,p){return p.split('.').reduce(function(a,k){return a==null?a:a[k]},o)}
+function setPath(o,p,v){var ks=p.split('.'),a=o;for(var i=0;i<ks.length-1;i++){if(a[ks[i]]==null)a[ks[i]]=/^\d+$/.test(ks[i+1])?[]:{};a=a[ks[i]]}a[ks[ks.length-1]]=v}
+function collect(box,fields){
+  var out={};
+  [].forEach.call(box.querySelectorAll('.f'),function(el){var w=el.dataset.w,p=el.dataset.path,v;if(w==='list'){if(getPath(out,p)==null)setPath(out,p,[]);return}
+    var inp=el.querySelector(w==='boolean'?'input[type=checkbox]':w==='image'?'input[type=text]':'input,textarea,select');
+    if(w==='boolean')v=inp.checked;else if(w==='number'){v=inp.value===''?'':(el.dataset.vt==='float'?parseFloat(inp.value):parseInt(inp.value,10))}else if(w==='select'){var f=findField(fields,p),o=(f.options||[]).find(function(x){return String(typeof x==='object'?x.value:x)===inp.value});v=o==null?inp.value:(typeof o==='object'?o.value:o)}else v=inp.value;
+    setPath(out,p,v)});
+  return out;
+}
+function clean(data,fields){fields.forEach(function(f){var v=data[f.name];if(f.widget==='list'&&f.fields&&Array.isArray(v))v.forEach(function(it){clean(it,f.fields)});if((v===''||v==null)&&!req(f))delete data[f.name]});return data}
+function validate(box,fields,data){
+  var ok=true;[].forEach.call(box.querySelectorAll('.f'),function(el){el.classList.remove('bad');var e=el.querySelector(':scope>.err');if(e)e.remove()});
+  [].forEach.call(box.querySelectorAll('.f'),function(el){var f=findField(fields,el.dataset.path);if(!f||f.widget==='boolean'||f.widget==='list')return;var v=getPath(data,el.dataset.path),msg='';
+    if(req(f)&&(v===''||v==null||(typeof v==='number'&&isNaN(v))))msg='Required';
+    else if(f.pattern&&v&&!(new RegExp(f.pattern[0])).test(String(v)))msg=f.pattern[1];
+    if(msg){ok=false;el.classList.add('bad');el.insertAdjacentHTML('beforeend','<div class="err">'+esc(msg)+'</div>')}});
+  if(!ok){var b=box.querySelector('.f.bad');if(b)b.scrollIntoView({behavior:'smooth',block:'center'})}
+  return ok;
+}
+function merge(orig,next,fields){var out=Object.assign({},orig);fields.forEach(function(f){delete out[f.name]});fields.forEach(function(f){if(next[f.name]!==undefined)out[f.name]=next[f.name]});return out}
+
+/* ---------- Edit a collection item ---------- */
+function editItem(col,slug){
+  if(needsGitHub())return;
+  var isNew=slug==='new',path=col.folder+'/'+slug+'.json',sha=null,orig={};
+  main.innerHTML='<p><a href="#c/'+col.name+'">← '+esc(col.label)+'</a></p><h1>'+(isNew?'New '+esc(col.label_singular||'item'):'Edit')+'</h1><p class="sub">'+esc(col.description||'')+'</p><div class="card form"><div id="fields"><div class="empty">Loading…</div></div><div class="actions"><button class="btn pri" id="save" type="button">'+(isNew?'Publish':'Save and publish')+'</button>'+(!isNew&&col.delete!==false?'<button class="btn del" id="del" type="button">Delete</button>':'')+(!isNew&&col.preview_path?'<a class="btn" target="_blank" rel="noopener" href="/'+esc(col.preview_path.replace('{{slug}}',slug))+'">View on site ↗</a>':'')+'<span class="msg" id="msg"></span></div></div>';
+  var box=$('fields');
+  (isNew?Promise.resolve({data:defaultsFor(col.fields)}):readFile(path)).then(function(x){sha=x.sha;orig=x.data;renderForm(box,col.fields,orig)}).catch(function(e){box.innerHTML='<div class="empty">'+esc(e.message)+'</div>'});
+  $('save').onclick=function(){
+    var data=clean(collect(box,col.fields),col.fields);if(!validate(box,col.fields,data))return;
+    var out=merge(orig,data,col.fields),target=path,btn=this;
+    var p=Promise.resolve();
+    if(isNew){var base=slugify(titleOf(col,out));p=listFolder(col.folder).then(function(files){var names=files.map(function(f){return f.name}),s=base,n=2;while(names.indexOf(s+'.json')>-1)s=base+'-'+n++;target=col.folder+'/'+s+'.json';slug=s})}
+    btn.disabled=true;$('msg').textContent='Saving…';
+    p.then(function(){return writeFile(target,out,sha,'Admin: '+(isNew?'create':'update')+' '+(col.label_singular||col.name)+' “'+titleOf(col,out)+'”')}).then(function(j){sha=j.content&&j.content.sha;orig=out;$('msg').textContent='Saved. Live on the site in about a minute.';if(isNew){isNew=false;history.replaceState(null,'','#c/'+col.name+'/'+encodeURIComponent(slug));editItem(col,slug)}}).catch(function(e){$('msg').textContent='';alert('Could not save: '+e.message)}).then(function(){btn.disabled=false});
+  };
+  if($('del'))$('del').onclick=function(){if(!confirm('Delete “'+titleOf(col,orig)+'” from the website? This cannot be undone here.'))return;this.disabled=true;removeFile(path,sha,'Admin: delete '+(col.label_singular||col.name)+' “'+titleOf(col,orig)+'”').then(function(){location.hash='#c/'+col.name}).catch(function(e){alert('Could not delete: '+e.message)})};
+}
+
+/* ---------- Edit a settings file ---------- */
+function editSettingsFile(col,file){
+  if(needsGitHub())return;
+  var sha=null,orig={};
+  main.innerHTML='<h1>'+esc(file.label||file.name)+'</h1><p class="sub">'+esc(col.label)+'</p><div class="card form"><div id="fields"><div class="empty">Loading…</div></div><div class="actions"><button class="btn pri" id="save" type="button">Save and publish</button><span class="msg" id="msg"></span></div></div>';
+  var box=$('fields');
+  readFile(file.file).then(function(x){sha=x.sha;orig=x.data;renderForm(box,file.fields,orig)}).catch(function(e){box.innerHTML='<div class="empty">'+esc(e.message)+'</div>'});
+  $('save').onclick=function(){var data=clean(collect(box,file.fields),file.fields);if(!validate(box,file.fields,data))return;var out=merge(orig,data,file.fields),btn=this;btn.disabled=true;$('msg').textContent='Saving…';
+    writeFile(file.file,out,sha,'Admin: update '+(file.label||file.name)).then(function(j){sha=j.content&&j.content.sha;orig=out;$('msg').textContent='Saved. Live on the site in about a minute.'}).catch(function(e){$('msg').textContent='';alert('Could not save: '+e.message)}).then(function(){btn.disabled=false})};
+}
+
+/* ---------- Form entries ---------- */
+var ED={entries:[],abandoned:[]},EV='entries';
+function pick(f,keys){for(var i=0;i<keys.length;i++){if(f[keys[i]])return f[keys[i]]}return''}
+function nameOf(f){return pick(f,['name','fullName'])||[pick(f,['firstName','first_name','fname']),pick(f,['lastName','last_name','lname'])].join(' ').trim()}
+function when(r){return new Date(r.at||r.updated||r.first)}
+function fmt(d){return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}
+function entries(){
+  main.innerHTML='<h1>Form entries</h1><p class="sub">Every form sent from the website, plus forms people started but never sent.</p><div class="tabs"><button class="tab" data-v="entries" type="button">Form entries <b id="n-entries">0</b></button><button class="tab" data-v="abandoned" type="button">Abandoned forms <b id="n-abandoned">0</b></button></div><div class="bar"><input id="eq" type="search" placeholder="Search name, email, company, phone"><select id="ef"><option value="">All forms</option></select><button class="btn" id="csv" type="button">Download CSV</button><button class="btn" id="refresh" type="button">Refresh</button></div><div class="card tablewrap"><table><thead><tr><th>Date</th><th>Form</th><th>Name</th><th>Email</th><th>Company</th><th>Phone</th><th>Budget</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="eempty">Loading…</div></div>';
+  [].forEach.call(main.querySelectorAll('.tab'),function(t){t.onclick=function(){EV=t.dataset.v;$('ef').value='';drawEntries()}});
+  $('eq').oninput=drawEntries;$('ef').onchange=drawEntries;$('csv').onclick=csv;$('refresh').onclick=loadEntries;
+  loadEntries();
+}
+function loadEntries(){
+  Promise.all(['entries','abandoned'].map(function(v){return fetch('/api/admin/entries?view='+v,{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json().then(function(j){return{ok:r.ok,status:r.status,j:j}})})})).then(function(res){
+    if(res[0].status===401)return showLogin();
+    if(!res[0].ok){ED={entries:[],abandoned:[]};drawEntries();$('eempty').textContent=res[0].j.error||'Could not load entries.';$('eempty').hidden=false;return}
+    ED.entries=res[0].j.rows||[];ED.abandoned=res[1].ok?(res[1].j.rows||[]):[];drawEntries();
+  });
+}
+function entryRows(){var q=($('eq').value||'').trim().toLowerCase(),ff=$('ef').value;return ED[EV].filter(function(r){return(!ff||r.form===ff)&&(!q||JSON.stringify(r.fields).toLowerCase().indexOf(q)>-1)}).sort(function(a,b){return when(b)-when(a)})}
+function drawEntries(){
+  if(!$('rows'))return;
+  [].forEach.call(main.querySelectorAll('.tab'),function(t){t.classList.toggle('on',t.dataset.v===EV)});
+  var list=entryRows(),forms={};ED[EV].forEach(function(r){forms[r.form]=1});
+  var sel=$('ef'),cur=sel.value;sel.innerHTML='<option value="">All forms</option>'+Object.keys(forms).sort().map(function(f){return'<option'+(f===cur?' selected':'')+'>'+esc(f)+'</option>'}).join('');
+  $('rows').innerHTML=list.map(function(r,i){var f=r.fields||{};return'<tr data-i="'+i+'"><td>'+esc(fmt(when(r)))+'</td><td><span class="tag">'+esc(r.form)+'</span></td><td>'+esc(nameOf(f))+'</td><td>'+esc(pick(f,['email','work_email','businessEmail']))+'</td><td>'+esc(pick(f,['company','companyName','company_name','website']))+'</td><td>'+esc(pick(f,['phone','phone_number','tel']))+'</td><td>'+esc(pick(f,['budget','monthly_budget']))+'</td></tr>'}).join('');
+  $('eempty').hidden=list.length>0;$('eempty').textContent='Nothing here yet.';
+  $('n-entries').textContent=ED.entries.length;$('n-abandoned').textContent=ED.abandoned.length;
+  [].forEach.call($('rows').children,function(tr){tr.onclick=function(){showEntry(list[+tr.dataset.i])}});
+}
+function showEntry(r){
+  var f=r.fields||{};$('d-title').textContent=nameOf(f)||pick(f,['email'])||'Entry';
+  $('d-sub').textContent=r.form+' · '+fmt(when(r))+(EV==='abandoned'?' · last typed':'');
+  var extra={Page:r.page,Referrer:r.referrer};if(EV==='abandoned'&&r.first)extra.Started=fmt(new Date(r.first));
+  $('d-body').innerHTML=Object.keys(f).map(function(k){return'<dt>'+esc(k)+'</dt><dd>'+esc(f[k])+'</dd>'}).join('')+Object.keys(extra).filter(function(k){return extra[k]}).map(function(k){return'<dt>'+k+'</dt><dd>'+esc(extra[k])+'</dd>'}).join('');
+  $('d-del').onclick=function(){if(!r.id||!confirm('Delete this entry for good? This cannot be undone.'))return;fetch('/api/admin/entries?view='+EV+'&id='+encodeURIComponent(r.id),{method:'DELETE',credentials:'same-origin'}).then(function(x){return x.json().then(function(j){if(!x.ok)throw new Error(j.error||'Could not delete.')})}).then(function(){$('detail').close();ED[EV]=ED[EV].filter(function(y){return y!==r});drawEntries()}).catch(function(e){alert(e.message)})};
+  $('detail').showModal();
+}
+function csv(){
+  var list=entryRows(),keys={};list.forEach(function(r){Object.keys(r.fields||{}).forEach(function(k){keys[k]=1})});
+  var cols=Object.keys(keys),q=function(v){v=String(v==null?'':v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  var lines=[['date','form'].concat(cols,['page']).map(q).join(',')].concat(list.map(function(r){return[when(r).toISOString(),r.form].concat(cols.map(function(k){return(r.fields||{})[k]}),[r.page]).map(q).join(',')}));
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='bpohive-'+EV+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+/* ---------- Sign-in ---------- */
+function showLogin(){$('app').hidden=true;$('login').hidden=false;var p=$('login-form').password;if(p)p.focus()}
+function start(){
   fetch('/api/admin/session',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(s){
-    if(!s.signedIn){location.replace('/admin/entries.html?next=/admin/');return}
-    if(!s.connected){
-      var live=/(^|\.)bpohive\.com$/.test(location.hostname);
-      show(live?'One-time setup: connect the GitHub account that owns the website code. After this, the admin password is all anyone needs.':'The content editor needs a one-time GitHub connection, which can only be done on www.bpohive.com/admin.',live?'Connect GitHub':'Open www.bpohive.com/admin',live?'/api/cms/auth?connect=1':'https://www.bpohive.com/admin/');
-      return;
-    }
-    try{localStorage.setItem('decap-cms-user',JSON.stringify({backendName:'github',token:'session'}))}catch(e){}
-    var sc=document.createElement('script');sc.src='https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js';sc.onload=function(){gate.remove()};document.body.appendChild(sc);
-  }).catch(function(){show('Could not reach the admin. Refresh to try again.')});
+    SESSION=s;if(!s.signedIn)return showLogin();
+    return fetch('/admin/config.yml',{cache:'no-store'}).then(function(r){return r.json()}).then(function(c){CFG=c;$('login').hidden=true;$('app').hidden=false;buildNav();route()});
+  }).catch(function(){main.innerHTML='<div class="empty">Could not load the admin. Refresh to try again.</div>';$('app').hidden=false});
+}
+$('login-form').onsubmit=function(e){e.preventDefault();$('login-err').textContent='';
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({password:this.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Sign in failed')})}).then(function(){$('login-form').reset();start()}).catch(function(e){$('login-err').textContent=e.message})};
+$('logout').onclick=function(){fetch('/api/admin/login',{method:'DELETE',credentials:'same-origin'}).then(function(){location.reload()})};
+$('menu').onclick=function(){$('side').classList.toggle('open')};
+document.querySelector('#detail .x').onclick=function(){$('detail').close()};
+window.addEventListener('hashchange',function(){if(CFG)route()});
+start();
 })();
 </script>
-</body></html>
+</body>
+</html>
