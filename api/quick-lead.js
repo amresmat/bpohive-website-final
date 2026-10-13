@@ -70,11 +70,12 @@ module.exports = async (req, res) => {
   }
 
   const budgetLabel = BUDGETS[lead.budget];
-  const qualified = lead.budget === '3000_plus';
-  const bookingUrl = qualified ? CALENDLY + '?' + new URLSearchParams({
+  // Everyone gets the calendar, whatever budget they pick.
+  const qualified = true;
+  const bookingUrl = CALENDLY + '?' + new URLSearchParams({
     name: `${lead.firstName} ${lead.lastName}`, email: lead.email, a1: lead.company, a3: lead.jobTitle,
     utm_source: 'bpohive.com', utm_medium: 'website', utm_campaign: 'build_my_campaign'
-  }) : '';
+  });
   const owner = process.env.LEAD_NOTIFICATION_EMAIL || 'info@bpohive.com';
   const rows = [['Name', `${lead.firstName} ${lead.lastName}`], ['Business email', lead.email], ['Monthly budget', budgetLabel],
     ['Job title', lead.jobTitle], ['Company', lead.company], ['Company size', lead.size], ['Phone', lead.phone],
@@ -90,7 +91,7 @@ module.exports = async (req, res) => {
     prefilled_calendly_link: bookingUrl, page_url: lead.pageUrl, referrer: lead.referrer,
     prospect_email_to: lead.email,
     prospect_email_subject: 'We received your BPO Hive request',
-    prospect_email_html: `<p>Hi ${esc(lead.firstName)},</p><p>Thanks for reaching out. Our team will review your details and reply to this email within one business day.</p>${bookingUrl ? `<p>If you'd like to talk sooner, <a href="${esc(bookingUrl)}">choose a call time here</a>.</p>` : ''}<p>BPO Hive</p>`,
+    prospect_email_html: `<p>Hi ${esc(lead.firstName)},</p><p>Thanks for reaching out. If you haven't picked a call time yet, <a href="${esc(bookingUrl)}">choose one here</a>.</p><p>BPO Hive</p>`,
     prospect_email_reply_to: owner,
     owner_email_to: owner,
     owner_email_subject: `New Build my campaign lead: ${lead.company} (${budgetLabel})`,
