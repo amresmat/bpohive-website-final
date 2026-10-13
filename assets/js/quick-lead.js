@@ -81,7 +81,14 @@
         var label = (t.textContent || '').replace(/[→›]/g, '').replace(/\s+/g, ' ').trim();
         cta = label.slice(0, 60);
         dlg.querySelector('#ql-title').textContent = label && label.length <= 30 ? label : 'Build my campaign';
-        if (!form.hidden) { dlg.showModal(); var f = form.querySelector('input'); if (f) f.focus(); } else dlg.showModal();
+        // Each click starts fresh: the form again, with their earlier answers still filled in.
+        if (form.hidden) {
+          form.hidden = false; done.hidden = true; dlg.classList.remove('cal'); done.classList.remove('cal');
+          cal.innerHTML = ''; cal.hidden = true;
+          dlg.querySelector('.ql-done-t').textContent = 'Thank you';
+          dlg.querySelector('.ql-done-p').textContent = 'We received your details and will reply within one business day.';
+        }
+        dlg.showModal(); var f = form.querySelector('input'); if (f) f.focus();
       });
     });
     dlg.querySelector('.ql-x').addEventListener('click', function () { dlg.close(); });
