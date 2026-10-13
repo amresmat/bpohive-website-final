@@ -1,6 +1,6 @@
 // Finishes the one-time GitHub connection and stores the key encrypted on the server.
 const c = require('../../lib/cms-oauth.cjs');
-const { saveToken } = require('../../lib/cms-token.cjs');
+const { saveAuth, fromGitHub } = require('../../lib/cms-token.cjs');
 const pages = require('../../lib/cms-pages.cjs');
 
 module.exports = async (req, res) => {
@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     const user = await u.json(), repo = await r.json();
     const allowed = (process.env.CMS_ALLOWED_USERS || 'amresmat').toLowerCase().split(',').map(s => s.trim());
     if (!allowed.includes(user.login?.toLowerCase()) || !repo.permissions?.push) throw Error('Access denied');
-    await saveToken(token.access_token);
+    await saveAuth(fromGitHub(token));
     return pages.success(req, res);
   } catch {
     c.popup(res, 'error', { message: 'GitHub connection failed. Please try again.' });

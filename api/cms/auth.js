@@ -3,7 +3,7 @@
 const crypto = require('node:crypto');
 const c = require('../../lib/cms-oauth.cjs');
 const { signedIn } = require('../../lib/admin-auth.cjs');
-const { getToken } = require('../../lib/cms-token.cjs');
+const { getAuth } = require('../../lib/cms-token.cjs');
 const pages = require('../../lib/cms-pages.cjs');
 
 function githubRedirect(res) {
@@ -25,8 +25,8 @@ module.exports = async (req, res) => {
   if (req.query?.connect === '1') {
     try { return githubRedirect(res); } catch { res.statusCode = 503; return res.end('GitHub connection is not configured.'); }
   }
-  let token = '';
-  try { token = await getToken(); } catch {}
-  if (!token) return pages.connect(res);
+  let auth = null;
+  try { auth = await getAuth(); } catch {}
+  if (!auth) return pages.connect(res);
   return pages.success(req, res);
 };
