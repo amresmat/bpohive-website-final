@@ -1,5 +1,6 @@
-// "Build my campaign" pop-up form. Any link or button with data-quick-lead opens it.
-// Without JavaScript the link still goes to its normal page.
+// The site's short lead form, shown as a pop-up. It opens from every call to action that points
+// to the booking page (Book a call, Fill My Calendar, Build my campaign...) and from anything
+// marked data-quick-lead. Without JavaScript the links still go to the booking page.
 (function () {
   var TOP = [['US', 'United States'], ['CA', 'Canada'], ['AE', 'United Arab Emirates'], ['SA', 'Saudi Arabia'], ['QA', 'Qatar'], ['KW', 'Kuwait'], ['BH', 'Bahrain'], ['OM', 'Oman'], ['EG', 'Egypt'], ['GB', 'United Kingdom']];
   var REST = [['AR', 'Argentina'], ['AU', 'Australia'], ['AT', 'Austria'], ['BE', 'Belgium'], ['BR', 'Brazil'], ['BG', 'Bulgaria'], ['CL', 'Chile'], ['CN', 'China'], ['CO', 'Colombia'], ['HR', 'Croatia'], ['CY', 'Cyprus'], ['CZ', 'Czechia'], ['DK', 'Denmark'], ['EE', 'Estonia'], ['FI', 'Finland'], ['FR', 'France'], ['DE', 'Germany'], ['GR', 'Greece'], ['HK', 'Hong Kong'], ['HU', 'Hungary'], ['IN', 'India'], ['ID', 'Indonesia'], ['IE', 'Ireland'], ['IL', 'Israel'], ['IT', 'Italy'], ['JP', 'Japan'], ['JO', 'Jordan'], ['KE', 'Kenya'], ['LV', 'Latvia'], ['LB', 'Lebanon'], ['LT', 'Lithuania'], ['LU', 'Luxembourg'], ['MY', 'Malaysia'], ['MT', 'Malta'], ['MX', 'Mexico'], ['MA', 'Morocco'], ['NL', 'Netherlands'], ['NZ', 'New Zealand'], ['NG', 'Nigeria'], ['NO', 'Norway'], ['PK', 'Pakistan'], ['PE', 'Peru'], ['PH', 'Philippines'], ['PL', 'Poland'], ['PT', 'Portugal'], ['RO', 'Romania'], ['SG', 'Singapore'], ['SK', 'Slovakia'], ['SI', 'Slovenia'], ['ZA', 'South Africa'], ['KR', 'South Korea'], ['ES', 'Spain'], ['SE', 'Sweden'], ['CH', 'Switzerland'], ['TW', 'Taiwan'], ['TH', 'Thailand'], ['TN', 'Tunisia'], ['TR', 'Turkey'], ['UA', 'Ukraine'], ['VN', 'Vietnam']];
@@ -39,14 +40,23 @@
     '</div></dialog>';
 
   function init() {
-    var triggers = document.querySelectorAll('[data-quick-lead]');
-    if (!triggers.length || typeof HTMLDialogElement === 'undefined') return;
+    if (typeof HTMLDialogElement === 'undefined' || /^\/outbound-assessment/.test(location.pathname)) return;
+    var isCta = function (el) { if (el.hasAttribute('data-quick-lead')) return true; var h = el.getAttribute('href') || ''; try { var u = new URL(h, location.href); return /(^|\.)bpohive\.com$|vercel\.app$|^localhost$/.test(u.hostname) && /^\/outbound-assessment(\.html)?\/?$/.test(u.pathname); } catch (e) { return false; } };
+    var triggers = [].filter.call(document.querySelectorAll('a[href],[data-quick-lead]'), isCta);
+    if (!triggers.length) return;
     var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
     document.body.insertAdjacentHTML('beforeend', html);
     var dlg = document.getElementById('quick-lead'), form = dlg.querySelector('form'), err = dlg.querySelector('.ql-err'),
-        go = dlg.querySelector('.ql-go'), done = dlg.querySelector('.ql-done'), book = dlg.querySelector('.ql-book');
+        go = dlg.querySelector('.ql-go'), done = dlg.querySelector('.ql-done'), book = dlg.querySelector('.ql-book'), cta = '';
     [].forEach.call(triggers, function (t) {
-      t.addEventListener('click', function (e) { e.preventDefault(); dlg.showModal(); var f = form.querySelector('input'); if (f) f.focus(); });
+      t.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
+        var label = (t.textContent || '').replace(/[→›]/g, '').replace(/\s+/g, ' ').trim();
+        cta = label.slice(0, 60);
+        dlg.querySelector('#ql-title').textContent = label && label.length <= 30 ? label : 'Build my campaign';
+        if (!form.hidden) { dlg.showModal(); var f = form.querySelector('input'); if (f) f.focus(); } else dlg.showModal();
+      });
     });
     dlg.querySelector('.ql-x').addEventListener('click', function () { dlg.close(); });
     dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
@@ -54,7 +64,7 @@
       e.preventDefault(); err.textContent = '';
       if (!form.checkValidity()) { err.textContent = 'Please complete all fields with a valid business email.'; var bad = form.querySelector(':invalid'); if (bad) bad.focus(); return; }
       var data = {}; new FormData(form).forEach(function (v, k) { data[k] = v; });
-      data.pageUrl = location.href; data.referrer = document.referrer;
+      data.pageUrl = location.href; data.referrer = document.referrer; data.cta = cta;
       go.disabled = true; go.textContent = 'Sending...';
       fetch('/api/quick-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
