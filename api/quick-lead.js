@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
     firstName: text(b.firstName, 80), lastName: text(b.lastName, 80), email: text(b.email, 200).toLowerCase(),
     budget: text(b.budget, 20), jobTitle: text(b.jobTitle, 120), company: text(b.company, 160),
     size: text(b.size, 20), phone: text(b.phone, 60), industry: text(b.industry, 120), hq: text(b.hq, 80),
-    pageUrl: text(b.pageUrl, 500), referrer: text(b.referrer, 500), submittedAt: new Date().toISOString()
+    pageUrl: text(b.pageUrl, 500), referrer: text(b.referrer, 500), cta: text(b.cta, 60), submittedAt: new Date().toISOString()
   };
   const missing = ['firstName', 'lastName', 'email', 'budget', 'jobTitle', 'company', 'size', 'phone', 'industry', 'hq'].some(k => !lead[k]);
   if (missing || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email) || !BUDGETS[lead.budget] || !SIZES.includes(lead.size)) {
@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
   const owner = process.env.LEAD_NOTIFICATION_EMAIL || 'info@bpohive.com';
   const rows = [['Name', `${lead.firstName} ${lead.lastName}`], ['Business email', lead.email], ['Monthly budget', budgetLabel],
     ['Job title', lead.jobTitle], ['Company', lead.company], ['Company size', lead.size], ['Phone', lead.phone],
-    ['Industry', lead.industry], ['HQ', lead.hq], ['Page', lead.pageUrl]];
+    ['Industry', lead.industry], ['HQ', lead.hq], ['Button clicked', lead.cta], ['Page', lead.pageUrl]];
   const table = rows.map(([k, v]) => `<tr><th style="padding:8px;border:1px solid #dbe6ec;text-align:left;background:#f5f9fb">${esc(k)}</th><td style="padding:8px;border:1px solid #dbe6ec">${esc(v)}</td></tr>`).join('');
 
   const event = {
@@ -86,7 +86,7 @@ module.exports = async (req, res) => {
     qualified, qualification_status: qualified ? 'Qualified' : 'Review',
     first_name: lead.firstName, last_name: lead.lastName, work_email: lead.email, phone_number: lead.phone,
     job_title: lead.jobTitle, company_name: lead.company, company_size: lead.size, industry: lead.industry,
-    company_hq: lead.hq, monthly_budget: budgetLabel, initial_campaign_budget: budgetLabel,
+    company_hq: lead.hq, cta_clicked: lead.cta, monthly_budget: budgetLabel, initial_campaign_budget: budgetLabel,
     prefilled_calendly_link: bookingUrl, page_url: lead.pageUrl, referrer: lead.referrer,
     prospect_email_to: lead.email,
     prospect_email_subject: 'We received your BPO Hive request',
@@ -98,7 +98,7 @@ module.exports = async (req, res) => {
     owner_email_reply_to: lead.email,
     summary: { name: `${lead.firstName} ${lead.lastName}`, email: lead.email, phone: lead.phone, company: lead.company, budget: budgetLabel, hq: lead.hq }
   };
-  await saveEntry('Build my campaign', { firstName: lead.firstName, lastName: lead.lastName, email: lead.email, budget: budgetLabel, jobTitle: lead.jobTitle, company: lead.company, size: lead.size, phone: lead.phone, industry: lead.industry, hq: lead.hq }, { page: lead.pageUrl, referrer: lead.referrer, draftId: text(b.draftId, 40) });
+  await saveEntry('Build my campaign', { firstName: lead.firstName, lastName: lead.lastName, email: lead.email, budget: budgetLabel, jobTitle: lead.jobTitle, company: lead.company, size: lead.size, phone: lead.phone, industry: lead.industry, hq: lead.hq, button: lead.cta }, { page: lead.pageUrl, referrer: lead.referrer, draftId: text(b.draftId, 40) });
   const delivered = await deliver(event);
   return res.status(200).json({ accepted: true, qualified, bookingUrl, delivered });
 };
