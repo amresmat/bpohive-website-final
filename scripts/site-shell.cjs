@@ -124,6 +124,8 @@ function applyShell(html, rel) {
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
   // Records unfinished forms for the admin "Abandoned forms" list.
   $('head').append('<script src="/assets/js/form-capture.js" defer></script>');
+  // The short lead form opens from every call to action (not on Careers, which has none).
+  if (!$('script[src="/assets/js/quick-lead.js"]').length) $('head').append('<script src="/assets/js/quick-lead.js" defer></script>');
   // The homepage title is set here, last, so an earlier build step cannot replace it.
   if (rel === 'index.html') $('title').text(HOME_TITLE);
   body.addClass('bh-has-shell');

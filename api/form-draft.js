@@ -22,9 +22,10 @@ module.exports = async (req, res) => {
   if (JSON.stringify(b).length > 12000) return res.status(413).json({ error: 'Too large' });
   if (!/^[a-z0-9]{12,40}$/i.test(String(b.id || '')) || !b.fields || typeof b.fields !== 'object') return res.status(400).json({ error: 'Invalid' });
   try {
-    await saveDraft(String(b.id), b.form, b.fields, { page: b.page, referrer: b.referrer });
+    const saved = await saveDraft(String(b.id), b.form, b.fields, { page: b.page, referrer: b.referrer });
+    return res.status(200).json({ ok: true, saved });
   } catch (e) {
     console.error('Draft not saved:', e.message);
+    return res.status(500).json({ error: 'Draft not saved' });
   }
-  return res.status(200).json({ ok: true });
 };
