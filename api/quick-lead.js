@@ -1,7 +1,7 @@
 // Short "Build my campaign" form. Sends the lead through the same Zapier webhook as the
 // outbound assessment, with its own event type so the Zap can tell the two apart.
 const CALENDLY = 'https://calendly.com/d/43h-5tz-rkf/discovery-call';
-const BUDGETS = { '5000_plus': '$5,000+', '0_5000': '$0 to $5,000', unsure: 'Unsure' };
+const BUDGETS = { '3000_plus': '$3,000+', '0_3000': '$0 to $3,000', unsure: 'Unsure' };
 const SIZES = ['1-10', '11-50', '51-200', '201-500', '501-1,000', '1,000+'];
 const recent = new Map();
 const { saveEntry } = require('../lib/entries.cjs');
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
   }
 
   const budgetLabel = BUDGETS[lead.budget];
-  const qualified = lead.budget === '5000_plus';
+  const qualified = lead.budget === '3000_plus';
   const bookingUrl = qualified ? CALENDLY + '?' + new URLSearchParams({
     name: `${lead.firstName} ${lead.lastName}`, email: lead.email, a1: lead.company, a3: lead.jobTitle,
     utm_source: 'bpohive.com', utm_medium: 'website', utm_campaign: 'build_my_campaign'
