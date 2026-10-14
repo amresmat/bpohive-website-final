@@ -19,7 +19,9 @@ function page(out,slug,title,h1,answer,body,faq=[],service=false,territories=cod
  $('title').text(title+' | BPO Hive');$('meta[name="description"],meta[property="og:description"],meta[name="twitter:description"]').attr('content',answer);
  $('meta[property="og:title"],meta[name="twitter:title"]').attr('content',title);$('link[rel="canonical"],meta[property="og:url"]').each((i,e)=>$(e).attr(e.tagName==='link'?'href':'content',ORIGIN+'/'+slug));
  $('script[type="application/ld+json"]').remove();
- $('main').html(`<article class="growth"><p class="eyebrow">BPO Hive · USA, Canada &amp; GCC</p><h1>${esc(h1)}</h1><p class="answer">${esc(answer)}</p>${byline}${cta}<div class="content">${body}${faqs(faq)}${cta}</div></article>`);
+ const plain=slug==='thank-you'; // the thank-you page has no region label or price line
+ const eyebrow=plain?'':'<p class="eyebrow">BPO Hive · USA, Canada &amp; GCC</p>',button=plain?cta.replace(/<p class="growth-caption">.*?<\/p>/,''):cta;
+ $('main').html(`<article class="growth">${eyebrow}<h1>${esc(h1)}</h1><p class="answer">${esc(answer)}</p>${byline}${button}<div class="content">${body}${faqs(faq)}${button}</div></article>`);
  const graph=[org,author,{'@type':'WebPage','@id':ORIGIN+'/'+slug,url:ORIGIN+'/'+slug,name:h1,dateModified:DATE,author:{'@id':author['@id']}}];
  if(service)graph.push({'@type':'Service',name:h1,provider:{'@id':org['@id']},areaServed:area(territories),url:ORIGIN+'/'+slug,description:answer});
  if(faq.length)graph.push({'@type':'FAQPage',mainEntity:faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))});
