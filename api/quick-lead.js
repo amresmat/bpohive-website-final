@@ -1,8 +1,8 @@
 // Short "Build my campaign" form. Sends the lead through the same Zapier webhook as the
 // outbound assessment, with its own event type so the Zap can tell the two apart.
 const CALENDLY = 'https://calendly.com/d/43h-5tz-rkf/discovery-call';
-const BUDGETS = { '3000_plus': '$3,000+', '0_3000': '$0 to $3,000', unsure: 'Unsure' };
-const SIZES = ['1-10', '11-50', '51-200', '201-500', '501-1,000', '1,000+'];
+const BUDGETS = { '4000_6000': '$4,000–$6,000', '6000_10000': '$6,000–$10,000', '10000_plus': '$10,000+', smaller_start: "I'd like a smaller first step" };
+const PLANS = { validation: 'Validation Sprint', growth: 'Growth', enterprise: 'Enterprise' };
 const recent = new Map();
 const { saveEntry } = require('../lib/entries.cjs');
 
@@ -58,14 +58,18 @@ module.exports = async (req, res) => {
   if (JSON.stringify(b).length > 8000) return res.status(413).json({ error: 'Request is too large.' });
   if (b.companyFax) return res.status(200).json({ accepted: true });
 
+  const name = text(b.name, 120).replace(/\s+/g, ' ');
+  const parts = name.split(' ');
+  const website = text(b.website, 200).replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/.*$/, '').toLowerCase();
   const lead = {
-    firstName: text(b.firstName, 80), lastName: text(b.lastName, 80), email: text(b.email, 200).toLowerCase(),
-    budget: text(b.budget, 20), jobTitle: text(b.jobTitle, 120), company: text(b.company, 160),
-    size: text(b.size, 20), phone: text(b.phone, 60), industry: text(b.industry, 120), hq: text(b.hq, 80),
+    name, firstName: parts[0] || '', lastName: parts.slice(1).join(' '), email: text(b.email, 200).toLowerCase(),
+    website, company: text(b.company, 160),
+    plan: text(b.plan, 20), target: text(b.target, 300), budget: text(b.budget, 20), phone: text(b.phone, 60),
     pageUrl: text(b.pageUrl, 500), referrer: text(b.referrer, 500), cta: text(b.cta, 60), submittedAt: new Date().toISOString()
   };
-  const missing = ['firstName', 'lastName', 'email', 'budget', 'jobTitle', 'company', 'size', 'phone', 'industry', 'hq'].some(k => !lead[k]);
-  if (missing || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email) || !BUDGETS[lead.budget] || !SIZES.includes(lead.size)) {
+  const missing = ['name', 'email', 'company', 'website', 'phone', 'plan', 'target', 'budget'].some(k => !lead[k]);
+  if (missing || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email) || !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(lead.website)
+    || !BUDGETS[lead.budget] || !PLANS[lead.plan]) {
     return res.status(400).json({ error: 'Please complete all fields.' });
   }
 
@@ -73,21 +77,23 @@ module.exports = async (req, res) => {
   // Everyone gets the calendar, whatever budget they pick.
   const qualified = true;
   const bookingUrl = CALENDLY + '?' + new URLSearchParams({
-    name: `${lead.firstName} ${lead.lastName}`, email: lead.email, a1: lead.company, a3: lead.jobTitle,
+    // aN = question N on the Calendly "BPO Hive Discovery Call" booking form.
+    name: lead.name, email: lead.email, a1: lead.company, a2: lead.website, a3: PLANS[lead.plan],
+    a4: lead.phone, a6: lead.target, a9: budgetLabel,
     utm_source: 'bpohive.com', utm_medium: 'website', utm_campaign: 'build_my_campaign'
   });
   const owner = process.env.LEAD_NOTIFICATION_EMAIL || 'info@bpohive.com';
-  const rows = [['Name', `${lead.firstName} ${lead.lastName}`], ['Business email', lead.email], ['Monthly budget', budgetLabel],
-    ['Job title', lead.jobTitle], ['Company', lead.company], ['Company size', lead.size], ['Phone', lead.phone],
-    ['Industry', lead.industry], ['HQ', lead.hq], ['Button clicked', lead.cta], ['Page', lead.pageUrl]];
+  const rows = [['Name', lead.name], ['Work email', lead.email], ['Company', lead.company], ['Website', lead.website], ['Campaign size', PLANS[lead.plan]],
+    ['Wants meetings with', lead.target], ['Monthly budget', budgetLabel], ['Phone', lead.phone],
+    ['Button clicked', lead.cta], ['Page', lead.pageUrl]];
   const table = rows.map(([k, v]) => `<tr><th style="padding:8px;border:1px solid #dbe6ec;text-align:left;background:#f5f9fb">${esc(k)}</th><td style="padding:8px;border:1px solid #dbe6ec">${esc(v)}</td></tr>`).join('');
 
   const event = {
     type: 'build_my_campaign_submitted', source: 'BPO Hive build my campaign form', submitted_at: lead.submittedAt,
     qualified, qualification_status: qualified ? 'Qualified' : 'Review',
     first_name: lead.firstName, last_name: lead.lastName, work_email: lead.email, phone_number: lead.phone,
-    job_title: lead.jobTitle, company_name: lead.company, company_size: lead.size, industry: lead.industry,
-    company_hq: lead.hq, cta_clicked: lead.cta, monthly_budget: budgetLabel, initial_campaign_budget: budgetLabel,
+    job_title: '', company_name: lead.company, company_size: '', industry: '', company_hq: '',
+    company_website: lead.website, campaign_size: PLANS[lead.plan], target_buyers: lead.target, cta_clicked: lead.cta, monthly_budget: budgetLabel, initial_campaign_budget: budgetLabel,
     prefilled_calendly_link: bookingUrl, page_url: lead.pageUrl, referrer: lead.referrer,
     prospect_email_to: lead.email,
     prospect_email_subject: 'We received your BPO Hive request',
@@ -97,9 +103,9 @@ module.exports = async (req, res) => {
     owner_email_subject: `New Build my campaign lead: ${lead.company} (${budgetLabel})`,
     owner_email_html: `<h2 style="font-family:Arial">New Build my campaign lead</h2><table style="border-collapse:collapse;font-family:Arial;font-size:14px">${table}</table>`,
     owner_email_reply_to: lead.email,
-    summary: { name: `${lead.firstName} ${lead.lastName}`, email: lead.email, phone: lead.phone, company: lead.company, budget: budgetLabel, hq: lead.hq }
+    summary: { name: lead.name, email: lead.email, phone: lead.phone, website: lead.website, plan: PLANS[lead.plan], budget: budgetLabel }
   };
-  await saveEntry('Build my campaign', { firstName: lead.firstName, lastName: lead.lastName, email: lead.email, budget: budgetLabel, jobTitle: lead.jobTitle, company: lead.company, size: lead.size, phone: lead.phone, industry: lead.industry, hq: lead.hq, button: lead.cta }, { page: lead.pageUrl, referrer: lead.referrer, draftId: text(b.draftId, 40) });
+  await saveEntry('Build my campaign', { name: lead.name, email: lead.email, website: lead.website, plan: PLANS[lead.plan], target: lead.target, budget: budgetLabel, phone: lead.phone, button: lead.cta }, { page: lead.pageUrl, referrer: lead.referrer, draftId: text(b.draftId, 40) });
   const delivered = await deliver(event);
   return res.status(200).json({ accepted: true, qualified, bookingUrl, delivered });
 };
