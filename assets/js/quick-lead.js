@@ -62,7 +62,7 @@
     '<label>Website<input type="text" name="website" inputmode="url" autocomplete="url" placeholder="yourcompany.com" required></label>' +
     '<label class="full">Phone number<span class="ql-phone"><select name="phoneCountry" aria-label="Country code">' + dialOpts() + '</select><input type="tel" name="phoneLocal" autocomplete="tel-national" minlength="6" required></span></label>' +
     '<fieldset><legend>Campaign size</legend>' + chips('plan', PLANS).replace('ql-chips', 'ql-chips ql-plans') + '</fieldset>' +
-    '<label class="full">Who do you want meetings with?<input type="text" name="target" placeholder="e.g. Heads of Sales at software companies" required></label>' +
+    '<label class="full">Who are you targeting?<input type="text" name="target" placeholder="e.g. Heads of Sales at software companies" required></label>' +
     '<fieldset><legend>Monthly budget</legend>' + chips('budget', BUDGETS) + '</fieldset>' +
     '</div><input class="ql-hp" name="companyFax" tabindex="-1" autocomplete="off" aria-hidden="true">' +
     '<button class="ql-go" type="submit">Fill My Calendar →</button><p class="ql-note">No obligation. We reply within one business day.</p><p class="ql-err" role="alert"></p></form>' +
