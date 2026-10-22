@@ -165,7 +165,7 @@ function renderReviews(html, data) {
   const list = (Array.isArray(data.reviews) ? data.reviews : []).filter(r => r && opt(r, 'quote'));
   const cards = list.map((r, i) => {
     const where = `Review ${i + 1}`;
-    const name = str(r, 'name', where), quote = opt(r, 'quote').replace(/^[“"']+|[”"']+$/g, ''), role = opt(r, 'role');
+    const name = str(r, 'name', where), quote = opt(r, 'quote').replace(/^[“"']+|[”"']+$/g, ''), role = opt(r, 'role').replace(/\s·\s/g, ', ');
     const rating = Math.min(5, Math.max(1, Math.round(Number(r.rating)) || 5));
     return `          <article class="testimonial-card">
             <div class="testimonial-top"><span class="testimonial-rating" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}<i>${'★'.repeat(5 - rating)}</i></span>${r.verified === false ? '' : '<span class="verified-pill">Verified on Clutch</span>'}</div>

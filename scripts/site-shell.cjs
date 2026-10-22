@@ -55,18 +55,16 @@ function footer(rel) {
         <img src="/assets/logo/bpohivelogo-white.png" alt="BPO Hive" width="400" height="130">
         <p>Managed B2B appointment setting, lead generation, omnichannel execution, and live campaign reporting.</p>
         <p class="bh-footer-regions">Serving <a href="/appointment-setting-usa">USA</a>, <a href="/appointment-setting-canada">Canada</a> &amp; <a href="/gcc">GCC</a></p>
+        <div class="bh-contact" id="contact-us">
+          <a class="bh-contact-row" href="mailto:${EMAIL}"><span>Email</span>${EMAIL}</a>
+          ${isCareers(rel) ? '' : `<a class="bh-contact-row" href="tel:+15026773800"><span>US and Canada</span>+1 502 677 3800</a>
+          <a class="bh-contact-row" href="https://wa.me/971563755110" target="_blank" rel="noopener"><span>WhatsApp, UAE</span>+971 56 375 5110</a>`}
+          ${cta(rel)}
+        </div>
       </div>
-      ${col('Company', [['About us', '/about'], ['Case studies', '/case-studies'], ['Blogs', '/blogs'], ['Careers', '/careers']])}
+      ${col('Company', [['About us', '/about'], ['Case studies', '/case-studies'], ['Blogs', '/blogs'], ['Careers', '/careers'], ['Resources', '/resources'], ['Industries', '/industries'], ['ROI calculator', '/roi-calculator']])}
       ${col('Services', [['Appointment setting', '/services/appointment-setting'], ['Cold calling', '/services/cold-calling'], ['Email outreach', '/services/cold-email-outreach'], ['LinkedIn outreach', '/services/linkedin-lead-generation'], ['B2B data', '/services/lead-research'], ['Sales development', '/services/sales-development'], ['CRM services', '/services/crm-services'], ['Email deliverability', '/services/email-deliverability']])}
-      ${col('Compare', [['Pricing', '/pricing'], ['Cost guide', '/appointment-setting-cost'], ['vs Belkins', '/vs/belkins'], ['vs SalesRoads', '/vs/salesroads'], ['vs In-house SDR', '/vs/in-house-sdr']])}
-      ${col('Resources', [['Resources', '/resources'], ['Industries', '/industries'], ['ROI calculator', '/roi-calculator'], ['Saudi Arabia', '/appointment-setting-saudi-arabia'], ['UAE & Dubai', '/appointment-setting-uae-dubai'], ['LinkedIn', 'https://www.linkedin.com/company/bpohive', true], ['YouTube', 'https://www.youtube.com/@bpohive', true]])}
-      <div class="bh-contact" id="contact-us">
-        <strong>Contact us</strong>
-        <a class="bh-contact-row" href="mailto:${EMAIL}"><span>Email</span>${EMAIL}</a>
-        ${isCareers(rel) ? '' : `<a class="bh-contact-row" href="tel:+15026773800"><span>US / Canada</span>+1 502 677 3800</a>
-        <a class="bh-contact-row" href="https://wa.me/971563755110" target="_blank" rel="noopener"><span>WhatsApp · UAE</span>+971 56 375 5110</a>`}
-        ${cta(rel)}
-      </div>
+      ${col('Pricing and markets', [['Pricing', '/pricing'], ['Cost guide', '/appointment-setting-cost'], ['vs Belkins', '/vs/belkins'], ['vs SalesRoads', '/vs/salesroads'], ['vs In-house SDR', '/vs/in-house-sdr'], ['Saudi Arabia', '/appointment-setting-saudi-arabia'], ['UAE and Dubai', '/appointment-setting-uae-dubai'], ['LinkedIn', 'https://www.linkedin.com/company/bpohive', true], ['YouTube', 'https://www.youtube.com/@bpohive', true]])}
     </div>
     <div class="bh-footer-bottom"><span>© ${YEAR} BPO Hive LLC. All rights reserved.</span><nav aria-label="Legal links"><a href="/privacy-policy">Privacy</a><a href="/terms-of-service">Terms</a><a href="/accessibility">Accessibility</a><a href="/cookie-policy">Cookies</a></nav></div>
   </div>
@@ -118,7 +116,7 @@ function applyShell(html, rel) {
   // One font source for every page: drop the old Google Fonts links and preload our own files
   // so text is drawn in the right font from the first frame.
   $('link[href*="fonts.googleapis.com"],link[href*="fonts.gstatic.com"]').remove();
-  const preload = ['inter-latin-wght-normal.woff2', 'dm-sans-latin-wght-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
+  const preload = ['archivo-latin-standard-normal.woff2'].map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('');
   const charset = $('head meta[charset]').first();
   if (charset.length) charset.after(preload); else $('head').prepend(preload);
   $('head').append('<link rel="stylesheet" href="/assets/css/site-shell.css">');
