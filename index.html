@@ -52,8 +52,8 @@
       --surface:#eef4f8;--surface-2:#e1eaf0;--on-dark-muted:#aebfca;
       --radius:4px;
       --font:"Archivo","Archivo Fallback","Helvetica Neue",Arial,sans-serif;
-      --display:clamp(40px,1.9rem + 2.7vw,60px);
-      --h2:clamp(32px,1.5rem + 2.4vw,56px);
+      --display:clamp(42px,1.8rem + 3.4vw,74px);
+      --h2:clamp(34px,1.5rem + 2.8vw,64px);
       --h3:clamp(20px,1.05rem + .5vw,24px);
       --lead:clamp(18px,1rem + .5vw,21px);
     }
@@ -92,50 +92,61 @@
     .section-dark .text-link{color:var(--accent-l)}
     .section-dark .text-link:hover{color:#fff}
 
-    .section{padding:112px 0}
+    .section{padding:128px 0}
     .section-soft{background:var(--surface)}
-    .section-dark{color:#fff;background:var(--navy-2)}
+    .section-dark{color:#fff;background:linear-gradient(180deg,var(--navy-2),var(--navy))}
     .section-head{margin-bottom:52px}
     .section-head .lead{margin-top:18px}
 
-    /* Hero: the headline and the thing we deliver, a booked meeting */
-    .hero{color:#fff;background:var(--navy)}
-    .hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:64px;align-items:center;padding:96px 0 104px}
-    .hero h1{margin-bottom:26px}
+    /* Hero: the headline and the thing we deliver, a calendar that fills up */
+    .hero{position:relative;color:#fff;background:linear-gradient(180deg,#0d1f30 0%,var(--navy) 70%);overflow:clip}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center;min-height:min(86vh,820px);padding:88px 0 96px}
+    .hero-grid>*{min-width:0}
+    .hero h1{margin-bottom:28px;max-width:none}
     .hero-tagline{max-width:40ch;margin:0 0 36px;color:var(--on-dark-muted);font-size:var(--lead);line-height:1.5}
     .hero-actions{display:flex;flex-wrap:wrap;gap:12px}
 
-    /* The meeting notification. It is a drawing of software, so it keeps its own corners and a shadow because it floats. */
-    .dl-stage{position:relative;display:flex;flex-direction:column;min-height:520px}
-    .dl-shadow{flex:1;display:flex;flex-direction:column;filter:drop-shadow(0 30px 50px rgba(0,0,0,.35))}
-    .dl-card{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;border-radius:10px;color:var(--ink);background:#fff}
-    .dl-top{display:flex;align-items:center;gap:13px;padding:16px 18px}
+    /* Calendar scene. Drawings of software keep their own corners and float, so they carry a shadow. */
+    .cal-scene{position:relative;min-height:540px;margin-right:44px}
+    .cal{position:relative;border-radius:10px;background:#fff;color:var(--ink);box-shadow:0 40px 80px rgba(0,0,0,.4);overflow:hidden}
+    .cal-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:16px 20px;background:var(--surface);font-size:14px;color:var(--muted)}
+    .cal-head b{color:var(--ink);font-weight:600}
+    .cal-count em{font-style:normal;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+    .cal-grid{padding:12px 16px 18px}
+    .cal-days{display:grid;grid-template-columns:30px repeat(5,1fr);gap:0 6px;margin-bottom:8px;color:var(--muted);font-size:12.5px;font-weight:600;text-align:center}
+    .cal-body{display:grid;grid-template-columns:30px 1fr;gap:0 6px;--row:46px}
+    .cal-hours{display:grid;grid-template-rows:repeat(8,var(--row));color:var(--muted);font-size:11.5px;text-align:right;padding-right:4px}
+    .cal-hours span{transform:translateY(-7px)}
+    .cal-cols{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0 6px;height:calc(var(--row) * 8);background:repeating-linear-gradient(180deg,var(--surface-2) 0 1px,transparent 1px var(--row))}
+    .cal-col{position:relative}
+    .cal-col+.cal-col::before{content:"";position:absolute;left:-3px;top:0;bottom:0;width:1px;background:var(--surface-2)}
+    .mtg{position:absolute;left:0;right:0;top:calc(var(--t) * var(--row));height:calc(var(--d) * var(--row) - 3px);padding:7px 8px;border-radius:5px;background:#d9ecfb;color:var(--ink);font-size:12px;line-height:1.25;overflow:hidden;opacity:0;transform:scale(.94);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
+    .mtg b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mtg span{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mtg.is-new{background:var(--accent);color:#fff}
+    .mtg.is-new span{color:rgba(255,255,255,.8)}
+    .mtg.on{opacity:1;transform:none}
+
+    .toast{position:absolute;right:-44px;bottom:-64px;z-index:2;width:min(372px,calc(100% - 20px));border-radius:10px;color:var(--ink);background:#fff;box-shadow:0 30px 60px rgba(0,0,0,.45);opacity:0;transform:translate3d(40px,0,0);transition:opacity .4s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+    .cal-scene[data-s="1"] .toast,.cal-scene[data-s="2"] .toast{opacity:1;transform:none}
+    .dl-top{display:flex;align-items:center;gap:13px;padding:14px 18px}
     .dl-app{flex:none;display:block;width:38px;height:38px;border-radius:9px}
     .dl-note{min-width:0;line-height:1.3}
     .dl-note small{display:block;color:var(--muted);font-size:13px}
     .dl-note small b{color:var(--ink);font-weight:600}
     .dl-note strong{display:block;margin-top:2px;color:var(--ink);font-size:16px;font-weight:700}
     .dl-note span{display:block;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .dl-more{flex:1;display:flex;flex-direction:column}
-    .dl-rows{flex:1;display:flex;flex-direction:column;margin:0;padding:6px 18px 4px;background:var(--surface)}
-    .dl-row{flex:1;display:grid;grid-template-columns:132px 1fr;align-items:center;gap:16px;padding:12px 0}
-    .dl-row dt{color:var(--muted);font-size:14px;line-height:1.4}
-    .dl-row dd{margin:0;color:var(--ink);font-weight:500;font-size:15.5px;line-height:1.45}
+    .dl-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.7,.2,1)}
+    .dl-more>div{overflow:hidden}
+    .cal-scene[data-s="2"] .dl-more{grid-template-rows:1fr}
+    .dl-rows{margin:0;padding:6px 18px 4px;background:var(--surface)}
+    .dl-row{display:grid;grid-template-columns:124px 1fr;align-items:start;gap:14px;padding:9px 0}
+    .dl-row dt{color:var(--muted);font-size:13.5px;line-height:1.4}
+    .dl-row dd{margin:0;color:var(--ink);font-weight:500;font-size:14.5px;line-height:1.4}
     .dl-row dd em{font-style:normal;font-weight:700}
-    .dl-foot{display:flex;flex-wrap:wrap;gap:8px 18px;padding:14px 18px;color:var(--muted);font-size:14px}
+    .dl-foot{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 18px;color:var(--muted);font-size:13.5px}
     .dl-foot b{color:var(--ink);font-weight:600}
-    .dl-cursor{position:absolute;left:0;top:0;z-index:3;width:46px;height:46px;opacity:0;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(8,21,33,.3));transform-origin:9px 5px}
-    .dl-click{position:absolute;left:0;top:0;z-index:2;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:2px solid rgba(255,255,255,.7);opacity:0;pointer-events:none}
-    .dl-anim .dl-card{transition:clip-path .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1),opacity .4s ease}
-    .dl-anim .dl-more{transition:opacity .45s ease .2s,transform .6s cubic-bezier(.2,.7,.2,1) .15s}
-    .dl-anim[data-s="0"] .dl-card{opacity:0;clip-path:inset(0 var(--cw) var(--ch) 0 round 10px);transform:translate3d(calc(var(--cw) + 90px),0,0)}
-    .dl-anim[data-s="1"] .dl-card,.dl-anim[data-s="2"] .dl-card{opacity:1;clip-path:inset(0 var(--cw) var(--ch) 0 round 10px);transform:translate3d(var(--cw),0,0)}
-    .dl-anim[data-s="2"] .dl-card{transform:translate3d(var(--cw),0,0) scale(.98);transform-origin:var(--bo,50% 50%);transition-duration:.18s}
-    .dl-anim[data-s="3"] .dl-card{opacity:1;clip-path:inset(0 0 0 0 round 10px);transform:none}
-    .dl-anim:not([data-s="3"]) .dl-more{opacity:0;transform:translateY(-12px)}
-    .dl-anim .dl-cursor{transition:opacity .35s ease;will-change:transform}
-    .dl-anim .dl-click.go{animation:dl-ring .6s ease-out}
-    @keyframes dl-ring{0%{opacity:.9;transform:var(--ring) scale(.3)}100%{opacity:0;transform:var(--ring) scale(1.6)}}
+    @media (prefers-reduced-motion:reduce){.mtg,.toast,.dl-more{transition:none}}
 
     /* Where we have been featured */
     .recognition{padding:40px 0 44px;background:#fff}
@@ -170,7 +181,7 @@
     .pf-points strong{display:block;margin-bottom:4px;font-size:19px}
     .pf-points span{display:block;color:var(--on-dark-muted);font-size:16px;line-height:1.5}
     .pf-link{display:inline-block;margin-top:30px}
-    .pf-app{border-radius:10px;background:#fff;color:var(--ink);overflow:hidden}
+    .pf-app{border-radius:10px;background:#fff;color:var(--ink);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.4)}
     .pf-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 22px;background:var(--surface);color:var(--muted);font-size:14px}
     .pf-bar b{color:var(--ink);font-weight:600}
     .pf-body{padding:24px 22px 8px}
@@ -195,12 +206,12 @@
     .testimonial-grid{display:flex;gap:24px;column-gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
     .testimonial-grid::-webkit-scrollbar{display:none}
     .testimonial-grid.is-static{overflow:visible}
-    .testimonial-card{flex:0 0 calc((100% - 48px)/3);display:flex;flex-direction:column;padding:30px 28px;background:var(--surface);scroll-snap-align:start}
+    .testimonial-card{flex:0 0 calc((100% - 24px)/2);display:flex;flex-direction:column;padding:40px 40px 36px;background:var(--surface);scroll-snap-align:start}
     .testimonial-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
     .testimonial-rating{color:var(--ink);font-size:13px;letter-spacing:.08em}
     .testimonial-rating i{font-style:normal;color:var(--surface-2)}
     .verified-pill{display:none}
-    .testimonial-card blockquote{margin:0 0 26px;color:var(--ink);font-size:19px;line-height:1.45;font-weight:500}
+    .testimonial-card blockquote{margin:0 0 34px;color:var(--ink);font-size:clamp(20px,1rem + .9vw,26px);line-height:1.35;font-weight:500;letter-spacing:-.01em}
     .testimonial-person{display:flex;align-items:center;gap:12px;margin-top:auto}
     .person-mark img{width:36px;height:36px;border-radius:50%}
     .testimonial-person strong{display:block;font-size:15px}
@@ -233,9 +244,12 @@
     .fine-print{margin:28px 0 0;color:var(--muted);font-size:13.5px;line-height:1.5}
 
     /* Programs */
-    .programs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px 40px}
+    .programs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+    .program{padding:40px 36px 44px}
+    .program.is-main{background:var(--surface)}
+    .program.is-main .volume{font-size:34px}
     .program h3{margin-bottom:8px}
-    .program .volume{display:block;margin-bottom:16px;font-size:26px;font-weight:700;font-stretch:106%;line-height:1.1;font-variant-numeric:tabular-nums}
+    .program .volume{display:block;margin-bottom:16px;font-size:28px;font-weight:700;font-stretch:106%;line-height:1.1;font-variant-numeric:tabular-nums}
     .program p{color:var(--muted);font-size:16px;line-height:1.5}
     .program ul{margin:0 0 26px;padding-left:18px;color:var(--ink);font-size:15.5px;line-height:1.5}
     .program li+li{margin-top:6px}
@@ -264,14 +278,15 @@
 
     @media (max-width:980px){
       .section{padding:80px 0}.cta{padding:80px 0}.section-head{margin-bottom:36px}
-      .hero-grid{grid-template-columns:1fr;gap:44px;padding:64px 0 72px}
-      .dl-stage{min-height:0}
+      .hero-grid{grid-template-columns:1fr;gap:48px;padding:64px 0 96px;min-height:0}
+      .cal-scene{min-height:0;margin-right:0}
+      .toast{position:relative;right:auto;bottom:auto;width:auto;margin:-28px 12px 0;transform:translate3d(0,24px,0)}
+      .cal-scene[data-s="1"] .toast,.cal-scene[data-s="2"] .toast{transform:none}
       .steps-grid{grid-template-columns:1fr;gap:40px}
       .aces{grid-template-columns:1fr 1fr;gap:36px 28px}
       .pf-grid{grid-template-columns:1fr;gap:44px}
       .calculator{grid-template-columns:1fr;gap:48px}
-      .testimonial-card{flex-basis:calc((100% - 24px)/2)}
-      .programs{grid-template-columns:1fr;gap:44px}
+      .programs{grid-template-columns:1fr}.program{padding:36px 24px}
       .markets{grid-template-columns:1fr;gap:40px}
     }
     @media (max-width:640px){
@@ -282,7 +297,8 @@
       .steps{grid-template-columns:1fr;gap:28px}
       .aces{grid-template-columns:1fr;gap:32px}
       .aces .letter{font-size:56px}
-      .dl-row{grid-template-columns:1fr;gap:2px;padding:10px 0}
+      .dl-row{grid-template-columns:1fr;gap:2px;padding:8px 0}
+      .cal-body{--row:40px}.cal-grid{padding:10px 10px 14px}.cal-days{grid-template-columns:24px repeat(5,1fr)}.cal-body{grid-template-columns:24px 1fr}.mtg{font-size:11px;padding:5px 6px}
       .pf-body{padding:20px 16px 6px}.pf-bar{padding:10px 16px}
       .pf-call{grid-template-columns:34px minmax(0,1fr);gap:4px 12px}.pf-play{width:34px;height:34px;grid-row:span 2}.pf-play::after{left:13px;top:10px}.pf-rec{grid-column:2}
       .result-grid{grid-template-columns:1fr 1fr;gap:22px 20px}
@@ -340,7 +356,7 @@ fbq('track', 'PageView');
   <main id="main">
     <section class="hero" id="top">
       <div class="shell hero-grid">
-        <div>
+        <div class="hero-copy">
           <h1><!--cms:hero_title-->We Fill Your Pipeline With<!--/cms:hero_title--> <!--cms:hero_accent-->Sales-Qualified Leads.<!--/cms:hero_accent--></h1>
           <p class="hero-tagline"><!--cms:hero_tagline-->We book qualified leads directly on your calendar.<!--/cms:hero_tagline--></p>
           <div class="hero-actions">
@@ -348,55 +364,54 @@ fbq('track', 'PageView');
             <a class="btn btn-ghost" href="#system">See how it works</a>
           </div>
         </div>
-        <div class="dl-stage" aria-label="Example of a meeting notification">
-          <div class="dl-shadow"><article class="dl-card">
+        <div class="cal-scene" aria-label="Example: a week of booked meetings and the notification for the latest one">
+          <div class="cal">
+            <div class="cal-head"><b>Your calendar</b><span class="cal-count"><em>0</em> meetings booked this week</span></div>
+            <div class="cal-grid">
+              <div class="cal-days"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
+              <div class="cal-body">
+                <div class="cal-hours"><span>9</span><span>10</span><span>11</span><span>12</span><span>1</span><span>2</span><span>3</span><span>4</span></div>
+                <div class="cal-cols">
+                  <div class="cal-col"><div class="mtg" data-i="1" style="--t:.5;--d:1"><b>Demo, CFO</b><span>Healthcare group</span></div></div>
+                  <div class="cal-col"><div class="mtg" data-i="2" style="--t:5;--d:1"><b>Discovery, Head of Sales</b><span>B2B software</span></div></div>
+                  <div class="cal-col"><div class="mtg" data-i="3" style="--t:2;--d:1"><b>Call, Owner</b><span>Solar installer</span></div></div>
+                  <div class="cal-col"><div class="mtg is-new" data-i="4" style="--t:1.5;--d:1"><b>Demo, VP of Operations</b><span>Logistics firm</span></div></div>
+                  <div class="cal-col"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <article class="toast">
             <div class="dl-top">
               <img class="dl-app" src="/assets/logo/apple-touch-icon.png" alt="" width="38" height="38">
-              <div class="dl-note"><small><b>BPO Hive</b>, now</small><strong>New meeting booked</strong><span>VP of Operations, logistics firm</span></div>
+              <div class="dl-note"><small><b>BPO Hive</b>, now</small><strong>New meeting booked</strong><span>VP of Operations, logistics firm, 240 employees</span></div>
             </div>
-            <div class="dl-more">
+            <div class="dl-more"><div>
               <dl class="dl-rows">
-                <div class="dl-row"><dt>When</dt><dd>Tuesday, 10:30 AM, 30 minutes</dd></div>
-                <div class="dl-row"><dt>Company</dt><dd>Logistics firm, 240 employees, Dallas</dd></div>
+                <div class="dl-row"><dt>When</dt><dd>Thursday, 10:30 AM, 30 minutes</dd></div>
                 <div class="dl-row"><dt>Why they said yes</dt><dd>Missed delivery windows are putting <em>two key accounts</em> at risk.</dd></div>
-                <div class="dl-row"><dt>Current setup</dt><dd>In-house dispatch team working from spreadsheets</dd></div>
                 <div class="dl-row"><dt>In their words</dt><dd>“If you can fix our delivery delays, I want to see it this week.”</dd></div>
                 <div class="dl-row"><dt>Agreed next step</dt><dd>Live demo with the decision-maker on the call</dd></div>
               </dl>
               <div class="dl-foot"><span><b>Added to your calendar</b></span><span><b>Call recording</b> in your portal</span></div>
-            </div>
-          </article></div>
-          <span class="dl-click" aria-hidden="true"></span>
-          <svg class="dl-cursor" viewBox="0 0 32 32" aria-hidden="true"><path d="M6.2 4.6c-.5-1 .6-2.1 1.6-1.6l19 9.1c1.1.5.9 2.1-.3 2.4l-7.9 2-3.4 7.6c-.5 1.1-2.1 1-2.4-.2z" fill="#0b0f14" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </div></div>
+          </article>
         </div>
       </div>
-                <script>(function(){
-var st=document.querySelector('.dl-stage');if(!st||!('IntersectionObserver' in window))return;
-if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-var card=st.querySelector('.dl-card'),top=st.querySelector('.dl-top'),cur=st.querySelector('.dl-cursor'),ring=st.querySelector('.dl-click');
-var timers=[],state=0,raf=0,pos={x:0,y:0};
-// Banner area and pointer targets, measured live so a late layout change cannot throw the pointer off.
-function geo(){var W=card.offsetWidth,H=card.offsetHeight,w0=Math.min(360,W),h0=top.offsetHeight;st.style.setProperty('--cw',(W-w0)+'px');st.style.setProperty('--ch',(H-h0)+'px');st.style.setProperty('--bo',(w0/2)+'px '+(h0/2)+'px');
-var ox=card.parentNode.offsetLeft,oy=card.parentNode.offsetTop;return{bx:ox+W-w0*.45,by:oy+h0*.55,sx:ox+W*.15,sy:oy+Math.min(H,560)*.95,ex:ox+W*.88,ey:oy+H*.9}}
-function at(x,y,sc){pos.x=x;pos.y=y;cur.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)'+(sc&&sc!==1?' scale('+sc.toFixed(3)+')':'')}
-// Press the pointer in place. The scale is part of the same transform, so the pointer cannot jump.
-function press(){var t0=performance.now();cancelAnimationFrame(raf);(function step(now){var t=Math.min(1,(now-t0)/380),k=t<.35?t/.35:1-(t-.35)/.65;at(pos.x,pos.y,1-.2*Math.max(0,k));if(t<1)raf=requestAnimationFrame(step)})(t0)}
-function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
-// Smooth pointer glide along a gentle arc. The end point is re-read every frame.
-function glide(target,ms,done){cancelAnimationFrame(raf);var fx=pos.x,fy=pos.y,t0=performance.now();
-  (function step(now){var t=Math.min(1,(now-t0)/ms),e=ease(t),g=geo(),p=target(g);at(fx+(p.x-fx)*e,fy+(p.y-fy)*e-Math.sin(e*Math.PI)*36);if(t<1)raf=requestAnimationFrame(step);else if(done)done()})(t0)}
+      <script>(function(){
+var sc=document.querySelector('.cal-scene');if(!sc)return;
+var mtgs=[].slice.call(sc.querySelectorAll('.mtg')),count=sc.querySelector('.cal-count em'),timers=[],playing=false;
+function finalState(){mtgs.forEach(function(m){m.classList.add('on')});count.textContent=mtgs.length;sc.dataset.s='2'}
+if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion:reduce)').matches){finalState();return}
 function later(f,ms){timers.push(setTimeout(f,ms))}
-function reset(){timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf);var g=geo();st.dataset.s='0';cur.style.opacity=0;at(g.sx,g.sy);state=0}
-function click(){var g=geo();press();st.dataset.s='2';ring.style.setProperty('--ring','translate3d('+(g.bx+4)+'px,'+(g.by+3)+'px,0)');ring.classList.remove('go');ring.offsetWidth;ring.classList.add('go');
-  later(function(){st.dataset.s='3'},230);
-  later(function(){glide(function(g){return{x:g.ex,y:g.ey}},900)},800);
-  later(function(){cur.style.opacity=0},1700)}
-function play(){if(state)return;state=1;st.dataset.s='1';
-  later(function(){cur.style.opacity=1;glide(function(g){return{x:g.bx,y:g.by}},1050,function(){later(click,120)})},700)}
-st.classList.add('dl-anim');reset();
-var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>=.45)play();else if(!e.isIntersecting)reset();})},{threshold:[0,.45]});
-io.observe(st);
-window.addEventListener('resize',function(){if(state===0)reset();else geo()});
+function reset(){timers.forEach(clearTimeout);timers=[];playing=false;mtgs.forEach(function(m){m.classList.remove('on')});count.textContent='0';sc.dataset.s='0'}
+function play(){if(playing)return;playing=true;sc.dataset.s='0';
+  mtgs.forEach(function(m,i){later(function(){m.classList.add('on');count.textContent=i+1},600+i*700)});
+  later(function(){sc.dataset.s='1'},600+mtgs.length*700+200);
+  later(function(){sc.dataset.s='2'},600+mtgs.length*700+1300)}
+sc.dataset.s='0';
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>=.4)play();else if(!e.isIntersecting)reset()})},{threshold:[0,.4]});
+io.observe(sc);
 })();</script>
     </section>
 
@@ -518,7 +533,7 @@ window.addEventListener('resize',function(){if(state===0)reset();else geo()});
         <div class="section-head"><h2>Validate first. Grow with evidence. Scale with control.</h2><p class="lead">Three programs, sized by touchpoints. <a class="text-link" href="pricing.html">See pricing</a></p></div>
         <div class="programs">
           <article class="program"><h3>Validation Sprint</h3><span class="volume">10,000 touchpoints</span><p>Test the ICP, data, messaging, qualification criteria, and channel mix before increasing volume.</p><ul><li>Market and ICP analysis</li><li>B2B prospect data prepared by BPO Hive</li><li>Phone, email, and LinkedIn execution</li><li>Dedicated reporting login</li><li>End-of-sprint validation review</li></ul><a class="btn btn-outline" href="outbound-assessment.html">Discuss validation</a></article>
-          <article class="program"><h3>Growth</h3><span class="volume">20,000–50,000 touchpoints</span><p>Expand the ICPs, messages, and sequences supported by campaign evidence while continuously optimizing delivery.</p><ul><li>Everything learned during validation</li><li>Higher-volume omnichannel execution</li><li>ICP and message optimization</li><li>Live platform visibility</li><li>Ongoing sales-feedback loop</li></ul><a class="btn btn-primary" href="outbound-assessment.html">Build a growth campaign</a></article>
+          <article class="program is-main"><h3>Growth</h3><span class="volume">20,000–50,000 touchpoints</span><p>Expand the ICPs, messages, and sequences supported by campaign evidence while continuously optimizing delivery.</p><ul><li>Everything learned during validation</li><li>Higher-volume omnichannel execution</li><li>ICP and message optimization</li><li>Live platform visibility</li><li>Ongoing sales-feedback loop</li></ul><a class="btn btn-primary" href="outbound-assessment.html">Build a growth campaign</a></article>
           <article class="program"><h3>Enterprise</h3><span class="volume">50,000+ touchpoints</span><p>For companies ready for sustained outreach across larger audiences, multiple ICPs, markets, or territories.</p><ul><li>High-volume campaign infrastructure</li><li>Multiple ICPs or territories</li><li>Dedicated strategy and optimization</li><li>Enterprise reporting and coordination</li><li>Controlled campaign expansion</li></ul><a class="btn btn-outline" href="outbound-assessment.html">Discuss enterprise</a></article>
         </div>
         <p class="program-note">A touchpoint is one outbound call, email, LinkedIn connection request, or LinkedIn message. Activity scope does not guarantee appointments, sales, or revenue.</p>
