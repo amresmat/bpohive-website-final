@@ -402,29 +402,29 @@
     .hero-copy-block{max-width:620px}
     .hero h1{font-size:clamp(42px,3.6vw,52px)}
     .hero-tagline{font-size:20px;max-width:520px}
-    .cal-scene{position:relative;height:540px;z-index:1}
-    .cal{position:absolute;left:0;right:0;top:88px;border-radius:12px;background:#fff;color:var(--ink);box-shadow:0 40px 80px rgba(0,0,0,.42);overflow:hidden;opacity:0;transform:translateY(18px);transition:opacity .5s ease .3s,transform .7s cubic-bezier(.2,.7,.2,1) .3s}
-    .cal-scene[data-s="2"] .cal{opacity:1;transform:none}
-    .cal-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:15px 20px;background:var(--blue-50);font-size:14px;color:var(--muted)}
-    .cal-head b{color:var(--ink);font-weight:700}
-    .cal-count em{font-style:normal;color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
-    .cal-grid{padding:12px 16px 18px}
-    .cal-days{display:grid;grid-template-columns:30px repeat(5,1fr);gap:0 6px;margin-bottom:8px;color:var(--muted);font-size:12.5px;font-weight:700;text-align:center}
-    .cal-body{display:grid;grid-template-columns:30px 1fr;gap:0 6px;--row:44px}
-    .cal-hours{display:grid;grid-template-rows:repeat(8,var(--row));color:var(--muted);font-size:11.5px;text-align:right;padding-right:4px}
-    .cal-hours span{transform:translateY(-7px)}
-    .cal-cols{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0 6px;height:calc(var(--row) * 8);background:repeating-linear-gradient(180deg,var(--line) 0 1px,transparent 1px var(--row))}
-    .cal-col{position:relative}
-    .cal-col+.cal-col::before{content:"";position:absolute;left:-3px;top:0;bottom:0;width:1px;background:var(--line)}
-    .mtg{position:absolute;left:0;right:0;top:calc(var(--t) * var(--row));height:calc(var(--d) * var(--row) - 3px);padding:6px 7px;border-radius:7px;background:var(--blue-100);color:var(--ink);font-size:11.5px;line-height:1.3;overflow:hidden;opacity:0;transform:scale(.94);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
-    .mtg b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .mtg span{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .mtg.is-new{background:linear-gradient(135deg,var(--blue-600),var(--blue-500));color:#fff}
-    .mtg.is-new span{color:rgba(255,255,255,.85)}
-    .mtg.on{opacity:1;transform:none}
+    .hc-cal-scene{position:relative;height:540px;z-index:1}
+    .hc-cal{position:absolute;left:0;right:0;top:88px;border-radius:12px;background:#fff;color:var(--ink);box-shadow:0 40px 80px rgba(0,0,0,.42);overflow:hidden;opacity:0;transform:translateY(18px);transition:opacity .5s ease .3s,transform .7s cubic-bezier(.2,.7,.2,1) .3s}
+    .hc-cal-scene[data-s="2"] .hc-cal{opacity:1;transform:none}
+    .hc-cal-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:15px 20px;background:var(--blue-50);font-size:14px;color:var(--muted)}
+    .hc-cal-head b{color:var(--ink);font-weight:700}
+    .hc-cal-count em{font-style:normal;color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+    .hc-cal-grid{padding:12px 16px 18px}
+    .hc-cal-days{display:grid;grid-template-columns:30px repeat(5,1fr);gap:0 6px;margin-bottom:8px;color:var(--muted);font-size:12.5px;font-weight:700;text-align:center}
+    .hc-cal-body{display:grid;grid-template-columns:30px 1fr;gap:0 6px;--row:44px}
+    .hc-cal-hours{display:grid;grid-template-rows:repeat(8,var(--row));color:var(--muted);font-size:11.5px;text-align:right;padding-right:4px}
+    .hc-cal-hours span{transform:translateY(-7px)}
+    .hc-cal-cols{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0 6px;height:calc(var(--row) * 8);background:repeating-linear-gradient(180deg,var(--line) 0 1px,transparent 1px var(--row))}
+    .hc-cal-col{position:relative}
+    .hc-cal-col+.hc-cal-col::before{content:"";position:absolute;left:-3px;top:0;bottom:0;width:1px;background:var(--line)}
+    .hc-mtg{position:absolute;left:0;right:0;top:calc(var(--t) * var(--row));height:calc(var(--d) * var(--row) - 3px);padding:6px 7px;border-radius:7px;background:var(--blue-100);color:var(--ink);font-size:11.5px;line-height:1.3;overflow:hidden;opacity:0;transform:scale(.94);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
+    .hc-mtg b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hc-mtg span{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hc-mtg.is-new{background:linear-gradient(135deg,var(--blue-600),var(--blue-500));color:#fff}
+    .hc-mtg.is-new span{color:rgba(255,255,255,.85)}
+    .hc-mtg.on{opacity:1;transform:none}
     .hc-toast{position:relative;z-index:2;width:min(380px,100%);margin-left:max(0px,calc(50% - 190px));border-radius:14px;color:var(--ink);background:#fff;box-shadow:0 30px 60px rgba(0,0,0,.45);opacity:0;transform:translateY(-22px);transition:opacity .4s ease,transform .6s cubic-bezier(.2,.7,.2,1),margin-left .7s cubic-bezier(.2,.7,.2,1),box-shadow .7s ease}
-    .cal-scene[data-s="1"] .hc-toast,.cal-scene[data-s="2"] .hc-toast{opacity:1;transform:none}
-    .cal-scene[data-s="2"] .hc-toast{margin-left:0;box-shadow:0 10px 24px rgba(0,0,0,.22)}
+    .hc-cal-scene[data-s="1"] .hc-toast,.hc-cal-scene[data-s="2"] .hc-toast{opacity:1;transform:none}
+    .hc-cal-scene[data-s="2"] .hc-toast{margin-left:0;box-shadow:0 10px 24px rgba(0,0,0,.22)}
     .hc-top{display:flex;align-items:center;gap:13px;padding:14px 18px}
     .hc-app{flex:none;display:block;width:38px;height:38px;border-radius:9px}
     .hc-note{min-width:0;line-height:1.3}
@@ -434,7 +434,7 @@
     .hc-note span{display:block;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .hc-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.7,.2,1)}
     .hc-more>div{overflow:hidden}
-    .cal-scene[data-s="1"] .hc-more{grid-template-rows:1fr}
+    .hc-cal-scene[data-s="1"] .hc-more{grid-template-rows:1fr}
     .hc-rows{margin:0;padding:6px 18px 4px;background:var(--blue-50)}
     .hc-row{display:grid;grid-template-columns:120px 1fr;align-items:start;gap:14px;padding:9px 0}
     .hc-row dt{color:var(--muted);font-size:13.5px;line-height:1.4}
@@ -442,16 +442,16 @@
     .hc-row dd em{font-style:normal;font-weight:700}
     .hc-foot{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 18px;color:var(--muted);font-size:13.5px}
     .hc-foot b{color:var(--ink);font-weight:700}
-    @media (prefers-reduced-motion:reduce){.mtg,.hc-toast,.hc-more{transition:none}}
+    @media (prefers-reduced-motion:reduce){.hc-mtg,.hc-toast,.hc-more{transition:none}}
     @media (max-width:980px){
       .hero-grid{grid-template-columns:minmax(0,1fr);gap:40px;align-items:start}
       .hero-copy-block{max-width:none}
-      .cal-scene{height:540px}
+      .hc-cal-scene{height:540px}
       .hero-bubble{opacity:.45}
     }
     @media (max-width:640px){
-      .cal-scene{height:463px}.cal-body{--row:36px}
-      .mtg{padding:5px 5px;font-size:10.5px}.mtg b{font-size:0}.mtg b::before{content:attr(data-short);font-size:10.5px}.mtg span+span{display:none}.cal-head{padding:12px 14px;font-size:13px}.cal-grid{padding:10px 10px 14px}.mtg{font-size:11px;padding:6px 6px}
+      .hc-cal-scene{height:463px}.hc-cal-body{--row:36px}
+      .hc-mtg{padding:5px 5px;font-size:10.5px}.hc-mtg b{font-size:0}.hc-mtg b::before{content:attr(data-short);font-size:10.5px}.hc-mtg span+span{display:none}.hc-cal-head{padding:12px 14px;font-size:13px}.hc-cal-grid{padding:10px 10px 14px}.hc-mtg{font-size:11px;padding:6px 6px}
       .hc-row{grid-template-columns:96px 1fr}
     }
   </style>
@@ -522,19 +522,19 @@ fbq('track', 'PageView');
             <a class="btn btn-light-outline" href="#process">See how the system works</a>
           </div>
         </div>
-        <div class="cal-scene" aria-label="Example: a week of booked meetings and the notification for the latest one">
-          <div class="cal">
-            <div class="cal-head"><b>Your calendar</b><span class="cal-count"><em>0</em> meetings booked this week</span></div>
-            <div class="cal-grid">
-              <div class="cal-days"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
-              <div class="cal-body">
-                <div class="cal-hours"><span>9</span><span>10</span><span>11</span><span>12</span><span>1</span><span>2</span><span>3</span><span>4</span></div>
-                <div class="cal-cols">
-                  <div class="cal-col"><div class="mtg" data-i="1" style="--t:0.5;--d:1.5"><b data-short="Sarah">Sarah Mitchell</b><span>VP of Sales</span><span>Healthcare</span></div><div class="mtg" data-i="2" style="--t:5;--d:1.5"><b data-short="Omar">Omar Haddad</b><span>GM</span><span>Freight</span></div></div>
-                  <div class="cal-col"><div class="mtg" data-i="3" style="--t:0;--d:1.5"><b data-short="David">David Chen</b><span>Head of Sales</span><span>B2B software</span></div><div class="mtg" data-i="4" style="--t:4;--d:1.5"><b data-short="Priya">Priya Nair</b><span>CFO</span><span>Manufacturing</span></div><div class="mtg" data-i="5" style="--t:6.5;--d:1.5"><b data-short="Tom">Tom Becker</b><span>Owner</span><span>Solar installer</span></div></div>
-                  <div class="cal-col"><div class="mtg" data-i="6" style="--t:1.5;--d:1.5"><b data-short="Laura">Laura Simmons</b><span>COO</span><span>Staffing agency</span></div><div class="mtg" data-i="7" style="--t:5.5;--d:1.5"><b data-short="James">James Carter</b><span>Managing Dir.</span><span>Consulting</span></div></div>
-                  <div class="cal-col"><div class="mtg" data-i="8" style="--t:4.5;--d:1.5"><b data-short="Aisha">Aisha Rahman</b><span>CMO</span><span>SaaS</span></div><div class="mtg is-new" data-i="11" style="--t:1.5;--d:1.5"><b data-short="Mark">Mark Reynolds</b><span>VP Operations</span><span>Logistics</span></div></div>
-                  <div class="cal-col"><div class="mtg" data-i="9" style="--t:0.5;--d:1.5"><b data-short="Michael">Michael Torres</b><span>CEO</span><span>Hospitality</span></div><div class="mtg" data-i="10" style="--t:3;--d:1.5"><b data-short="Emily">Emily Watson</b><span>Head of Growth</span><span>Fintech</span></div></div>
+        <div class="hc-cal-scene" aria-label="Example: a week of booked meetings and the notification for the latest one">
+          <div class="hc-cal">
+            <div class="hc-cal-head"><b>Your calendar</b><span class="hc-cal-count"><em>0</em> meetings booked this week</span></div>
+            <div class="hc-cal-grid">
+              <div class="hc-cal-days"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
+              <div class="hc-cal-body">
+                <div class="hc-cal-hours"><span>9</span><span>10</span><span>11</span><span>12</span><span>1</span><span>2</span><span>3</span><span>4</span></div>
+                <div class="hc-cal-cols">
+                  <div class="hc-cal-col"><div class="hc-mtg" data-i="1" style="--t:0.5;--d:1.5"><b data-short="Sarah">Sarah Mitchell</b><span>VP of Sales</span><span>Healthcare</span></div><div class="hc-mtg" data-i="2" style="--t:5;--d:1.5"><b data-short="Omar">Omar Haddad</b><span>GM</span><span>Freight</span></div></div>
+                  <div class="hc-cal-col"><div class="hc-mtg" data-i="3" style="--t:0;--d:1.5"><b data-short="David">David Chen</b><span>Head of Sales</span><span>B2B software</span></div><div class="hc-mtg" data-i="4" style="--t:4;--d:1.5"><b data-short="Priya">Priya Nair</b><span>CFO</span><span>Manufacturing</span></div><div class="hc-mtg" data-i="5" style="--t:6.5;--d:1.5"><b data-short="Tom">Tom Becker</b><span>Owner</span><span>Solar installer</span></div></div>
+                  <div class="hc-cal-col"><div class="hc-mtg" data-i="6" style="--t:1.5;--d:1.5"><b data-short="Laura">Laura Simmons</b><span>COO</span><span>Staffing agency</span></div><div class="hc-mtg" data-i="7" style="--t:5.5;--d:1.5"><b data-short="James">James Carter</b><span>Managing Dir.</span><span>Consulting</span></div></div>
+                  <div class="hc-cal-col"><div class="hc-mtg" data-i="8" style="--t:4.5;--d:1.5"><b data-short="Aisha">Aisha Rahman</b><span>CMO</span><span>SaaS</span></div><div class="hc-mtg is-new" data-i="11" style="--t:1.5;--d:1.5"><b data-short="Mark">Mark Reynolds</b><span>VP Operations</span><span>Logistics</span></div></div>
+                  <div class="hc-cal-col"><div class="hc-mtg" data-i="9" style="--t:0.5;--d:1.5"><b data-short="Michael">Michael Torres</b><span>CEO</span><span>Hospitality</span></div><div class="hc-mtg" data-i="10" style="--t:3;--d:1.5"><b data-short="Emily">Emily Watson</b><span>Head of Growth</span><span>Fintech</span></div></div>
                 </div>
               </div>
             </div>
@@ -557,8 +557,8 @@ fbq('track', 'PageView');
           </article>
         </div>
       <script>(function(){
-var sc=document.querySelector('.cal-scene');if(!sc)return;
-var mtgs=[].slice.call(sc.querySelectorAll('.mtg')).sort(function(a,b){return a.dataset.i-b.dataset.i}),count=sc.querySelector('.cal-count em'),timers=[],playing=false;
+var sc=document.querySelector('.hc-cal-scene');if(!sc)return;
+var mtgs=[].slice.call(sc.querySelectorAll('.hc-mtg')).sort(function(a,b){return a.dataset.i-b.dataset.i}),count=sc.querySelector('.hc-cal-count em'),timers=[],playing=false;
 function finalState(){mtgs.forEach(function(m){m.classList.add('on')});count.textContent=mtgs.length;sc.dataset.s='2'}
 if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion:reduce)').matches){finalState();return}
 function later(f,ms){timers.push(setTimeout(f,ms))}
