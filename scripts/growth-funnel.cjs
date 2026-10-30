@@ -27,7 +27,7 @@ function funnel(out){
  // Common commercial navigation, schema and content-link rules across published HTML.
  const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(x=>x.isDirectory()&&!['assets','admin'].includes(x.name)?walk(path.join(dir,x.name)):x.isFile()&&x.name.endsWith('.html')?[path.join(dir,x.name)]:[]);
  for(const file of walk(out)){
-  const rel=path.relative(out,file).replaceAll('\\','/'),career=rel==='careers.html';$=c.load(fs.readFileSync(file,'utf8'));
+  const rel=path.relative(out,file).replaceAll('\\','/'),career=rel==='careers.html';if(require('./standalone-pages.cjs').has(rel))continue;$=c.load(fs.readFileSync(file,'utf8'));
   $('head').append('<link rel="stylesheet" href="/assets/css/growth.css"><script src="/assets/js/growth.js" defer></script>');
   if(rel!=='outbound-assessment.html'&&!career){
    $('a[href*="calendly.com"]').attr('href','/outbound-assessment').removeAttr('onclick');

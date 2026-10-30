@@ -70,7 +70,7 @@ function build(out=path.join(root,'dist')) {
       const file = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         if (!['admin', 'assets'].includes(entry.name)) addLivechat(file);
-      } else if (entry.name.endsWith('.html')) {
+      } else if (entry.name.endsWith('.html') && !require('./standalone-pages.cjs').has(path.relative(out, file).split(path.sep).join('/'))) {
         const original = fs.readFileSync(file, 'utf8');
         let html = original.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, script =>
           /https:\/\/(?:www\.)?chatbase\.co\/embed\.min\.js/i.test(script) ? '' : script);

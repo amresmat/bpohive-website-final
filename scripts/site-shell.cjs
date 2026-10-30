@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const cheerio = require('cheerio');
+const STANDALONE = require('./standalone-pages.cjs');
 
 const LINKS = [
   ['Home', '/', rel => rel === 'index.html'],
@@ -161,6 +162,7 @@ function shell(out) {
       if (f.isDirectory()) { if (f.name !== 'admin' && f.name !== 'assets') walk(p); continue; }
       if (!f.name.endsWith('.html')) continue;
       const rel = path.relative(out, p).split(path.sep).join('/');
+      if (STANDALONE.has(rel)) continue;
       const html = fs.readFileSync(p, 'utf8');
       const next = sharpCorners(noLongDashes(applyShell(html, rel) || html));
       if (next !== html) fs.writeFileSync(p, next);
