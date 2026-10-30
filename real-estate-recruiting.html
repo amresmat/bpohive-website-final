@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Recruiting Interviews, Booked for You | BPO Hive</title>
+  <meta name="description" content="BPO Hive calls licensed real estate agents in your market, screens them against your criteria and puts 10–15 interview bookings a month on your calendar. $799/month.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://www.bpohive.com/real-estate-recruiting">
+  <meta property="og:title" content="Agent interviews on your calendar | BPO Hive">
+  <meta property="og:description" content="10–15 agent interview bookings a month, on your calendar. $799/month.">
+  <meta property="og:image" content="https://www.bpohive.com/assets/og/bpohive-share.png">
+  <link rel="icon" href="assets/logo/favicon.png">
+  <link rel="apple-touch-icon" href="assets/logo/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://assets.calendly.com">
+  <style>
+    /* Layout: sky hero with a live calendar on a blue panel; navy story band; white, sky and blue sections. */
+    :root{
+      --navy:#20292F;--navy-2:#2C3840;--blue:#4EA6F8;--blue-deep:#2F8BE6;--light:#78BBFA;--sky:#EAF4FE;--pale:#DCEBFD;--sun:#FFC94D;--mint:#3DBE8B;
+      --bg:#FFFFFF;--surface:#F2F6FA;--ink:#20292F;--muted:#56646D;
+      --on-dark:#F4F7F9;--on-dark-muted:#AEBDC6;
+      --display-font:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+      --font:"Figtree","Avenir Next","Segoe UI",system-ui,sans-serif;
+      --small:clamp(.8125rem,.79rem + .1vw,.875rem);
+      --body:clamp(1.0625rem,1rem + .25vw,1.1875rem);
+      --lead:clamp(1.1875rem,1.05rem + .6vw,1.4375rem);
+      --head:clamp(2.125rem,1.3rem + 3.2vw,3.75rem);
+      --display:clamp(2.75rem,1.2rem + 3.6vw,4.375rem);
+      --gutter:clamp(20px,4vw,48px);--gap:clamp(88px,10vw,152px)
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font:400 var(--body)/1.55 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:.07em}
+    h1,h2,h3{margin:0;font-family:var(--display-font);font-weight:700;hyphens:none;text-wrap:balance;font-optical-sizing:auto}
+    p{margin:0;text-wrap:pretty}
+    img{max-width:100%;display:block}
+    ::selection{background:var(--blue);color:var(--navy)}
+    :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+    .wrap{width:100%;max-width:1280px;margin:0 auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:0 30px;border:0;border-radius:999px;background:var(--navy);color:#fff;font:600 1.0625rem/1 var(--font);text-decoration:none;cursor:pointer;transition:background .15s,transform .15s}
+    .btn:hover{background:#11181D}
+    .btn svg{width:18px;height:18px;transition:transform .15s}
+    .btn:hover svg{transform:translateX(3px)}
+    .btn.blue{background:var(--blue);color:var(--navy)}
+    .btn.blue:hover{background:var(--light)}
+    .btn.small{min-height:46px;padding:0 22px;font-size:.9375rem}
+    .btn[disabled]{opacity:.55;cursor:not-allowed}
+    .tnum{font-variant-numeric:tabular-nums}
+    section.block{padding:var(--gap) 0}
+    .sh{font-size:var(--head);line-height:1;letter-spacing:-.035em}
+    .intro{margin-top:20px;font-size:var(--lead);line-height:1.45;color:var(--muted);max-width:44ch}
+
+    /* Bar */
+    .bar{background:var(--sky)}
+    .bar .wrap{display:flex;align-items:center;justify-content:space-between;min-height:84px}
+    .bar img{width:150px;height:auto}
+
+    /* Hero */
+    .hero{background:var(--sky);padding:clamp(24px,4vw,56px) 0 clamp(72px,8vw,120px)}
+    .hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(40px,5vw,80px);align-items:center}
+    .hero h1{font-size:var(--display);line-height:.95;letter-spacing:-.045em;max-width:17ch;margin-left:-.03em}
+    .hero .lead{margin-top:26px;font-size:var(--lead);line-height:1.45;color:var(--muted);max-width:32ch}
+    .hero .lead b{color:var(--ink);font-weight:600}
+    .hero .go{margin-top:36px;display:flex;align-items:center;gap:14px 22px;flex-wrap:wrap}
+    .hero .go span{color:var(--muted);font-size:var(--small)}
+    .stats{margin-top:52px;display:flex;gap:16px 44px;flex-wrap:wrap}
+    .stats div{display:grid;gap:6px}
+    .stats strong{font-family:var(--display-font);font-size:clamp(2.125rem,1.5rem + 1.8vw,3rem);font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--blue-deep)}
+    .stats span{color:var(--muted);font-size:var(--small);line-height:1.35;max-width:22ch}
+
+    .stage{position:relative;background:var(--blue);border-radius:32px;padding:clamp(22px,3vw,36px);padding-bottom:clamp(64px,7vw,84px)}
+    .stage .peep{position:absolute;left:-28px;bottom:-34px;width:150px;height:150px}
+    .cal{background:var(--bg);color:var(--ink);border-radius:22px;padding:20px 20px 16px}
+    .cal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .cal-top .t{font-family:var(--display-font);font-weight:700;font-size:1.125rem}
+    .cal-top .t span{color:var(--muted);font-family:var(--font);font-weight:400;font-size:.9375rem;margin-left:8px}
+    .cal-top .m{font-size:var(--small);color:var(--muted);background:var(--sky);border-radius:999px;padding:6px 12px}
+    .cal-top .m b{color:var(--ink);font-weight:700}
+    .grid{margin-top:16px;display:grid;grid-template-columns:44px repeat(5,minmax(0,1fr));gap:6px}
+    .grid .dh{font-size:var(--small);font-weight:600;color:var(--muted);padding:0 4px 2px}
+    .grid .tm{font-size:.75rem;color:var(--muted);padding-top:8px;font-variant-numeric:tabular-nums}
+    .cell{background:var(--surface);border-radius:12px;min-height:66px;position:relative;overflow:hidden}
+    .chip{position:absolute;inset:0;background:var(--pale);color:var(--navy);border-radius:12px;padding:8px 9px;font-size:.75rem;line-height:1.25;opacity:0;transform:scale(.9);transition:opacity .35s ease,transform .35s cubic-bezier(.2,.9,.3,1.2)}
+    .chip.on{opacity:1;transform:none}
+    .chip.new{background:var(--navy);color:#fff}
+    .chip strong{display:block;font-size:.8125rem;font-weight:700}
+    .chip em{display:block;font-style:normal;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .toast{position:absolute;right:clamp(16px,3vw,28px);bottom:-30px;width:min(340px,80%);display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:18px;padding:14px 16px;box-shadow:0 18px 50px rgba(20,40,70,.22)}
+    .toast .dot{flex:none;width:38px;height:38px;border-radius:50%;background:var(--mint);display:grid;place-items:center}
+    .toast .dot svg{width:16px;height:16px}
+    .toast .txt{min-width:0}
+    .toast .txt b{display:block;font-weight:700;font-size:.9375rem}
+    .toast .txt span{display:block;color:var(--muted);font-size:var(--small);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .toast.flash{animation:flash .45s ease}
+    @keyframes flash{from{transform:translateY(8px);opacity:.2}to{transform:none;opacity:1}}
+    .cap{margin-top:46px;font-size:.8125rem;color:var(--muted)}
+
+    /* Story */
+    .story{background:var(--navy);color:var(--on-dark)}
+    .story .head{display:flex;justify-content:space-between;align-items:end;gap:24px 48px;flex-wrap:wrap}
+    .story .intro{color:var(--on-dark-muted)}
+    .tabs{margin-top:44px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .tab{border:0;background:var(--navy-2);color:var(--on-dark-muted);border-radius:16px;padding:14px 16px 16px;text-align:left;font:600 1rem/1.2 var(--font);cursor:pointer;position:relative;overflow:hidden}
+    .tab small{display:block;font-weight:500;font-size:.8125rem;margin-bottom:4px;opacity:.8}
+    .tab[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+    .tab i{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--blue)}
+    .scenes{margin-top:12px;position:relative}
+    .scene{display:none;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);background:var(--bg);color:var(--ink);border-radius:28px;overflow:hidden;min-height:440px}
+    .scene.on{display:grid;animation:sceneIn .5s ease}
+    @keyframes sceneIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .art{position:relative;display:flex;align-items:center;justify-content:center;padding:clamp(28px,4vw,48px)}
+    .s1 .art{background:var(--blue)}
+    .s2 .art{background:var(--light)}
+    .s3 .art{background:var(--sun)}
+    .s4 .art{background:var(--mint)}
+    @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+    .mock{width:100%;max-width:400px;background:var(--bg);border-radius:22px;padding:20px;box-shadow:0 20px 50px rgba(20,40,70,.18);animation:pop .5s .1s both}
+    .av{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:.875rem;flex:none}
+    .mh{display:flex;align-items:center;gap:12px}
+    .mh div{flex:1;min-width:0}
+    .mh b{display:block}
+    .mh span{color:var(--muted);font-size:var(--small)}
+    .timer{background:#E3F7EE;color:#1C7A55;border-radius:999px;padding:5px 10px;font-weight:700;font-size:.8125rem}
+    .wave{margin:16px 0 6px;display:flex;align-items:center;gap:4px;height:34px}
+    .wave i{flex:1;background:var(--blue);border-radius:3px;height:30%;animation:wv 1s ease-in-out infinite}
+    .wave i:nth-child(3n){animation-delay:.15s}.wave i:nth-child(3n+1){animation-delay:.3s}.wave i:nth-child(4n){animation-delay:.45s}
+    @keyframes wv{0%,100%{height:25%}50%{height:95%}}
+    .say{margin-top:10px;padding:10px 14px;border-radius:16px;font-size:.9375rem;line-height:1.4;max-width:88%;animation:pop .45s both}
+    .say.us{background:var(--sky);border-bottom-left-radius:4px;animation-delay:.5s}
+    .say.them{background:var(--surface);margin-left:auto;border-bottom-right-radius:4px;animation-delay:1.1s}
+    .checks{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+    .checks span{display:inline-flex;align-items:center;gap:6px;background:#E3F7EE;color:#1C7A55;border-radius:999px;padding:6px 11px;font-size:.8125rem;font-weight:700;animation:pop .4s both}
+    .checks span::before{content:"✓"}
+    .checks span:nth-child(1){animation-delay:1.6s}.checks span:nth-child(2){animation-delay:1.9s}.checks span:nth-child(3){animation-delay:2.2s}
+    .badge{display:inline-block;background:var(--sun);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.8125rem}
+    .ttl{display:block;margin-top:12px;font-family:var(--display-font);font-size:1.375rem;letter-spacing:-.02em;line-height:1.15}
+    .when{margin-top:14px;display:flex;gap:14px;align-items:center}
+    .when .day{display:grid;place-items:center;width:56px;height:60px;border-radius:14px;background:var(--sky);font-size:.75rem;font-weight:600;line-height:1.1;text-align:center}
+    .when .day strong{font-family:var(--display-font);font-size:1.5rem}
+    .when b{display:block}
+    .when div span{color:var(--muted);font-size:var(--small)}
+    .notes{margin-top:14px;background:var(--surface);border-radius:14px;padding:12px 14px;font-size:.9375rem;line-height:1.45}
+    .notes b{display:block;font-size:.8125rem;color:var(--muted);margin-bottom:2px}
+    .rec{margin-top:10px;display:flex;align-items:center;gap:12px;background:var(--navy);color:#fff;border-radius:14px;padding:12px 14px}
+    .rec .play{width:34px;height:34px;border-radius:50%;background:var(--blue);position:relative;flex:none}
+    .rec .play::after{content:"";position:absolute;left:13px;top:10px;border-left:11px solid var(--navy);border-top:7px solid transparent;border-bottom:7px solid transparent}
+    .rec div b{display:block;font-size:.875rem}
+    .rec div span{font-size:.75rem;color:var(--on-dark-muted)}
+    .rec i{flex:1;height:6px;border-radius:6px;background:var(--navy-2);overflow:hidden}
+    .rec i em{display:block;height:100%;width:0;background:var(--blue);animation:prog 4.5s linear .4s forwards}
+    @keyframes prog{to{width:72%}}
+    .mt{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .live{display:inline-flex;align-items:center;gap:8px;background:#E3F7EE;color:#1C7A55;border-radius:999px;padding:6px 12px;font-size:.8125rem;font-weight:700}
+    .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mint);animation:blink 1.2s infinite}
+    @keyframes blink{50%{opacity:.25}}
+    .tiles{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .tile{background:var(--navy);color:#fff;border-radius:16px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+    .tile.you{background:var(--navy-2)}
+    .av.big{width:58px;height:58px;font-size:1.0625rem;background:var(--blue);color:var(--navy)}
+    .tile small{font-size:.8125rem;color:var(--on-dark-muted)}
+    .joined{margin-top:12px;font-size:.875rem;color:var(--muted)}
+    .ok{width:52px;height:52px;border-radius:50%;background:var(--mint);display:grid;place-items:center;animation:pop .45s .3s both}
+    .ok svg{width:26px;height:26px}
+    .offer p{margin-top:4px;color:var(--muted)}
+    .roster,.next{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--surface);border-radius:14px;padding:12px 14px;font-size:.9375rem}
+    .roster b{font-family:var(--display-font);font-size:1.25rem}
+    .roster s{color:var(--muted);text-decoration:none;font-weight:500}
+    .next{background:var(--sky)}
+    .copy{padding:clamp(28px,4vw,52px);display:flex;flex-direction:column;justify-content:center}
+    .copy h3{font-size:clamp(1.75rem,1.3rem + 1.6vw,2.625rem);line-height:1.04;letter-spacing:-.035em}
+    .copy p{margin-top:14px;color:var(--muted);max-width:40ch}
+    .story .note{margin-top:16px;font-size:.8125rem;color:var(--on-dark-muted)}
+
+    /* Benefits */
+    .benefits .top{display:flex;justify-content:space-between;align-items:end;gap:24px 48px;flex-wrap:wrap}
+    .ben{margin-top:48px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .ben article{border-radius:28px;padding:clamp(26px,3vw,38px);display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:300px}
+    .ben article:nth-child(1){background:var(--sky)}
+    .ben article:nth-child(2){background:var(--surface)}
+    .ben article:nth-child(3){background:var(--surface)}
+    .ben article:nth-child(4){background:var(--sky)}
+    .ben h3{font-size:clamp(1.5rem,1.2rem + 1vw,2.125rem);line-height:1.06;letter-spacing:-.03em;max-width:16ch}
+    .ben p{margin-top:10px;color:var(--muted);max-width:44ch}
+    .vis{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .crit{background:var(--bg);border-radius:999px;padding:9px 14px;font-weight:600;font-size:.9375rem}
+    .crit.on{background:var(--navy);color:#fff}
+    .note-card{background:var(--bg);border-radius:18px;padding:16px 18px;max-width:360px;font-size:.9375rem}
+    .note-card b{display:block;font-size:.8125rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+    .ring{width:120px;height:120px;flex:none}
+    .ring-txt b{display:block;font-family:var(--display-font);font-size:2rem;font-weight:700;letter-spacing:-.03em;line-height:1}
+    .ring-txt span{color:var(--muted);font-size:var(--small)}
+    .rec.light{background:var(--bg);color:var(--ink);max-width:420px}
+    .rec.light div span{color:var(--muted)}
+    .rec.light i{background:var(--sky)}
+    .credit{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .credit > div:not(.arrow){background:var(--bg);border-radius:16px;padding:12px 16px}
+    .credit span{display:block;font-size:.8125rem;color:var(--muted)}
+    .credit b{font-weight:700}
+    .credit .cr{background:var(--sun)!important}
+    .credit .arrow{font-size:1.5rem;color:var(--muted)}
+    .bars{display:grid;gap:10px;width:100%;max-width:420px}
+    .bars div{display:grid;grid-template-columns:120px 1fr;align-items:center;gap:12px;font-size:.875rem;font-weight:600}
+    .bars i{display:block;height:14px;border-radius:999px;background:var(--bg)}
+    .bars i em{display:block;height:100%;border-radius:999px}
+
+    /* Pricing */
+    .pricing{background:var(--sky)}
+    .pricing .wrap{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(40px,6vw,96px);align-items:center}
+    .compare{margin-top:36px;display:grid;gap:10px;max-width:520px}
+    .compare div{display:flex;justify-content:space-between;gap:16px;background:var(--bg);border-radius:16px;padding:16px 20px;font-weight:600}
+    .compare div span{color:var(--muted);font-weight:500;text-align:right}
+    .compare .us{background:var(--navy);color:#fff}
+    .compare .us span{color:var(--light)}
+    .plan{background:var(--bg);border-radius:32px;padding:clamp(28px,4vw,48px);position:relative}
+    .plan .tag{display:inline-block;background:var(--sun);color:var(--navy);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.875rem}
+    .plan h3{margin-top:18px;font-size:clamp(1.5rem,1.2rem + 1vw,2rem);letter-spacing:-.03em}
+    .price{margin-top:14px;display:flex;align-items:baseline;gap:8px}
+    .price strong{font-family:var(--display-font);font-size:clamp(4rem,2.6rem + 5vw,6.5rem);font-weight:800;letter-spacing:-.05em;line-height:.9}
+    .price span{color:var(--muted);font-size:var(--lead)}
+    .fees{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+    .fees span{background:var(--sky);border-radius:12px;padding:8px 12px;font-weight:600;font-size:.9375rem}
+    .fees span:first-child{background:var(--navy);color:#fff}
+    .promise{margin-top:26px;background:var(--sun);border-radius:18px;padding:16px 18px;font-size:.9375rem;line-height:1.45}
+    .promise b{display:block;font-size:1rem;margin-bottom:2px}
+    .per{margin-top:12px;display:inline-block;background:var(--sky);border-radius:12px;padding:8px 12px;font-weight:600;font-size:.9375rem}
+    .plan ul{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:14px}
+    .plan li{display:flex;gap:12px;align-items:flex-start;font-size:1.0625rem}
+    .plan li svg{flex:none;width:22px;height:22px;margin-top:2px}
+    .plan .btn{margin-top:22px;width:100%}
+    .plan .terms{margin-top:16px;font-size:.8125rem;color:var(--muted);line-height:1.5}
+
+    /* Team */
+    .team .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(40px,6vw,96px);align-items:center}
+    .faces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .face{margin:0}
+    .face img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:24px;background:var(--sky)}
+    .face figcaption{margin-top:10px;font-weight:700;line-height:1.25}
+    .face figcaption span{display:block;font-weight:400;color:var(--muted);font-size:var(--small)}
+
+    /* Steps */
+    .steps{background:var(--surface)}
+    .steps ol{margin:44px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:s}
+    .steps li{background:var(--bg);border-radius:28px;padding:clamp(24px,3vw,34px);counter-increment:s}
+    .steps li::before{content:counter(s);display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--blue);color:var(--navy);font-family:var(--display-font);font-weight:700;font-size:1.25rem;margin-bottom:22px}
+    .steps li b{display:block;font-family:var(--display-font);font-size:1.5rem;letter-spacing:-.02em;line-height:1.15}
+    .steps li span{display:block;margin-top:8px;color:var(--muted)}
+
+    /* FAQ */
+    .faq .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(40px,6vw,96px)}
+    details{background:var(--surface);border-radius:18px;margin-bottom:8px}
+    summary{cursor:pointer;list-style:none;padding:22px 26px;font-weight:600;font-size:var(--lead);line-height:1.3;display:flex;justify-content:space-between;gap:20px}
+    summary::-webkit-details-marker{display:none}
+    summary::after{content:"+";font-weight:400;color:var(--blue-deep);font-size:1.6rem;line-height:1}
+    details[open] summary::after{content:"–"}
+    details p{padding:0 26px 24px;max-width:62ch;color:var(--muted)}
+
+    /* Close */
+    .close{background:var(--blue);color:var(--navy);padding:var(--gap) 0 0;overflow:hidden}
+    .close .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(40px,6vw,96px);align-items:center}
+    .close h2{font-size:var(--display);line-height:.95;letter-spacing:-.045em;max-width:12ch}
+    .close p{margin-top:22px;font-size:var(--lead);max-width:34ch}
+    .close .btn{margin-top:34px}
+    .teaser{background:var(--bg);border-radius:28px;padding:clamp(24px,3vw,34px);margin-bottom:var(--gap);display:grid;gap:8px;box-shadow:0 24px 60px rgba(20,40,70,.2)}
+    .teaser .ts{font-size:var(--small);color:var(--muted);font-weight:600}
+    .teaser b{font-family:var(--display-font);font-size:clamp(1.5rem,1.2rem + 1vw,2rem);letter-spacing:-.03em;margin:4px 0 10px}
+    .teaser button{border:0;border-radius:14px;background:var(--surface);color:var(--ink);padding:17px 20px;text-align:left;font:600 1.0625rem var(--font);cursor:pointer;transition:background .12s}
+    .teaser button:hover{background:var(--pale)}
+    .close .txt{padding-bottom:var(--gap)}
+    footer{background:var(--navy);color:var(--on-dark-muted);font-size:var(--small)}
+    footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:28px;padding-bottom:28px}
+    footer img{width:126px}
+    footer a{color:var(--on-dark-muted)}
+
+    /* Qualifier dialog */
+    dialog{border:0;padding:0;margin:auto;width:min(640px,100vw - 32px);max-height:calc(100dvh - 32px);background:var(--bg);color:var(--ink);border-radius:24px;box-shadow:0 30px 90px rgba(5,15,22,.45);overflow:auto}
+    dialog::backdrop{background:rgba(20,27,32,.8)}
+    .q-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 30px 0}
+    .q-head span{font-size:var(--small);color:var(--muted);font-weight:500}
+    .q-x{border:0;background:none;font:400 1.75rem/1 var(--font);color:var(--ink);cursor:pointer;padding:4px 8px;margin-right:-8px}
+    .bar-track{margin:14px 30px 0;height:6px;border-radius:6px;background:var(--surface);overflow:hidden}
+    .bar-fill{height:6px;width:0;background:var(--blue);transition:width .25s ease}
+    .q-body{padding:32px 30px 34px}
+    .q-body h2{font-size:clamp(1.625rem,1.3rem + 1.2vw,2.25rem);line-height:1.1;letter-spacing:-.03em;max-width:22ch}
+    .q-body .hint{margin-top:10px;color:var(--muted);font-size:var(--small)}
+    .opts{margin-top:24px;display:grid;gap:8px}
+    .opt{display:block;width:100%;text-align:left;border:0;border-radius:14px;background:var(--surface);color:var(--ink);padding:18px 22px;font:500 1.0625rem/1.3 var(--font);cursor:pointer;transition:background .12s}
+    .opt:hover{background:var(--pale)}
+    .opt[aria-pressed="true"]{background:var(--navy);color:#fff}
+    .fields{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .f{display:flex;flex-direction:column;gap:6px}
+    .f.full{grid-column:1 / -1}
+    label{font-size:var(--small);font-weight:500}
+    input{width:100%;min-height:54px;padding:0 16px;border:0;border-radius:12px;background:var(--surface);color:var(--ink);font:400 1rem var(--font)}
+    input:focus{outline:3px solid var(--blue);outline-offset:0}
+    .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+    .q-foot{margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+    .back{border:0;background:none;color:var(--muted);font:500 var(--small) var(--font);cursor:pointer;padding:8px 0;text-decoration:underline;text-underline-offset:.18em}
+    .err{margin-top:14px;color:#A33434;font-size:var(--small);font-weight:600}
+    .fine{margin-top:16px;color:var(--muted);font-size:var(--small)}
+    #calendly{height:680px;margin-top:20px;border-radius:14px;overflow:hidden;background:var(--surface)}
+
+
+    @media (max-width:960px){
+      .hero .wrap,.pricing .wrap,.team .wrap,.faq .wrap,.close .wrap{grid-template-columns:1fr}
+      .stage .peep{display:none}
+      .scene{grid-template-columns:1fr;min-height:0}
+      .steps ol{grid-template-columns:1fr}
+      .close .txt{padding-bottom:0}
+      .teaser{margin-bottom:var(--gap)}
+    }
+    @media (max-width:640px){
+      .bar img{width:128px}
+      .bar .btn{display:none}
+      .hero .go .btn{width:100%}
+      .stage{border-radius:24px;padding:14px 14px 70px}
+      .cal{padding:14px 12px 12px;border-radius:18px}
+      .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+      .grid .tm,.grid .corner{display:none}
+      .cell{min-height:50px;border-radius:9px}
+      .chip{padding:6px;font-size:.6875rem;border-radius:9px}
+      .chip strong{font-size:.75rem}
+      .chip em{display:none}
+      .toast{width:calc(100% - 28px);right:14px;bottom:-26px}
+      .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .ben{grid-template-columns:1fr}
+      .ben article{min-height:0}
+      .faces{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .bars div{grid-template-columns:96px 1fr}
+      dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}
+      .q-head,.q-body{padding-left:20px;padding-right:20px}
+      .bar-track{margin-left:20px;margin-right:20px}
+      .fields{grid-template-columns:1fr}
+      #calendly{height:760px}
+    }
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+  </style>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-WTCM2N4W');</script>
+  <!-- Mouseflow -->
+  <script>
+    window._mfq=window._mfq||[];
+    (function(){var mf=document.createElement('script');mf.type='text/javascript';mf.defer=true;mf.src='//cdn.mouseflow.com/projects/ad9417c7-5ae0-40a7-b673-57641c0b64ad.js';document.getElementsByTagName('head')[0].appendChild(mf)})();
+  </script>
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init','1492963711498633');fbq('track','PageView');fbq('track','ViewContent',{content_name:'Real estate recruiting'});
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1492963711498633&ev=PageView&noscript=1" alt=""></noscript>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MRYSLESY4H"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-MRYSLESY4H');</script>
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+</head>
+<body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTCM2N4W" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <header class="bar">
+    <div class="wrap">
+      <img src="assets/logo/bpohivelogo.png" alt="BPO Hive" width="150" height="38">
+      <button class="btn small" type="button" data-open>See if you qualify</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Agent interviews<br> on your calendar</h1>
+          <p class="lead">Our callers find licensed agents in your market, screen them to your criteria and book them with you. <b><span style="white-space:nowrap">10–15</span> interview bookings a month, $799.</b></p>
+          <div class="go">
+            <button class="btn" type="button" data-open>See if you qualify <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h11m-4-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <span>7 quick questions</span>
+          </div>
+          <div class="stats">
+            <div><strong class="tnum" id="count" data-to="15000">15,000+</strong><span>appointments booked for real estate leaders and broker owners</span></div>
+            <div><strong class="tnum">~70%</strong><span>of booked agents show up</span></div>
+          </div>
+        </div>
+
+        <figure style="margin:0" aria-label="Example: agent interviews being booked on a broker's calendar">
+          <div class="stage">
+            <div class="cal">
+              <div class="cal-top">
+                <div class="t">Your calendar<span>Nov 9–13</span></div>
+                <div class="m">Booked this month <b class="tnum" id="month">0</b></div>
+              </div>
+              <div class="grid" id="grid" aria-hidden="true"></div>
+            </div>
+            <div class="toast" id="toast">
+              <div class="dot"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="txt"><b id="toast-t">Interview booked</b><span id="toast-s">Your calendar fills as our callers book agents</span></div>
+            </div>
+          </div>
+          <figcaption class="cap">Example of how bookings arrive. Your calendar shows your own agents.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block story" aria-labelledby="story-h">
+      <div class="wrap">
+        <div class="head">
+          <h2 class="sh" id="story-h">From first call to final interview</h2>
+          <p class="intro">We do the calling and the booking. You run the final interview and close.</p>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-s="0"><small>Step 1</small>We call<i></i></button>
+          <button class="tab" role="tab" aria-selected="false" data-s="1"><small>Step 2</small>It’s booked<i></i></button>
+          <button class="tab" role="tab" aria-selected="false" data-s="2"><small>Step 3</small>Final interview<i></i></button>
+          <button class="tab" role="tab" aria-selected="false" data-s="3"><small>Step 4</small>You close<i></i></button>
+        </div>
+        <div class="scenes">
+          <div class="scene s1 on" role="tabpanel">
+            <div class="art">
+              <div class="mock call">
+                <div class="mh"><span class="av">ML</span><div><b>Maria L.</b><span>Licensed agent, Austin</span></div><span class="tnum timer">04:12</span></div>
+                <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="say us">“Open to hearing what a growing brokerage near you offers agents?”</p>
+                <p class="say them">“Sure, if the split and the leads are better.”</p>
+                <div class="checks"><span>Licensed 8 years</span><span>Full-time</span><span>Open to a move</span></div>
+              </div>
+            </div>
+            <div class="copy">
+              <h3>We call agents in your market</h3>
+              <p>Our calling team reaches licensed agents near you and screens each one against the criteria you set. Every call is recorded.</p>
+            </div>
+          </div>
+          <div class="scene s2" role="tabpanel">
+            <div class="art">
+              <div class="mock invite">
+                <span class="badge">New booking</span>
+                <b class="ttl">Recruiting interview: Maria L.</b>
+                <div class="when"><span class="day tnum">Thu<br><strong>12</strong></span><div><b>11:00–11:30 AM</b><span>Added to your calendar</span></div></div>
+                <div class="notes"><b>Call notes</b>19 closings last year. Wants coaching and better leads. Prefers a team environment.</div>
+                <div class="rec"><span class="play" aria-hidden="true"></span><div><b>Call recording</b><span class="tnum">04:12</span></div><i aria-hidden="true"><em></em></i></div>
+              </div>
+            </div>
+            <div class="copy">
+              <h3>The interview lands on your calendar</h3>
+              <p>Each booking comes with our call notes and the call recording, so you hear the conversation before you meet.</p>
+            </div>
+          </div>
+          <div class="scene s3" role="tabpanel">
+            <div class="art">
+              <div class="mock meet">
+                <div class="mt"><b>Final interview</b><span class="live">In progress</span></div>
+                <div class="tiles"><div class="tile you"><span class="av big">You</span><small>Broker-owner</small></div><div class="tile"><span class="av big">ML</span><small>Maria L.</small></div></div>
+                <div class="joined">Maria joined at 10:58 AM, two minutes early</div>
+              </div>
+            </div>
+            <div class="copy">
+              <h3>You run the final interview</h3>
+              <p>About 70% of the agents we book show up. You meet agents who already know why they’re there.</p>
+            </div>
+          </div>
+          <div class="scene s4" role="tabpanel">
+            <div class="art">
+              <div class="mock offer">
+                <div class="ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <b class="ttl">Offer accepted</b>
+                <p>Maria L. is joining your brokerage.</p>
+                <div class="roster tnum"><span>Agents on your roster</span><b><s>24</s> → 25</b></div>
+                <div class="next"><span>Next interview</span><b>Mon, 9:00 AM</b></div>
+              </div>
+            </div>
+            <div class="copy">
+              <h3>You close</h3>
+              <p>You make the offer and the agent joins. Meanwhile, next month’s interviews are already being booked.</p>
+            </div>
+          </div>
+        </div>
+        <p class="note">Example. Names and numbers are for illustration.</p>
+      </div>
+    </section>
+
+    <section class="block benefits">
+      <div class="wrap">
+        <div class="top">
+          <h2 class="sh">Recruit without dialing</h2>
+          <p class="intro">Keep your time for selling, coaching and closing the agents you meet.</p>
+        </div>
+        <div class="ben">
+          <article>
+            <div><h3>Hear every call yourself</h3><p>Every booking comes with our call notes and the recording. You hear exactly how the agent was approached and what they said.</p></div>
+            <div class="rec light"><span class="play" aria-hidden="true"></span><div><b>Call with Maria L.</b><span class="tnum">04:12, recorded</span></div><i aria-hidden="true"><em style="width:38%;animation:none"></em></i></div>
+          </article>
+          <article>
+            <div><h3>You only meet agents who fit</h3><p>You set the criteria before we start. We only book agents who match them.</p></div>
+            <div class="vis"><span class="crit on">Licensed 3+ years</span><span class="crit on">Full-time</span><span class="crit">Your city</span><span class="crit on">10+ closings</span><span class="crit">Open to a move</span></div>
+          </article>
+          <article>
+            <div><h3>Interviews that actually happen</h3><p>About 70% or more of the agents we book show up.</p></div>
+            <div class="vis" style="gap:18px">
+              <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="#FFFFFF" stroke-width="16"/><circle cx="60" cy="60" r="50" fill="none" stroke="#4EA6F8" stroke-width="16" stroke-linecap="round" stroke-dasharray="219.9 314.2" transform="rotate(-90 60 60)"/></svg>
+              <div class="ring-txt"><b>~70%</b><span>show rate on booked interviews</span></div>
+            </div>
+          </article>
+          <article>
+            <div><h3>Missing bookings carry over</h3><p>If we book fewer than 10 in a month, the difference is credited to the next month until we deliver it.</p></div>
+            <div class="credit tnum"><div><span>November</span><b>8 of 10 booked</b></div><div class="arrow" aria-hidden="true">→</div><div class="cr"><span>December</span><b>+2 credited</b></div></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block pricing" id="pricing">
+      <div class="wrap">
+        <div>
+          <h2 class="sh">One plan, month to month</h2>
+          <p class="intro">Compare it with building the same thing in-house.</p>
+          <div class="compare">
+            <div>Hire a recruiter or ISA<span>Salary, training, turnover</span></div>
+            <div>Buy agent lists and a dialer<span>Monthly tools on top</span></div>
+            <div>Make the calls yourself<span>Your evenings</span></div>
+            <div class="us">BPO Hive recruiting program<span>$799 a month + $500 setup</span></div>
+          </div>
+        </div>
+        <div class="plan">
+          <span class="tag">Month to month</span>
+          <h3>Agent recruiting program</h3>
+          <div class="price"><strong class="tnum">$799</strong><span>/ month</span></div>
+          <div class="fees"><span>+ $500 one-time setup</span><span>About $53–$80 per interview booking</span></div>
+          <ul>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10–15 interview bookings on your calendar every month</li>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Licensed agents screened to your criteria</li>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Call notes with every booking</li>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Call recordings, so you hear every call yourself</li>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Agent list for your market, built by us</li>
+            <li><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="#4EA6F8"/><path d="M6.5 11.3l3 2.8 6-6.2" stroke="#20292F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Month to month, no long contract</li>
+          </ul>
+          <div class="promise"><b>Fewer than 10 bookings in a month?</b>The missing bookings are credited to the next month until we deliver them.</div>
+          <button class="btn" type="button" data-open>See if you qualify <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h11m-4-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <p class="terms">We book the interviews; we can’t promise every agent attends or that they’ll join. That depends on your offer and your conversation with them.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block team">
+      <div class="wrap">
+        <div>
+          <h2 class="sh">Real people behind every booking</h2>
+          <p class="intro">BPO Hive has booked more than 15,000 appointments for real estate leaders and broker owners. This is the team that runs it.</p>
+        </div>
+        <div class="faces">
+          <figure class="face"><img src="assets/about-us/team-photos/amr-abdelrazzak-2026.jpg" alt="Amr Abdelrazzak" width="800" height="800" style="object-position:35% center"><figcaption>Amr<span>Founder &amp; CEO</span></figcaption></figure>
+          <figure class="face"><img src="assets/about-us/team-photos/Abdullah.webp" alt="Abdullah" width="500" height="500"><figcaption>Abdullah<span>Client Success &amp; Sales</span></figcaption></figure>
+          <figure class="face"><img src="assets/about-us/team-photos/Layla.m1.webp" alt="Layla" width="500" height="500"><figcaption>Layla<span>Talent Acquisition</span></figcaption></figure>
+          <figure class="face"><img src="assets/about-us/team-photos/Mai.K.webp" alt="Mai" width="500" height="500"><figcaption>Mai<span>Operations &amp; HR</span></figcaption></figure>
+          <figure class="face"><img src="assets/about-us/team-photos/Maira-Osama.webp" alt="Myra" width="500" height="500"><figcaption>Myra<span>Talent Sourcing</span></figcaption></figure>
+          <figure class="face"><img src="assets/about-us/team-photos/Hesham.webp" alt="Hisham" width="500" height="373"><figcaption>Hisham<span>Finance &amp; Operations</span></figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="block steps">
+      <div class="wrap">
+        <h2 class="sh">Start in three steps</h2>
+        <ol>
+          <li><b>Answer seven questions</b><span>About your brokerage, your hiring goal and your market. About a minute.</span></li>
+          <li><b>Book a short call</b><span>We set your criteria together: experience, production, area and what you offer agents.</span></li>
+          <li><b>Interviews start landing</b><span>We build your agent list, start calling, and bookings arrive on your calendar.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block faq">
+      <div class="wrap">
+        <h2 class="sh">Questions brokers ask</h2>
+        <div>
+          <details><summary>What counts as a qualified interview?</summary><p>A licensed agent who meets the criteria you set with us and agreed to a time on your calendar to talk about joining your brokerage.</p></details>
+          <details><summary>Where do the agents come from?</summary><p>We build the agent list for your market ourselves, then our team calls them.</p></details>
+          <details><summary>Is there a contract?</summary><p>No long contract. The program is month to month: $799 a month plus a one-time $500 setup fee.</p></details>
+          <details><summary>What if you book fewer than 10 in a month?</summary><p>The missing bookings are credited to the next month until we deliver them.</p></details>
+          <details><summary>Can I hear the calls?</summary><p>Yes. Every booking comes with our call notes and the call recording, so you hear exactly what the agent said.</p></details>
+          <details><summary>Do you guarantee hires?</summary><p>No. We do the finding, screening and booking. Whether an agent joins depends on your offer and the interview.</p></details>
+          <details><summary>How many show up?</summary><p>About 70% or higher, across more than 15,000 appointments we have booked for real estate leaders and broker owners.</p></details>
+          <details><summary>Which markets do you cover?</summary><p>Markets across the United States. Tell us where you recruit and we confirm on the call.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="close">
+      <div class="wrap">
+        <div class="txt">
+          <h2>Fill your interview calendar</h2>
+          <p>10–15 interview bookings on your calendar every month. $799 a month, month to month.</p>
+          <button class="btn" type="button" data-open>See if you qualify <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h11m-4-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="teaser" aria-label="First question of the qualifier">
+          <span class="ts">Question 1 of 7</span>
+          <b>Which best describes you?</b>
+          <button type="button" data-open>Broker-owner</button>
+          <button type="button" data-open>Managing or principal broker</button>
+          <button type="button" data-open>Team leader</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <img src="assets/logo/bpohivelogo-white.png" alt="BPO Hive" width="126" height="32">
+      <span>© 2026 BPO Hive LLC. <a href="privacy-policy">Privacy</a></span>
+    </div>
+  </footer>
+
+  <dialog id="q" aria-labelledby="q-title">
+    <div class="q-head"><span id="q-step">Question 1 of 6</span><button class="q-x" type="button" aria-label="Close" data-close>×</button></div>
+    <div class="bar-track"><div class="bar-fill" id="q-bar"></div></div>
+    <div class="q-body" id="q-body"></div>
+  </dialog>
+
+  <script>
+  (function(){
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Count-up to 15,000+
+    var c = document.getElementById('count'), to = +c.getAttribute('data-to');
+    function fmt(n){ return n.toLocaleString('en-US'); }
+    if (!reduce) {
+      var t0 = null, dur = 1800; c.textContent = '0';
+      var step = function(t){ if (!t0) t0 = t; var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        c.textContent = fmt(Math.round(to * e)) + (p === 1 ? '+' : ''); if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }
+
+    // Live calendar
+    var days = ['Mon','Tue','Wed','Thu','Fri'], times = ['9:00','10:30','12:00','1:30','3:00'];
+    var grid = document.getElementById('grid');
+    var html = '<div class="corner"></div>' + days.map(function(d){ return '<div class="dh">' + d + '</div>'; }).join('');
+    times.forEach(function(tm, r){ html += '<div class="tm">' + tm + '</div>'; days.forEach(function(d, c){ html += '<div class="cell" id="c' + r + c + '"></div>'; }); });
+    grid.innerHTML = html;
+    var B = [
+      [1,0,'6 yrs exp.','Licensed 6 years, 14 closings last year'],
+      [3,2,'22 deals','22 closings last year, wants more leads'],
+      [0,4,'Team lead','Runs a 4-agent team, open to a move'],
+      [2,1,'Top 10%','Top 10% in her office, unhappy with splits'],
+      [4,3,'9 yrs exp.','Licensed 9 years, relocating brokerages'],
+      [1,3,'Relocated','Moved from Dallas, licensed 5 years'],
+      [3,0,'19 deals','19 closings last year, wants coaching'],
+      [0,2,'4 yrs exp.','Licensed 4 years, full-time, local'],
+      [4,1,'Full-time','Licensed 7 years, needs lead support'],
+      [2,4,'Luxury','Luxury listings, open to hear your offer'],
+      [1,1,'11 deals','Full-time agent, 11 closings this year'],
+      [3,4,'8 yrs exp.','Licensed 8 years, wants a better split']
+    ];
+    var month = document.getElementById('month'), tt = document.getElementById('toast-t'), ts = document.getElementById('toast-s'), toast = document.getElementById('toast');
+    function chip(b, isNew){
+      var el = document.getElementById('c' + b[0] + b[1]);
+      el.innerHTML = '<div class="chip' + (isNew ? ' new' : '') + '"><strong>' + times[b[0]] + '</strong>Interview<em>' + b[2] + '</em></div>';
+      var ch = el.firstChild; requestAnimationFrame(function(){ requestAnimationFrame(function(){ ch.classList.add('on'); }); });
+      return ch;
+    }
+    if (reduce) { B.forEach(function(b){ chip(b).classList.add('on'); }); month.textContent = B.length; }
+    else {
+      var i = 0, last = null;
+      var tick = function(){
+        if (i >= B.length) { setTimeout(function(){ document.querySelectorAll('.cell').forEach(function(x){ x.innerHTML=''; }); i = 0; month.textContent = '0'; tick(); }, 2600); return; }
+        if (last) last.classList.remove('new');
+        var b = B[i]; last = chip(b, true);
+        month.textContent = i + 1;
+        tt.textContent = 'Interview booked, ' + days[b[1]] + ' ' + times[b[0]];
+        ts.textContent = b[3];
+        toast.classList.remove('flash'); void toast.offsetWidth; toast.classList.add('flash');
+        i++; setTimeout(tick, 1700);
+      };
+      setTimeout(tick, 900);
+    }
+
+    // Story: auto-advancing steps
+    var tabs = [].slice.call(document.querySelectorAll('.tab')), scenes = [].slice.call(document.querySelectorAll('.scene'));
+    var cur = 0, timer = null, DUR = 5200;
+    function show(n){
+      cur = n;
+      tabs.forEach(function(t, k){ t.setAttribute('aria-selected', k === n ? 'true' : 'false'); var bar = t.querySelector('i'); bar.style.transition = 'none'; bar.style.width = k < n ? '100%' : '0'; });
+      scenes.forEach(function(s, k){ s.classList.toggle('on', k === n); });
+      if (!reduce) { var bar = tabs[n].querySelector('i'); void bar.offsetWidth; bar.style.transition = 'width ' + DUR + 'ms linear'; bar.style.width = '100%'; }
+    }
+    function auto(){ clearTimeout(timer); if (reduce) return; timer = setTimeout(function(){ show((cur + 1) % scenes.length); auto(); }, DUR); }
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ show(+t.getAttribute('data-s')); auto(); }); });
+    show(0); auto();
+  })();
+  </script>
+  <script>
+  (function(){
+    var CAL = 'https://calendly.com/d/43h-5tz-rkf/discovery-call';
+    // Cal.com booking link (free plan), e.g. 'bpohive/agent-recruiting'. Leave empty to use Calendly.
+    var CALCOM_LINK = 'amr-abdelrazzak-7ugy8x/agent-recruiting-call';
+    var STEPS = [
+      { key:'role', q:'Which best describes you?', opts:[['owner','Broker-owner'],['managing','Managing or principal broker'],['team','Team leader'],['agent','I’m an agent looking for a brokerage']] },
+      { key:'agents', q:'How many agents are with you today?', opts:[['1_10','1–10'],['11_50','11–50'],['51_200','51–200'],['200_plus','200+']] },
+      { key:'goal', q:'How many agents do you want to hire in the next 3 months?', opts:[['1_4','1–4'],['5_9','5–9'],['10_15','10–15'],['16_plus','16 or more']] },
+      { key:'timeline', q:'When do you want interviews to start?', opts:[['2_weeks','Within 2 weeks'],['30_days','Within 30 days'],['1_3_months','In 1–3 months']] },
+      { key:'budget', q:'The program is $799 a month plus a one-time $500 setup, for 10–15 interview bookings on your calendar. Does that fit your budget?', opts:[['yes','Yes, that works'],['discuss','I’d need to discuss it'],['no','Not right now']] },
+      { key:'ongoing', q:'Are you looking for a one-time push or ongoing recruiting help?', opts:[['ongoing','Ongoing, every month'],['one_time','A one-time push'],['unsure','Not sure yet']] },
+      { key:'market', q:'Where do you recruit?', input:{ ph:'City, state', label:'City and state' } },
+      { key:'contact', q:'Where should we send your booking details?' }
+    ];
+    var TOTAL = STEPS.length - 1; // contact step isn't counted as a "question"
+    var dlg = document.getElementById('q'), body = document.getElementById('q-body');
+    var stepEl = document.getElementById('q-step'), bar = document.getElementById('q-bar');
+    var ans = {}, i = 0, started = false, done = false;
+    window.dataLayer = window.dataLayer || [];
+    var esc = function(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); };
+
+    function open(){
+      if (!dlg.open) dlg.showModal();
+      if (!started) { started = true; window.dataLayer.push({event:'re_qualifier_started'}); if (window.fbq) fbq('trackCustom','QualifierStarted'); }
+      if (!done) render();
+    }
+    document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', open); });
+    dlg.querySelector('[data-close]').addEventListener('click', function(){ dlg.close(); });
+    dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+
+    function progress(n, label){
+      stepEl.textContent = label;
+      bar.style.width = Math.round(n * 100) + '%';
+    }
+    function backBtn(){ return i > 0 ? '<button class="back" type="button" id="q-back">Back</button>' : '<span></span>'; }
+    function wireBack(){ var b = document.getElementById('q-back'); if (b) b.addEventListener('click', function(){ i--; render(); }); }
+
+    function render(){
+      var s = STEPS[i];
+      if (s.key === 'contact') return renderContact();
+      progress(i / STEPS.length, 'Question ' + (i + 1) + ' of ' + TOTAL);
+      var h = '<h2 id="q-title">' + esc(s.q) + '</h2>';
+      if (s.opts) {
+        h += '<div class="opts" role="group" aria-label="' + esc(s.q) + '">' + s.opts.map(function(o){
+          return '<button class="opt" type="button" data-v="' + o[0] + '" aria-pressed="' + (ans[s.key] === o[0]) + '">' + esc(o[1]) + '</button>';
+        }).join('') + '</div><div class="q-foot">' + backBtn() + '<span></span></div>';
+        body.innerHTML = h;
+        body.querySelectorAll('.opt').forEach(function(b){ b.addEventListener('click', function(){ pick(s.key, b.getAttribute('data-v')); }); });
+        var first = body.querySelector('.opt[aria-pressed="true"]') || body.querySelector('.opt'); if (first) first.focus();
+      } else {
+        h += '<div class="fields"><div class="f full"><label for="q-in">' + esc(s.input.label) + '</label><input id="q-in" placeholder="' + esc(s.input.ph) + '" value="' + esc(ans[s.key] || '') + '"></div></div>'
+          + '<p class="err" id="q-err" role="alert"></p><div class="q-foot">' + backBtn() + '<button class="btn" type="button" id="q-next">Next</button></div>';
+        body.innerHTML = h;
+        var inp = document.getElementById('q-in'); inp.focus();
+        var next = function(){ var v = inp.value.trim(); if (!v) { document.getElementById('q-err').textContent = 'Please enter your city and state.'; inp.focus(); return; } ans[s.key] = v; i++; render(); };
+        document.getElementById('q-next').addEventListener('click', next);
+        inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); next(); } });
+      }
+      wireBack();
+    }
+
+    function pick(key, v){
+      ans[key] = v;
+      if (key === 'role' && v === 'agent') return renderAgentExit();
+      if (key === 'budget' && v !== 'yes') return renderRevisit();
+      i++; setTimeout(render, 120);
+    }
+
+    function renderAgentExit(){
+      progress(1, 'Thanks');
+      body.innerHTML = '<h2 id="q-title">This service is for brokerages</h2><p class="hint" style="font-size:var(--body);margin-top:14px">We book interviews for broker-owners who are hiring agents, so we can’t help with a brokerage search here. Good luck with your next move.</p><div class="q-foot">' + backBtn() + '<button class="btn" type="button" data-close2>Close</button></div>';
+      body.querySelector('[data-close2]').addEventListener('click', function(){ dlg.close(); });
+      wireBack();
+    }
+
+    function renderRevisit(){
+      progress(1, 'Thanks');
+      window.dataLayer.push({ event: 're_qualifier_budget_exit', budget: ans.budget });
+      body.innerHTML = '<h2 id="q-title">Come back when you’re sure</h2><p class="hint" style="font-size:var(--body);margin-top:14px">That’s fine. Take the time you need. When $799 a month for 10–15 interview bookings makes sense for your brokerage, revisit this page and we’ll get you started.</p><div class="q-foot">' + backBtn() + '<button class="btn" type="button" data-close2>Close</button></div>';
+      body.querySelector('[data-close2]').addEventListener('click', function(){ dlg.close(); });
+      wireBack();
+    }
+
+    function renderContact(){
+      progress(TOTAL / STEPS.length, 'Last step');
+      body.innerHTML = '<h2 id="q-title">Where should we send your booking details?</h2>'
+        + '<form id="q-form" novalidate><div class="fields">'
+        + '<div class="f"><label for="c-name">Your name</label><input id="c-name" name="name" autocomplete="name" required></div>'
+        + '<div class="f"><label for="c-company">Brokerage</label><input id="c-company" name="company" autocomplete="organization" required></div>'
+        + '<div class="f"><label for="c-email">Work email</label><input id="c-email" name="email" type="email" autocomplete="email" required></div>'
+        + '<div class="f"><label for="c-phone">Mobile phone</label><input id="c-phone" name="phone" type="tel" autocomplete="tel" required></div>'
+        + '<div class="hp" aria-hidden="true"><label for="c-fax">Fax</label><input id="c-fax" name="companyFax" tabindex="-1" autocomplete="off"></div>'
+        + '</div><p class="err" id="q-err" role="alert"></p>'
+        + '<div class="q-foot">' + backBtn() + '<button class="btn" type="submit" id="q-submit">See my next step</button></div>'
+        + '<p class="fine">We use your details only to reply to you. <a href="privacy-policy" target="_blank">Privacy policy</a>.</p></form>';
+      ['name','company','email','phone'].forEach(function(k){ if (ans[k]) document.getElementById('c-' + k).value = ans[k]; });
+      document.getElementById('c-name').focus();
+      wireBack();
+      document.getElementById('q-form').addEventListener('submit', submit);
+    }
+
+    // Strong fit only (mirrors the server): hiring 10+ in 3 months, budget fits, starting within 30 days, ongoing.
+    function qualifies(){ return ans.role !== 'agent' && ['10_15','16_plus'].indexOf(ans.goal) > -1 && ans.budget === 'yes'
+      && ['2_weeks','30_days'].indexOf(ans.timeline) > -1 && ans.ongoing === 'ongoing'; }
+
+    async function submit(e){
+      e.preventDefault();
+      var f = e.target, err = document.getElementById('q-err');
+      var d = Object.fromEntries(new FormData(f).entries());
+      var need = ['name','company','email','phone'];
+      for (var k = 0; k < need.length; k++) { if (!String(d[need[k]] || '').trim()) { err.textContent = 'Please fill in every field.'; f.elements[need[k]].focus(); return; } }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; f.elements.email.focus(); return; }
+      need.forEach(function(k){ ans[k] = d[k].trim(); });
+      var btn = document.getElementById('q-submit'); btn.disabled = true; btn.textContent = 'One moment…';
+      var payload = Object.assign({}, ans, { companyFax: d.companyFax || '', pageUrl: location.href, referrer: document.referrer });
+      var ok = qualifies(), url = CAL + '?' + new URLSearchParams({ name: ans.name, email: ans.email, utm_source: 'facebook', utm_medium: 'paid', utm_campaign: 'real_estate_recruiting' });
+      try {
+        var r = await fetch('/api/re-recruiting-lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        var j = await r.json().catch(function(){ return {}; });
+        if (r.status === 400) { err.textContent = j.error || 'Please check your details.'; btn.disabled = false; btn.textContent = 'See my next step'; return; }
+        if (r.ok && j.accepted) { if (typeof j.qualified === 'boolean') ok = j.qualified; if (j.bookingUrl) url = j.bookingUrl; }
+      } catch (x) {}
+      done = true;
+      window.dataLayer.push({ event: ok ? 're_recruiting_lead' : 're_recruiting_unqualified', agents: ans.agents, goal: ans.goal, timeline: ans.timeline });
+      if (ok) {
+        if (window.fbq) fbq('track', 'Lead', { content_name: 'Real estate recruiting', value: 799, currency: 'USD' });
+        renderBooking(url);
+      } else {
+        if (window.fbq) fbq('trackCustom', 'UnqualifiedLead', { content_name: 'Real estate recruiting' });
+        renderNotYet();
+      }
+    }
+
+    // All answers in one block, sent into the booking so they show on the calendar event and booking email.
+    function summary(){
+      var lines = [];
+      STEPS.forEach(function(st){
+        if (!st.opts && !st.input) return;
+        var v = ans[st.key], label = v;
+        if (st.opts) st.opts.forEach(function(o){ if (o[0] === v) label = o[1]; });
+        lines.push(st.q + ' ' + label);
+      });
+      lines.push('Brokerage: ' + ans.company + ' | Phone: ' + ans.phone);
+      return lines.join('\n');
+    }
+
+    function renderCalcom(){
+      (function (C, A, L) { var p = function (a, ar) { a.q.push(ar); }; var d = C.document; C.Cal = C.Cal || function () { var cal = C.Cal; var ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; } if (ar[0] === L) { var api = function () { p(api, arguments); }; var ns = ar[1]; api.q = api.q || []; if (typeof ns === 'string') { cal.ns[ns] = cal.ns[ns] || api; p(cal.ns[ns], ar); p(cal, ['initNamespace', ns]); } else p(cal, ar); return; } p(cal, ar); }; })(window, 'https://app.cal.com/embed/embed.js', 'init');
+      Cal('init', { origin: 'https://cal.com' });
+      Cal('ui', { theme: 'light', hideEventTypeDetails: false, layout: 'month_view', cssVarsPerTheme: { light: { 'cal-brand': '#20292F' } } });
+      Cal('inline', { elementOrSelector: '#calendly', calLink: CALCOM_LINK, config: { name: ans.name, email: ans.email, notes: summary(), layout: 'month_view' } });
+      Cal('on', { action: 'bookingSuccessful', callback: function(e){
+        if (window.fbq) fbq('track', 'Schedule', { content_name: 'Real estate recruiting' });
+        window.dataLayer.push({ event: 'calcom_booking', source: 'real_estate_recruiting' });
+        fetch('/api/calendly-booked', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: ans.email, companyName: ans.company, calendly: { event: 'cal.com booking', detail: (e && e.detail && e.detail.data) || {} } }) }).catch(function(){});
+      } });
+    }
+
+    function renderBooking(url){
+      progress(1, 'You qualify');
+      if (CALCOM_LINK) url = 'https://cal.com/' + CALCOM_LINK + '?' + new URLSearchParams({ name: ans.name, email: ans.email, notes: summary() });
+      body.innerHTML = '<h2 id="q-title">You’re a fit. Pick a time to talk.</h2><p class="hint">Your details are filled in. Choose a slot that suits you.</p><div id="calendly"></div><p class="fine">Calendar not loading? <a href="' + esc(url) + '" target="_blank" rel="noopener">Open it in a new tab</a>.</p>';
+      if (CALCOM_LINK) return renderCalcom();
+      var go = function(){ if (window.Calendly && Calendly.initInlineWidget) { Calendly.initInlineWidget({ url: url + '&hide_gdpr_banner=1', parentElement: document.getElementById('calendly'), prefill: { name: ans.name, email: ans.email } }); } else { setTimeout(go, 300); } };
+      go();
+    }
+
+    function renderNotYet(){
+      progress(1, 'Thanks');
+      body.innerHTML = '<h2 id="q-title">Thanks, we have your details</h2><p class="hint" style="font-size:var(--body);margin-top:14px">This program is built for brokerages hiring 10 or more agents a quarter and ready to start within a month. Our team will review your answers and email you if it’s a fit.</p><div class="q-foot"><span></span><button class="btn" type="button" data-close2>Close</button></div>';
+      body.querySelector('[data-close2]').addEventListener('click', function(){ dlg.close(); });
+    }
+
+    window.addEventListener('message', function(ev){
+      if (ev.origin !== 'https://calendly.com' || !ev.data || ev.data.event !== 'calendly.event_scheduled') return;
+      if (window.fbq) fbq('track', 'Schedule', { content_name: 'Real estate recruiting' });
+      window.dataLayer.push({ event: 'calendly_event_scheduled', source: 'real_estate_recruiting' });
+      fetch('/api/calendly-booked', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: ans.email, companyName: ans.company, calendly: ev.data.payload }) }).catch(function(){});
+    });
+  })();
+  </script>
+</body>
+</html>
