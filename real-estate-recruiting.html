@@ -805,7 +805,9 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; f.elements.email.focus(); return; }
       need.forEach(function(k){ ans[k] = d[k].trim(); });
       var btn = document.getElementById('q-submit'); btn.disabled = true; btn.textContent = 'One moment…';
-      var payload = Object.assign({}, ans, { companyFax: d.companyFax || '', pageUrl: location.href, referrer: document.referrer });
+      var ck = function(n){ var m = document.cookie.match('(?:^|; )' + n + '=([^;]*)'); return m ? decodeURIComponent(m[1]) : ''; };
+      var eventId = 'relead_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+      var payload = Object.assign({}, ans, { companyFax: d.companyFax || '', pageUrl: location.href, referrer: document.referrer, eventId: eventId, fbp: ck('_fbp'), fbc: ck('_fbc') });
       var ok = qualifies(), url = CAL + '?' + new URLSearchParams({ name: ans.name, email: ans.email, utm_source: 'facebook', utm_medium: 'paid', utm_campaign: 'real_estate_recruiting' });
       try {
         var r = await fetch('/api/re-recruiting-lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
@@ -816,7 +818,7 @@
       done = true;
       window.dataLayer.push({ event: ok ? 're_recruiting_lead' : 're_recruiting_unqualified', agents: ans.agents, goal: ans.goal, timeline: ans.timeline });
       if (ok) {
-        if (window.fbq) fbq('track', 'Lead', { content_name: 'Real estate recruiting', value: 799, currency: 'USD' });
+        if (window.fbq) fbq('track', 'Lead', { content_name: 'Real estate recruiting', value: 799, currency: 'USD' }, { eventID: eventId });
         renderBooking(url);
       } else {
         if (window.fbq) fbq('trackCustom', 'UnqualifiedLead', { content_name: 'Real estate recruiting' });

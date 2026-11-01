@@ -10,6 +10,7 @@ const TIMELINES = { '2_weeks': 'Within 2 weeks', '30_days': 'Within 30 days', '1
 const BUDGETS = { yes: 'Yes, $799/month + $500 setup works', discuss: 'Needs to discuss it', no: 'Not right now' };
 const recent = new Map();
 const { saveEntry } = require('../lib/entries.cjs');
+const capi = require('../lib/meta-capi.cjs');
 
 const text = (v, n = 200) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -69,7 +70,8 @@ module.exports = async (req, res) => {
     name, firstName: parts[0] || '', lastName: parts.slice(1).join(' '), email: text(b.email, 200).toLowerCase(),
     company: text(b.company, 160), phone: text(b.phone, 60), market: text(b.market, 160), agents: text(b.agents, 20),
     role: text(b.role, 20), goal: text(b.goal, 20), timeline: text(b.timeline, 20), budget: text(b.budget, 20), ongoing: text(b.ongoing, 20),
-    pageUrl: text(b.pageUrl, 500), referrer: text(b.referrer, 500), submittedAt: new Date().toISOString()
+    pageUrl: text(b.pageUrl, 500), referrer: text(b.referrer, 500), submittedAt: new Date().toISOString(),
+    eventId: /^[a-z0-9_.-]{8,80}$/i.test(text(b.eventId, 80)) ? text(b.eventId, 80) : '', fbp: text(b.fbp, 200), fbc: text(b.fbc, 400)
   };
   const missing = ['name', 'email', 'company', 'phone', 'market', 'agents', 'role', 'goal', 'timeline', 'budget', 'ongoing'].some(k => !lead[k]);
   if (missing || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email) || !AGENTS[lead.agents] || !ROLES[lead.role]
@@ -117,7 +119,16 @@ module.exports = async (req, res) => {
     owner_email_reply_to: lead.email,
     summary: { name: lead.name, email: lead.email, phone: lead.phone, company: lead.company, market: lead.market, agents: agentsLabel, status }
   };
-  await saveEntry('Real estate recruiting', { name: lead.name, email: lead.email, brokerage: lead.company, phone: lead.phone, market: lead.market, agents: agentsLabel, role: ROLES[lead.role], goal: GOALS[lead.goal], timeline: TIMELINES[lead.timeline], budget: BUDGETS[lead.budget], ongoing: ONGOING[lead.ongoing], status }, { page: lead.pageUrl, referrer: lead.referrer });
-  const delivered = await deliver(event);
+  await saveEntry('Real estate recruiting', { name: lead.name, email: lead.email, brokerage: lead.company, phone: lead.phone, market: lead.market, agents: agentsLabel, role: ROLES[lead.role], goal: GOALS[lead.goal], timeline: TIMELINES[lead.timeline], budget: BUDGETS[lead.budget], ongoing: ONGOING[lead.ongoing], status, eventId: lead.eventId }, { page: lead.pageUrl, referrer: lead.referrer });
+  // Qualified leads also go to Meta from the server, so the ad gets credit even when the pixel is blocked.
+  const [delivered, meta] = await Promise.all([
+    deliver(event),
+    qualified && lead.eventId ? capi.sendLead({
+      email: lead.email, phone: lead.phone, firstName: lead.firstName, lastName: lead.lastName, pageUrl: lead.pageUrl,
+      eventId: lead.eventId, fbp: lead.fbp, fbc: lead.fbc,
+      ip: text(req.headers?.['x-forwarded-for'], 200).split(',')[0].trim(), userAgent: text(req.headers?.['user-agent'], 400)
+    }) : null
+  ]);
+  if (meta && !meta.sent) console.error('RE lead not sent to Meta:', meta.reason);
   return res.status(200).json({ accepted: true, qualified, bookingUrl, delivered });
 };
