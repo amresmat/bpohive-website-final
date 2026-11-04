@@ -44,7 +44,7 @@ table{width:100%;border-collapse:collapse;min-width:860px}
 th,td{padding:11px 14px;border-bottom:1px solid #edf3f7;text-align:left;vertical-align:top}
 th{background:#fff;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfe}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .tab{padding:9px 16px;border:1px solid var(--line);border-radius:6px;background:#fff;font-weight:600;cursor:pointer}
 .tab.on{border-color:var(--blue);background:var(--blue);color:#fff}
 .tab b{margin-left:6px;padding:1px 7px;border-radius:10px;background:rgba(0,0,0,.08);font-size:12px}.tab.on b{background:rgba(255,255,255,.2)}
@@ -87,6 +87,7 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
 .ins-tile small{display:block;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .ins-tile b{display:block;margin:6px 0 2px;font-family:"DM Sans",Inter,sans-serif;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .ins-tile span{display:block;color:var(--muted);font-size:13px;min-height:18px}
+.ins-tile b.ins-path{font-size:18px;letter-spacing:-.01em;line-height:1.25;word-break:break-all;margin-top:10px}
 .card h3{margin:0;padding:16px 16px 8px;font-size:15px;font-weight:700}
 .ins-chart,.ins-funnel{margin-bottom:14px}
 .ins-scroll{overflow-x:auto}.ins-svg{display:block;width:100%;min-width:560px;height:auto;padding:0 8px 4px}
@@ -98,7 +99,7 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
 .ins-bar i{display:block;height:10px;border-radius:5px;background:#0f7ac4;flex:0 0 auto;max-width:calc(100% - 44px)}
 .ins-bar.big i{height:18px;border-radius:9px;max-width:100%}.ins-bar span{color:var(--muted);font-size:13px}
 .ins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}
-.ins-table table{min-width:0}.ins-table td,.ins-table th{padding:9px 16px}.ins-table tbody tr{cursor:default}.ins-table tbody tr:hover{background:none}
+.ins-table table{min-width:0}.ins-table.tablewrap table{min-width:760px}.ins-table td,.ins-table th{padding:9px 16px}.ins-table tbody tr{cursor:default}.ins-table tbody tr:hover{background:none}
 td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tr.is-booked td{background:#eaf7ef;border-bottom-color:#cfe9d8}tr.is-booked td:first-child{box-shadow:inset 4px 0 0 #1e7a43}tr.is-booked:hover td{background:#dff2e6}tr.is-booked b{color:#1e7a43}
 tr.is-submit td{background:#f3f8fc}tr.is-submit td:first-child{box-shadow:inset 4px 0 0 #0f7ac4}

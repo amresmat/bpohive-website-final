@@ -23,7 +23,7 @@
   function label(name) { return FIELD_LABELS[name] || name; }
   function rangeSel(cur) { return '<select id="ins-range">' + [7, 30, 90].map(function (d) { return '<option value="' + d + '"' + (d === cur ? ' selected' : '') + '>Last ' + d + ' days</option>'; }).join('') + '</select>'; }
   function head(title, sub, extra) { return '<div class="ins-head"><div><h1>' + title + '</h1><p class="sub">' + sub + '</p></div><div class="bar" style="margin:0">' + (extra || '') + '</div></div>'; }
-  function tabs(cur) { return '<div class="tabs"><a class="tab' + (cur === 'overview' ? ' on' : '') + '" href="#insight">Overview</a><a class="tab' + (cur === 'sessions' ? ' on' : '') + '" href="#insight/sessions">Recordings</a><a class="tab' + (cur === 'forms' ? ' on' : '') + '" href="#insight/forms">Forms</a></div>'; }
+  function tabs(cur) { return '<div class="tabs">' + [['overview', '#insight', 'Overview'], ['pages', '#insight/pages', 'Pages'], ['sessions', '#insight/sessions', 'Recordings'], ['forms', '#insight/forms', 'Forms']].map(function (t) { return '<a class="tab' + (cur === t[0] ? ' on' : '') + '" href="' + t[1] + '">' + t[2] + '</a>'; }).join('') + '</div>'; }
   function table(title, rows, cols) {
     return '<div class="card ins-table"><h3>' + esc(title) + '</h3>' + (rows.length ? '<table><thead><tr>' + cols.map(function (c) { return '<th' + (c.num ? ' class="num"' : '') + '>' + esc(c.h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td' + (c.num ? ' class="num"' : '') + '>' + c.f(r) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '<div class="empty">No data yet.</div>') + '</div>';
   }
@@ -98,6 +98,39 @@
   function funnel(steps) {
     var max = Math.max(1, steps[0][1]);
     return '<div class="ins-steps">' + steps.map(function (s, i) { var prev = i ? steps[i - 1][1] : s[1]; return '<div class="ins-step"><div class="ins-step-l"><b>' + esc(s[0]) + '</b><span>' + s[1].toLocaleString() + (i ? ' · ' + pct(s[1], prev) + '% of previous step' : '') + '</span></div><div class="ins-bar big"><i style="width:' + Math.max(1, pct(s[1], max)) + '%"></i></div></div>'; }).join('') + '</div>';
+  }
+
+
+  /* ---------- Pages ---------- */
+  var PG = null, PSORT = 'views';
+  function pagesView() {
+    main.innerHTML = head('Pages', 'The most visited pages on bpohive.com, and which ones lead to booked calls.', rangeSel(RANGE)) + tabs('pages') + '<div class="bar" id="ins-filters"></div><div id="ins-body"><div class="empty">Loading…</div></div>';
+    $('ins-range').onchange = function () { RANGE = +this.value; pagesView(); };
+    Promise.all([api({ view: 'overview', days: RANGE }), api({ view: 'sessions', days: RANGE, limit: 3000 })]).then(function (r) {
+      PG = { o: r[0], rows: r[1].rows || [] };
+      $('ins-filters').innerHTML = filterSel(PG.rows) + '<select id="ins-sort"><option value="views">Sort by views</option><option value="visitors">Sort by visitors</option><option value="entries">Sort by landings</option><option value="booked">Sort by booked calls</option><option value="scroll">Sort by scroll depth</option></select>';
+      $('ins-sort').value = PSORT; $('ins-sort').onchange = function () { PSORT = this.value; drawPages(); };
+      wireFilters(drawPages); drawPages();
+    }).catch(function (e) { $('ins-body').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
+  }
+  function drawPages() {
+    var rows = applyFilter(PG.rows), filtered = Boolean(FILTER.country || FILTER.source), scroll = {}, map = {};
+    PG.o.scroll.forEach(function (x) { scroll[x.path] = x.pct; });
+    rows.forEach(function (r) {
+      Object.keys(r.paths || {}).forEach(function (p) {
+        var m = map[p] = map[p] || { path: p, views: 0, visitors: 0, entries: 0, popup: 0, booked: 0 };
+        m.views += r.paths[p]; m.visitors++; if (r.popup) m.popup++; if (r.booked) m.booked++;
+      });
+      if (r.entry && map[r.entry]) map[r.entry].entries++;
+    });
+    var list = Object.keys(map).map(function (k) { var m = map[k]; m.scroll = filtered ? null : (scroll[k] != null ? scroll[k] : null); return m; });
+    list.sort(function (a, b) { return (b[PSORT] || 0) - (a[PSORT] || 0) || b.views - a.views; });
+    var totalViews = list.reduce(function (a, m) { return a + m.views; }, 0), max = Math.max(1, Math.max.apply(null, list.map(function (m) { return m.views; })));
+    var body = '<div class="ins-tiles">' + [['Pages viewed', list.length, 'different pages'], ['Page views', totalViews, rows.length ? (totalViews / rows.length).toFixed(1) + ' per visitor' : ''], ['Most visited', list.length ? list.slice().sort(function (a, b) { return b.views - a.views; })[0].path : '–', ''], ['Top landing page', list.length ? list.slice().sort(function (a, b) { return b.entries - a.entries; })[0].path : '–', '']].map(function (x) { return '<div class="ins-tile"><small>' + x[0] + '</small><b' + (typeof x[1] === 'string' ? ' class="ins-path"' : '') + '>' + esc(typeof x[1] === 'number' ? x[1].toLocaleString() : x[1]) + '</b><span>' + esc(x[2]) + '</span></div>'; }).join('') + '</div>';
+    body += '<div class="card tablewrap ins-table"><table><thead><tr><th>Page</th><th>Views</th><th class="num">Visitors</th><th class="num">Landed here</th><th class="num">Avg scroll</th><th class="num">Opened pop-up</th><th class="num">Booked a call</th></tr></thead><tbody>' +
+      (list.length ? list.map(function (m) { return '<tr' + (m.booked ? ' class="is-booked"' : '') + '><td><a href="' + esc(m.path) + '" target="_blank" rel="noopener">' + esc(m.path) + '</a></td><td>' + barCell(m.views, max) + '</td><td class="num">' + m.visitors + '</td><td class="num">' + m.entries + '</td><td class="num">' + (m.scroll != null ? m.scroll + '%' : '') + '</td><td class="num">' + (m.popup || '') + '</td><td class="num">' + (m.booked ? '<span class="tag ok">' + m.booked + '</span>' : '') + '</td></tr>'; }).join('') : '<tr><td colspan="7" class="empty">No page views yet.</td></tr>') + '</tbody></table></div>';
+    body += '<p class="ins-note">Views count every time a page was opened. Visitors counts people. "Landed here" is the first page of their visit. "Booked a call" counts visitors who saw this page during a visit that ended in a booking.' + (filtered ? ' Scroll depth is only shown without filters.' : '') + '</p>';
+    $('ins-body').innerHTML = body;
   }
 
   /* ---------- Recordings list ---------- */
@@ -193,14 +226,15 @@
   }
 
   window.BH_INSIGHT = {
-    nav: function () { return '<h4>Analytics</h4><a href="#insight">Overview</a><a href="#insight/sessions">Recordings</a><a href="#insight/forms">Forms</a>'; },
+    nav: function () { return '<h4>Analytics</h4><a href="#insight">Overview</a><a href="#insight/pages">Pages</a><a href="#insight/sessions">Recordings</a><a href="#insight/forms">Forms</a>'; },
     route: function (parts, el) {
       main = el;
       if (player) { try { player.pause(); } catch (e) {} player = null; }
-      var want = parts[0] === 'forms' ? '#insight/forms' : (parts[0] === 'sessions' || parts[0] === 's') ? '#insight/sessions' : '#insight';
+      var want = parts[0] === 'forms' ? '#insight/forms' : parts[0] === 'pages' ? '#insight/pages' : (parts[0] === 'sessions' || parts[0] === 's') ? '#insight/sessions' : '#insight';
       [].forEach.call(document.querySelectorAll('.side a'), function (a) { if (/^#insight/.test(a.getAttribute('href'))) a.classList.toggle('on', a.getAttribute('href') === want); });
       if (parts[0] === 'sessions') return sessions();
       if (parts[0] === 'forms') return formsView();
+      if (parts[0] === 'pages') return pagesView();
       if (parts[0] === 's' && parts[1]) return replay(parts[1]);
       return overview();
     }
