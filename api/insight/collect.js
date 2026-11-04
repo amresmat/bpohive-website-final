@@ -36,5 +36,7 @@ module.exports = async (req, res) => {
   try { body = await readBody(req); } catch (e) { return res.status(/large/.test(e.message) ? 413 : 400).end(); }
   if (!body || JSON.stringify(body).length > 1024 * 1024) return res.status(413).end();
   try { await ingest(body, req); } catch (e) { console.error('Insight ingest failed:', e.message); return res.status(400).end(); }
+  // Site traffic also nudges the follow-up email job (it runs at most every 10 minutes).
+  try { await require('../../lib/followup.cjs').run(); } catch (e) { console.error('Follow-up run failed:', e.message); }
   return res.status(204).end();
 };
