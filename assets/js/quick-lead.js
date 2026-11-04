@@ -127,6 +127,23 @@
         dlg.showModal(); var f = form.querySelector('input[name=name]'); if (f) f.focus();
       });
     });
+    // "Finish your request" links in follow-up emails reopen the pop-up with what the person typed.
+    var resumeToken = new URLSearchParams(location.search).get('resume');
+    if (resumeToken) {
+      try { var u = new URL(location.href); u.searchParams.delete('resume'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (x) {}
+      fetch('/api/followup/resume?t=' + encodeURIComponent(resumeToken), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        var f = (j && j.fields) || {};
+        Object.keys(f).forEach(function (k) {
+          var els = form.querySelectorAll('[name="' + k + '"]'); if (!els.length) return;
+          if (els[0].type === 'radio') { [].forEach.call(els, function (el) { el.checked = el.value === f[k]; }); }
+          else { els[0].value = f[k]; }
+          els[0].dispatchEvent(new Event('input', { bubbles: true })); els[0].dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        cta = 'Follow-up email'; dlg.showModal();
+        var empty = [].filter.call(form.querySelectorAll('input[required],select[required]'), function (el) { return el.type === 'radio' ? !form.querySelector('[name="' + el.name + '"]:checked') : !el.value; })[0];
+        if (empty) empty.focus();
+      }).catch(function () {});
+    }
     dlg.querySelector('.ql-x').addEventListener('click', function () { dlg.close(); });
     dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
     form.addEventListener('submit', function (e) {
