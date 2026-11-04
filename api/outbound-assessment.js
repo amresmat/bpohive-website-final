@@ -103,7 +103,7 @@ function qualifiedEmail(lead, forecast, bookingUrl) {
           <ul>
             <li>Target market: ${escapeHtml(lead.targetMarket)}</li>
             <li>Average revenue per sale: ${escapeHtml(lead.averageSale)}</li>
-            <li>Recommended campaign: 30-day Outbound Validation Sprint</li>
+            <li>Recommended campaign: 3-month Outbound Validation Sprint</li>
             <li>Channels: phone, email, and LinkedIn</li>
             <li>Directional meeting range: ${escapeHtml(forecast.meetingRange)}</li>
           </ul>
