@@ -26,7 +26,7 @@
     $('fu-body').innerHTML = state + tiles + preview +
       '<div class="card tablewrap ins-table" style="margin-bottom:14px"><h3>Due next</h3><table><thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Next</th><th>Page</th></tr></thead><tbody>' + (dueRows || '<tr><td colspan="5" class="empty">Nobody is due right now.</td></tr>') + '</tbody></table></div>' +
       '<div class="card tablewrap ins-table"><h3>History</h3><table><thead><tr><th>When</th><th>Name</th><th>Email</th><th>Company</th><th>What happened</th></tr></thead><tbody>' + (logRows || '<tr><td colspan="5" class="empty">No emails sent yet.</td></tr>') + '</tbody></table></div>' +
-      '<p class="ins-note">Rules: one email an hour after someone stops typing, one reminder three days later, never more. Anyone who sends a form, unsubscribes, uses a bpohive.com address, or came from the careers or real estate recruiting pages is left alone. Visitors in Canada are only emailed if they ticked the marketing box.</p>';
+      '<p class="ins-note">Rules: one email an hour after someone stops typing, one reminder three days later, never more. Anyone who sends a form, unsubscribes, uses a bpohive.com address, or came from the careers or real estate recruiting pages is left alone.</p>';
     var fr = $('fu-frame'); fr.srcdoc = p.html;
     [].forEach.call($('fu-body').querySelectorAll('.tabs .tab'), function (t) { t.onclick = function () { PREVIEW_STEP = +t.dataset.s; draw(); }; });
   }
