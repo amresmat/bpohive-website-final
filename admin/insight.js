@@ -30,7 +30,7 @@
   function barCell(n, max) { return '<div class="ins-bar"><i style="width:' + pct(n, max) + '%"></i><span>' + n + '</span></div>'; }
 
   /* ---------- Overview ---------- */
-  var SOURCE_LABELS = { chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity', gemini: 'Google Gemini', copilot: 'Microsoft Copilot', 'you.com': 'You.com', poe: 'Poe', mistral: 'Mistral', deepseek: 'DeepSeek', grok: 'Grok', 'meta ai': 'Meta AI', 'duck.ai': 'Duck.ai', google: 'Google search', bing: 'Bing search', duckduckgo: 'DuckDuckGo', yahoo: 'Yahoo', 'google ads': 'Google Ads', linkedin: 'LinkedIn', facebook: 'Facebook / Instagram', x: 'X (Twitter)', youtube: 'YouTube', clutch: 'Clutch', direct: 'Direct (typed the address or a bookmark)' };
+  var SOURCE_LABELS = { chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity', gemini: 'Google Gemini', copilot: 'Microsoft Copilot', 'you.com': 'You.com', poe: 'Poe', mistral: 'Mistral', deepseek: 'DeepSeek', grok: 'Grok', 'meta ai': 'Meta AI', 'duck.ai': 'Duck.ai', google: 'Google search', bing: 'Bing search', duckduckgo: 'DuckDuckGo', yahoo: 'Yahoo', 'google ads': 'Google Ads', linkedin: 'LinkedIn', facebook: 'Facebook / Instagram', x: 'X (Twitter)', youtube: 'YouTube', clutch: 'Clutch', direct: 'Direct (typed the address or a bookmark)', followup: 'Follow-up email' };
   var AI = { chatgpt: 1, claude: 1, perplexity: 1, gemini: 1, copilot: 1, 'you.com': 1, poe: 1, mistral: 1, deepseek: 1, grok: 1, 'meta ai': 1, 'duck.ai': 1 };
   function srcLabel(name) { return SOURCE_LABELS[name] || name; }
   var FILTER = { country: '', source: '' };

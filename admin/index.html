@@ -66,6 +66,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfe}
 .mini{height:30px;padding:0 10px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer;font-size:13px}
 .actions{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;margin:0 -24px -24px;padding:14px 24px;border-top:1px solid var(--line);background:#fff;border-radius:0 0 10px 10px}
 .actions .msg{margin-left:auto;color:var(--muted);font-size:14px}
+.note code{padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.06);font-size:13px}
 .note{padding:14px 16px;border:1px solid #f3dfae;border-radius:8px;background:#fff8e6;color:#6b5414;margin-bottom:16px}
 .login{max-width:380px;margin:12vh auto;padding:32px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .login img{height:34px;margin-bottom:18px}.login label{display:grid;gap:6px;font-size:13px;font-weight:600;color:#344d5c}
@@ -145,6 +146,7 @@ tr.is-submit td{background:#f3f8fc}tr.is-submit td:first-child{box-shadow:inset 
 <dialog id="detail"><div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2 id="d-title"></h2><div id="d-sub" style="color:#5d7280"></div><dl id="d-body"></dl><button class="btn del" id="d-del" type="button" style="margin-top:22px">Delete this entry</button></div></dialog>
 
 <script src="/admin/insight.js"></script>
+<script src="/admin/followup.js"></script>
 <script>
 (function(){
 var REPO='amresmat/bpohive-website-final',BRANCH='main',API='/api/gh/repos/'+REPO;
@@ -163,7 +165,7 @@ function listFolder(folder){return gh('/contents/'+folder+'?ref='+BRANCH).then(f
 
 /* ---------- Navigation ---------- */
 function buildNav(){
-  var h='<h4>Leads</h4><a href="#entries">Form entries</a>'+(window.BH_INSIGHT?window.BH_INSIGHT.nav():'')+'<h4>Content</h4>';
+  var h='<h4>Leads</h4><a href="#entries">Form entries</a>'+(window.BH_FOLLOWUP?'<a href="#followup">Follow-up emails</a>':'')+(window.BH_INSIGHT?window.BH_INSIGHT.nav():'')+'<h4>Content</h4>';
   CFG.collections.forEach(function(c){if(c.folder)h+='<a href="#c/'+c.name+'">'+esc(c.label)+'</a>'});
   CFG.collections.forEach(function(c){if(c.files){h+='<h4>'+esc(c.label)+'</h4>';c.files.forEach(function(f){h+='<a href="#f/'+c.name+'/'+f.name+'">'+esc(f.label||f.name)+'</a>'})}});
   h+='<h4>Website</h4><a href="/" target="_blank" rel="noopener">View live site ↗</a>';
@@ -173,6 +175,7 @@ function markNav(){var h=location.hash||'#entries';[].forEach.call($('side').que
 function route(){
   var h=(location.hash||'#entries').slice(1).split('/');markNav();
   if(h[0]==='insight'&&window.BH_INSIGHT)return window.BH_INSIGHT.route(h.slice(1),main);
+  if(h[0]==='followup'&&window.BH_FOLLOWUP)return window.BH_FOLLOWUP.view(main);
   if(h[0]==='c'){var col=CFG.collections.find(function(c){return c.name===h[1]});if(!col)return entries();return h[2]?editItem(col,decodeURIComponent(h[2])):listCollection(col)}
   if(h[0]==='f'){var c2=CFG.collections.find(function(c){return c.name===h[1]});var file=c2&&c2.files.find(function(f){return f.name===h[2]});if(file)return editSettingsFile(c2,file)}
   entries();
