@@ -43,7 +43,7 @@ test('preview mode sends nothing, live mode sends one email per person, then a r
   r = await fu.run({ force: true });
   assert.equal(sentMail.length, 2);
   const m = sentMail.find(x => x.to[0].email === 'jane@northwind.io');
-  assert.equal(m.sender.email, 'success@bpohive.com'); assert.equal(m.subject, "Jane, your request didn't reach us");
+  assert.equal(m.sender.email, 'success@bpohive.com'); assert.equal(m.subject, 'Jane, your calendar almost got busier 📅');
   assert.match(m.htmlContent, /Northwind/); assert.match(m.htmlContent, /Unsubscribe/); assert.match(m.headers['List-Unsubscribe'], /unsubscribe\?t=/);
   r = await fu.run({ force: true }); assert.equal(sentMail.length, 2, 'no repeat within 3 days');
   // three days later -> reminder
