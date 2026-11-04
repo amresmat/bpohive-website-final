@@ -84,5 +84,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/followup/run",
+      "schedule": "7 14 * * *"
+    }
   ]
 }
