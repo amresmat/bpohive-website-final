@@ -12,6 +12,7 @@ function cmd(c) { const [op, k, ...a] = c; switch (op) {
   case 'ZADD': { const z = Z.get(k) || new Map(); Z.set(k, z); z.set(a[1], num(a[0])); return 1; }
   case 'ZRANGE': { const z = [...(Z.get(k) || new Map())].sort((x, y) => x[1] - y[1]).map(x => x[0]); const e = num(a[1]); return z.slice(num(a[0]), e < 0 ? z.length + e + 1 : e + 1); }
   case 'SMEMBERS': return [...(SETS.get(k) || [])];
+  case 'SREM': { const st = SETS.get(k); return st && st.delete(a[0]) ? 1 : 0; }
   case 'SADD': { const s = SETS.get(k) || new Set(); SETS.set(k, s); a.forEach(x => s.add(x)); return 1; }
   case 'HGETALL': { const h = H.get(k); return h ? [...h].flat() : []; }
   case 'HGET': { const h = H.get(k); return h && h.has(a[0]) ? h.get(a[0]) : null; }
@@ -56,15 +57,19 @@ global.fetch = async (url, opt = {}) => {
 };
 const pl = require('../lib/pipeline.cjs');
 
-test('sheet tabs are read by their headers, wherever the columns are', () => {
-  const rows = pl.readTab([['Timestamp', 'Name', 'Title', 'Company', 'Campaign', 'Latest Update', 'Update Trail', 'Number'],
-    ['05 Nov 2026 08:06', 'Cenk Temiz', 'CEO', 'Portel', 'BPO Hive', 'Booked a meeting', '05 Nov – Booked', 'cenk@portel.com'],
-    ['', '', '', '', '', '', '', ''], ['16 Oct 2026 22:39', 'Matt LeBlanc', 'Owner', 'El Pollo Guapo', 'Max', 'Not interested', '', '1 860 246 2800']]);
+test('Lead Entry sheets are read by their headers; appointment times use the right time zone', () => {
+  const H1 = ['Timestamp', 'Vertical Type', 'Prospect Name', 'Business Name', ' Prospect Title/Position', 'Agent Name', 'Appointment Date', 'Appointment Time', 'Timezone', 'Prospect Email', 'Prospect Phone Number USE FORMAT (000) 000-0000 ONLY', 'Call Recording Link', 'Call notes', 'Variable question', 'Prospect Phone 2', 'Location / Address', 'Call Recording Link 2', 'Confirmation Status', 'Pre-Meeting Follow-up', 'Show Status'];
+  const rows = pl.readTab([H1,
+    ['10/30/2026 18:52:30', '', 'Jacob Morley', 'AutoManager', 'CEO', 'Shayen', '10/30/2026', '3:30:00 PM', 'EST', 'jake@automanager.com', '+1 315 854 2187', 'https://rec/1', 'Wants more sales', '', '', '', '', 'Confirmed', '', 'Showed Up'],
+    ['9/14/2026 14:29', 'GCC - General', 'Mohammad Ammar', 'Robert Walters', 'Head of BD', 'Joy', 'Thu, Sep 10, 2026', '2:00 PM', '', '', '+966560641222', 'https://rec/2', 'Interested', '', '', '', '', '', '', 'No-Show']]);
   assert.equal(rows.length, 2);
-  assert.equal(rows[0].email, 'cenk@portel.com'); assert.equal(rows[0].campaign, 'BPO Hive');
-  assert.equal(rows[1].phone, '1 860 246 2800'); assert.equal(rows[1].email, '');
-  assert.equal(pl.callerFromTitle('Hot Leads Juwayriya'), 'Juwayriya');
-  assert.equal(pl.callerFromTitle('Hot Leads Internal Sales Zeina'), 'Zeina');
+  assert.equal(rows[0].caller, 'Shayen'); assert.equal(rows[0].email, 'jake@automanager.com'); assert.equal(rows[0].phone, '+1 315 854 2187'); assert.equal(rows[0].recording, 'https://rec/1'); assert.equal(rows[0].show, 'Showed Up'); assert.equal(rows[0].confirm, 'Confirmed');
+  assert.equal(rows[1].title, 'Head of BD'); assert.equal(rows[1].vertical, 'GCC - General');
+  assert.equal(new Date(pl.apptTime('10/30/2026', '3:30:00 PM', 'EST', 'Asia/Dubai')).toISOString(), '2026-10-30T19:30:00.000Z'); // EDT that day
+  assert.equal(new Date(pl.apptTime('Thu, Sep 10, 2026', '2:00 PM', '', 'Asia/Dubai')).toISOString(), '2026-09-10T10:00:00.000Z');
+  assert.equal(new Date(pl.apptTime('11/11/2026', '12:00:00 PM', '', 'America/New_York')).toISOString(), '2026-11-11T17:00:00.000Z');
+  assert.equal(pl.sheetOutcome('Showed Up'), 'showed'); assert.equal(pl.sheetOutcome('No-Show'), 'no_show'); assert.equal(pl.sheetOutcome(''), '');
+  assert.equal(pl.sheetIdOf('https://docs.google.com/spreadsheets/d/18SdZiU_9y5lI2eYLzwWX-NS1rx2nYV2DukvgbV74eQ0/edit#gid=1'), '18SdZiU_9y5lI2eYLzwWX-NS1rx2nYV2DukvgbV74eQ0');
 });
 
 test('only signed tokens from our Google accounts can push sheets', async () => {
@@ -83,11 +88,26 @@ test('only signed tokens from our Google accounts can push sheets', async () => 
 test('website, sheets and Calendly merge into one pipeline; outcomes sync to Calendly', async () => {
   process.env.CALENDLY_TOKEN = 'cal';
   L.set('entries', [JSON.stringify({ id: 'e1', form: 'Build my campaign', at: iso(now - 2 * 864e5), page: 'https://www.bpohive.com/', fields: { name: 'Jane Cooper', email: 'jane@northwind.io', company: 'Northwind' } })]);
-  await pl.saveSheets({ sheets: [{ id: '19r0AwkMBJlcrQEL9vZ5wtUDHxsJ-XDiTQhrwf2mX5HY', title: 'Hot Leads Juwayriya', tab: 'Hot Leads', rows: [['Timestamp', 'Name', 'Title', 'Company', 'Campaign', 'Latest Update', 'Update Trail'], [new Date(now - 6 * 864e5).toUTCString(), 'Cenk Temiz', 'CEO', 'Portel', 'BPO Hive', 'Booked a meeting', 'Booked']] }] }, 'amr@bpohive.com');
+  const d = new Date(now - 2 * 864e5), mdy = (d.getUTCMonth() + 1) + '/' + d.getUTCDate() + '/' + d.getUTCFullYear();
+  const later = new Date(now + 3 * 864e5), mdy2 = (later.getUTCMonth() + 1) + '/' + later.getUTCDate() + '/' + later.getUTCFullYear();
+  const HDR = ['Timestamp', 'Prospect Name', 'Business Name', 'Prospect Title/Position', 'Agent Name', 'Appointment Date', 'Appointment Time', 'Timezone', 'Prospect Email', 'Call Recording Link', 'Confirmation Status', 'Show Status'];
+  const t = s => new Date(now - 6 * 864e5).toUTCString();
+  const r = await pl.saveSheets({ sheets: [
+    { id: '18SdZiU_9y5lI2eYLzwWX-NS1rx2nYV2DukvgbV74eQ0', title: 'BPO Hive USA Lead Entry Form (Responses)', tab: 'Form Responses 1', rows: [HDR,
+      [t(), 'Cenk Temiz', 'Portel', 'CEO', 'Juwayriya', iso(now - 2 * 864e5).slice(0, 10), new Date(now - 2 * 864e5).toISOString().slice(11, 16), 'UTC', 'cenk@portel.com', 'https://rec/c', 'Confirmed', ''],
+      [t(), 'Lena Ford', 'Fordwise', 'COO', 'Shayen', mdy2, '10:00 AM', 'EST', 'lena@fordwise.com', '', '', ''],
+      [t(), 'Omar Said', 'Saidco', 'GM', 'Shayen', mdy, '9:00 AM', '', '', '', '', 'No-Show']] },
+    { id: '1Ebdfps1QC1LY_GD7_48Uk8RjhCxXTMGFazDiOq50iEc', title: 'Hot Leads Shayen', tab: 'Hot Leads', rows: [['Name', 'Company'], ['Not Allowed', 'X']] }] }, 'amr@bpohive.com');
+  assert.equal(r.files.length, 1, 'sheets not listed in Sources are ignored');
   const snap = await pl.snapshot();
-  assert.equal(snap.status.calendly.connected, true); assert.equal(snap.meetings.length, 3);
+  assert.equal(snap.status.calendly.connected, true); assert.equal(snap.meetings.length, 5);
   const cenk = snap.leads.find(l => l.name === 'Cenk Temiz');
-  assert.equal(cenk.type, 'outbound'); assert.deepEqual(cenk.callers, ['Juwayriya']); assert.equal(cenk.stage, 'needs'); assert.equal(cenk.meetings.length, 1);
+  assert.equal(cenk.type, 'outbound'); assert.deepEqual(cenk.callers, ['Juwayriya']); assert.deepEqual(cenk.campaigns, ['BPO Hive USA']); assert.equal(cenk.stage, 'needs'); assert.equal(cenk.meetings.length, 1, 'sheet appointment joins the Calendly meeting at the same time');
+  const ev1 = snap.meetings.find(m => m.id === 'EV1'); assert.equal(ev1.sheet.recording, 'https://rec/c'); assert.equal(ev1.sheet.confirm, 'Confirmed');
+  const omar = snap.meetings.find(m => m.invitee.name === 'Omar Said'); assert.equal(omar.kind, 'sheet'); assert.equal(omar.outcome, 'no_show'); assert.equal(omar.viaSheet, true);
+  assert.equal(snap.meetings.find(m => m.invitee.name === 'Lena Ford').outcome, 'upcoming');
+  await pl.setOutcome(omar.id, 'showed');
+  assert.equal((await pl.snapshot({ sync: false })).meetings.find(m => m.id === omar.id).outcome, 'showed', 'a mark in the Pipeline wins over the sheet');
   const jane = snap.leads.find(l => l.email === 'jane@northwind.io');
   assert.equal(jane.type, 'inbound'); assert.equal(jane.stage, 'booked'); assert.equal(jane.company, 'Northwind');
   assert.equal(snap.meetings.find(m => m.id === 'EV3').outcome, 'rescheduled');
@@ -123,4 +143,37 @@ test('Fathom recordings attach to the lead and mark the meeting as showed when t
   await pl.setOutcome('EV2', 'rescheduled');
   const s2 = await pl.snapshot({ sync: false });
   assert.equal(s2.meetings.find(x => x.id === 'EV2').outcome, 'rescheduled');
+});
+
+test('Sources can be changed in the admin; links are turned into sheet IDs', async () => {
+  const out = await pl.setSources([{ name: 'BPO Hive USA', url: 'https://docs.google.com/spreadsheets/d/18SdZiU_9y5lI2eYLzwWX-NS1rx2nYV2DukvgbV74eQ0/edit', tz: 'America/New_York' }, { name: 'New GCC', url: 'https://docs.google.com/spreadsheets/d/1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/edit', tz: 'Asia/Riyadh' }]);
+  assert.deepEqual(out.map(x => x.id), ['18SdZiU_9y5lI2eYLzwWX-NS1rx2nYV2DukvgbV74eQ0', '1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA']);
+  await assert.rejects(pl.setSources([{ name: 'x', url: 'not a link' }]), /Unknown/);
+});
+
+test('team members sign in with their own password and only see their own leads', async () => {
+  const team = require('../lib/team.cjs');
+  const handler = require('../api/admin/pipeline.js');
+  const login = require('../api/admin/login.js');
+  const call = async (fn, { method = 'GET', body, cookie = '', query = {} } = {}) => { const out = { headers: {} }; const res = { status(c) { out.status = c; return res; }, setHeader(k, v) { out.headers[k.toLowerCase()] = v; }, json(o) { out.body = o; }, end() {} }; await fn({ method, body, query, headers: { cookie } }, res); return out; };
+  const { user, token } = await team.addUser({ name: 'Shayen R', email: 'Shayen@Example.com', agents: 'Shayen' });
+  assert.equal(user.status, 'invited');
+  await assert.rejects(team.addUser({ name: 'Dup', email: 'shayen@example.com' }), /already/);
+  assert.equal((await call(login, { method: 'POST', body: { invite: token, password: 'short' } })).status, 400);
+  const ok = await call(login, { method: 'POST', body: { invite: token, password: 'goodpassword1' } });
+  assert.equal(ok.status, 200);
+  const cookie = ok.headers['set-cookie'].split(';')[0];
+  assert.equal((await call(login, { method: 'POST', body: { invite: token, password: 'goodpassword1' } })).status, 400, 'an invite works once');
+  assert.equal((await call(login, { method: 'POST', body: { email: 'shayen@example.com', password: 'wrong-pass' } })).status, 401);
+  assert.equal((await call(login, { method: 'POST', body: { email: 'shayen@example.com', password: 'goodpassword1' } })).status, 200);
+  const view = await call(handler, { cookie, query: { sync: '0' } });
+  assert.equal(view.status, 200); assert.equal(view.body.role, 'caller');
+  assert.ok(view.body.leads.length >= 2); assert.ok(view.body.leads.every(l => l.callers.includes('Shayen')));
+  assert.ok(view.body.meetings.every(m => view.body.leads.some(l => l.key === m.leadKey)));
+  assert.equal(view.body.sources, undefined); assert.equal(view.body.team, undefined);
+  assert.equal((await call(handler, { method: 'POST', cookie, body: { action: 'outcome', id: 'EV1', outcome: 'showed' } })).status, 403, 'callers are read-only');
+  assert.equal((await call(require('../api/admin/entries.js'), { cookie })).status, 401, 'callers cannot open the rest of the admin');
+  // a new invite link signs them out
+  await team.reinvite(user.id);
+  assert.equal((await call(handler, { cookie, query: { sync: '0' } })).status, 401);
 });
