@@ -117,6 +117,23 @@ tr.is-submit td{background:#f3f8fc}tr.is-submit td:first-child{box-shadow:inset 
 .ins-events li.popup_open,.ins-events li.popup_submit,.ins-events li.booked{font-weight:600}.ins-events li.booked{color:#1e7a43}
 @media(max-width:1100px){.ins-replay{grid-template-columns:1fr}.ins-side{position:static;max-height:none}}
 @media(max-width:860px){.ins-step{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr}}
+.st,.ty{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
+.st-new{background:#e8f3fb;color:#0f6fae}.st-work{background:#eef1f4;color:#40525f}.st-booked{background:#0f7ac4;color:#fff}.st-needs{background:#fff1d6;color:#8a5a00}.st-showed{background:#1e7a43;color:#fff}.st-noshow{background:#fdecea;color:#b3261e}.st-won{background:#0b4f2b;color:#fff}.st-off{background:#f1f3f5;color:#5c6b76}
+.ty-in{background:#e8f3fb;color:#0f6fae}.ty-out{background:#e3f1f2;color:#1B7381}
+.pl-sync{display:block;margin-top:2px;font-size:13px}
+.pl-table table{min-width:900px}.pl-table td{font-size:14px}.pl-table small{color:var(--muted)}
+.pl-latest{max-width:280px;color:#344d5c}.pl-when{white-space:nowrap}
+tr.pl-m-needs td{background:#fffaf0}tr.pl-m-needs td:first-child{box-shadow:inset 4px 0 0 #e0a526}
+tr.pl-m-showed td:first-child{box-shadow:inset 4px 0 0 #1e7a43}tr.pl-m-no_show td:first-child{box-shadow:inset 4px 0 0 #c0392b}
+.pl-outs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.pl-outs .mini{height:30px}.pl-outs .mini.on{color:#fff;border-color:transparent}
+.pl-o-showed.on{background:#1e7a43}.pl-o-no_show.on{background:#c0392b}.pl-o-rescheduled.on,.pl-o-cancelled.on{background:#5c6b76}
+.pl-o-showed:hover{border-color:#1e7a43}.pl-o-no_show:hover{border-color:#c0392b}.pl-undo{color:var(--muted)}
+dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px)}
+.pl-dtags{display:flex;gap:8px;margin-top:10px}.pl-h{margin:22px 0 8px;font-size:15px}
+.pl-trail{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--soft);margin-bottom:8px}.pl-trail pre{margin:6px 0 0;white-space:pre-wrap;font:14px/1.5 Inter,Arial,sans-serif}
+.pl-edit{display:grid;grid-template-columns:220px 220px 1fr;gap:12px;align-items:start}.pl-edit label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#344d5c}
+.pl-edit select{height:40px}.pl-edit select,.pl-edit textarea{min-height:40px;padding:8px 10px;border:1px solid #d3e0e8;border-radius:6px;background:#fff;font-weight:400}
+@media(max-width:860px){.pl-edit{grid-template-columns:1fr}.bar select{flex:1 1 45%}.pl-table table{min-width:0}.pl-table thead{display:none}.pl-table tr{display:block;padding:12px 14px;border-bottom:1px solid #edf3f7}.pl-table td{display:block;padding:2px 0!important;border:0;background:none!important;box-shadow:none!important}.pl-table td.pl-when{font-weight:700}tr.pl-m-needs{background:#fffaf0;box-shadow:inset 4px 0 0 #e0a526}.pl-latest{max-width:none}}
 .menu{display:none}
 @media(max-width:860px){.wrap{grid-template-columns:1fr}.side{display:none;position:fixed;top:62px;left:0;right:0;bottom:0;z-index:15;overflow:auto}.side.open{display:block}.menu{display:inline-flex}main{padding:20px 16px 60px}.dl dl{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
 </style>
@@ -147,6 +164,7 @@ tr.is-submit td{background:#f3f8fc}tr.is-submit td:first-child{box-shadow:inset 
 
 <script src="/admin/insight.js"></script>
 <script src="/admin/followup.js"></script>
+<script src="/admin/pipeline.js"></script>
 <script>
 (function(){
 var REPO='amresmat/bpohive-website-final',BRANCH='main',API='/api/gh/repos/'+REPO;
@@ -165,7 +183,7 @@ function listFolder(folder){return gh('/contents/'+folder+'?ref='+BRANCH).then(f
 
 /* ---------- Navigation ---------- */
 function buildNav(){
-  var h='<h4>Leads</h4><a href="#entries">Form entries</a>'+(window.BH_FOLLOWUP?'<a href="#followup">Follow-up emails</a>':'')+(window.BH_INSIGHT?window.BH_INSIGHT.nav():'')+'<h4>Content</h4>';
+  var h='<h4>Leads</h4>'+(window.BH_PIPELINE?window.BH_PIPELINE.nav():'')+'<a href="#entries">Form entries</a>'+(window.BH_FOLLOWUP?'<a href="#followup">Follow-up emails</a>':'')+(window.BH_INSIGHT?window.BH_INSIGHT.nav():'')+'<h4>Content</h4>';
   CFG.collections.forEach(function(c){if(c.folder)h+='<a href="#c/'+c.name+'">'+esc(c.label)+'</a>'});
   CFG.collections.forEach(function(c){if(c.files){h+='<h4>'+esc(c.label)+'</h4>';c.files.forEach(function(f){h+='<a href="#f/'+c.name+'/'+f.name+'">'+esc(f.label||f.name)+'</a>'})}});
   h+='<h4>Website</h4><a href="/" target="_blank" rel="noopener">View live site ↗</a>';
@@ -176,6 +194,7 @@ function route(){
   var h=(location.hash||'#entries').slice(1).split('/');markNav();
   if(h[0]==='insight'&&window.BH_INSIGHT)return window.BH_INSIGHT.route(h.slice(1),main);
   if(h[0]==='followup'&&window.BH_FOLLOWUP)return window.BH_FOLLOWUP.view(main);
+  if(h[0]==='pipeline'&&window.BH_PIPELINE)return window.BH_PIPELINE.route(h.slice(1),main);
   if(h[0]==='c'){var col=CFG.collections.find(function(c){return c.name===h[1]});if(!col)return entries();return h[2]?editItem(col,decodeURIComponent(h[2])):listCollection(col)}
   if(h[0]==='f'){var c2=CFG.collections.find(function(c){return c.name===h[1]});var file=c2&&c2.files.find(function(f){return f.name===h[2]});if(file)return editSettingsFile(c2,file)}
   entries();
