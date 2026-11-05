@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     const b = await body(req);
     if (b.action === 'outcome') return res.status(200).json(await pl.setOutcome(String(b.id || ''), String(b.outcome || '')));
     if (b.action === 'lead') return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }));
-    if (b.action === 'sync') return res.status(200).json(await pl.syncCalendly({ force: true, budgetMs: 8000 }));
+    if (b.action === 'sync') { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
     return res.status(400).json({ error: 'Unknown action.' });
   } catch (e) {
     console.error('Pipeline failed:', e.message);
