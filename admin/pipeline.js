@@ -41,7 +41,7 @@
 
   function head() {
     var s = DATA.status, c = s.calendly, sh = s.sheets;
-    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ' · ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ' · Website forms live';
+    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ' · ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ' · ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + ' · Website forms live';
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">Every inbound and outbound lead, and every Calendly meeting. <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
       setup() +
@@ -49,6 +49,8 @@
   }
   function setup() {
     var s = DATA.status, bits = [];
+    if (s.fathom && !s.fathom.connected) bits.push('<li><b>Fathom:</b> not connected yet. Add your Fathom API key as <code>FATHOM_API_KEY</code> in Vercel to attach call recordings and summaries to leads.</li>');
+    else if (s.fathom && s.fathom.error) bits.push('<li><b>Fathom:</b> last sync failed: ' + esc(s.fathom.error) + '</li>');
     if (!s.calendly.connected) bits.push('<li><b>Calendly:</b> not connected yet. Add your Calendly key as <code>CALENDLY_TOKEN</code> in Vercel (Settings → Environment Variables), then redeploy.</li>');
     else if (s.calendly.error) bits.push('<li><b>Calendly:</b> last sync failed: ' + esc(s.calendly.error) + '</li>');
     if (!s.sheets.files.length) bits.push('<li><b>Callers\' Google Sheets:</b> not connected yet. The "BPO Hive Pipeline sync" Google script sends them here every 15 minutes once it is switched on.</li>');
@@ -154,7 +156,7 @@
   function meetingTable(rows, compact) {
     return '<table><thead><tr><th>When</th><th>Who</th><th>Type</th><th>Meeting</th><th>' + (compact ? 'Status' : 'Outcome') + '</th></tr></thead><tbody>' + rows.map(function (m) {
       var who = m.invitee.name || m.invitee.email || '(unknown)';
-      return '<tr class="pl-m-' + m.outcome + '" data-k="' + esc(m.leadKey || '') + '"><td class="pl-when">' + when(m.start) + '</td><td><b>' + esc(who) + '</b><br><small>' + esc([m.company, m.invitee.email].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(m.type) + (m.callers.length ? '<br><small>' + esc(m.callers.join(', ')) + '</small>' : '') + '</td><td>' + esc(m.name) + (m.host ? '<br><small>with ' + esc(m.host) + '</small>' : '') + '</td><td>' + tag(OUT, m.outcome) + (compact ? '' : outcomeButtons(m)) + '</td></tr>';
+      return '<tr class="pl-m-' + m.outcome + '" data-k="' + esc(m.leadKey || '') + '"><td class="pl-when">' + when(m.start) + '</td><td><b>' + esc(who) + '</b><br><small>' + esc([m.company, m.invitee.email].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(m.type) + (m.callers.length ? '<br><small>' + esc(m.callers.join(', ')) + '</small>' : '') + '</td><td>' + esc(m.name) + (m.host ? '<br><small>with ' + esc(m.host) + '</small>' : '') + (m.fathom && m.fathom.url ? '<br><a class="pl-rec" href="' + esc(m.fathom.url) + '" target="_blank" rel="noopener">▶ Fathom recording</a>' : '') + '</td><td>' + tag(OUT, m.outcome) + (m.viaFathom ? ' <small class="pl-via">from Fathom</small>' : '') + (compact ? '' : outcomeButtons(m)) + '</td></tr>';
     }).join('') + '</tbody></table>';
   }
   function meetingsView() {
@@ -190,13 +192,14 @@
     var ms = l.meetings.map(function (id) { return DATA.meetings.find(function (m) { return m.id === id; }); }).filter(Boolean);
     var row = function (k, v) { return v ? '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>' : ''; };
     var trail = l.sheetRows.map(function (r) { return '<div class="pl-trail"><small>' + esc(r.sheet) + (r.at ? ' · added ' + esc(r.at) : '') + '</small><pre>' + esc(r.trail || r.update || '') + '</pre></div>'; }).join('');
+    var recs = (l.recordings || []).map(function (r) { return '<div class="pl-trail"><small>' + when(r.start) + (r.recordedBy ? ' · recorded by ' + esc(r.recordedBy) : '') + (r.spoke ? '' : ' · prospect did not speak') + '</small><div class="pl-rec-h"><b>' + esc(r.title || 'Call') + '</b>' + (r.url ? ' <a href="' + esc(r.url) + '" target="_blank" rel="noopener">▶ Watch in Fathom</a>' : '') + '</div>' + (r.summary ? '<details><summary>Summary</summary><pre>' + esc(r.summary.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')) + '</pre></details>' : '') + (r.actions && r.actions.length ? '<details><summary>Action items (' + r.actions.length + ')</summary><pre>' + esc(r.actions.map(function (a) { return '• ' + a; }).join('\n')) + '</pre></details>' : '') + '</div>'; }).join('');
     var forms = l.website.map(function (w) { return '<div class="pl-trail"><small>' + esc(w.form) + ' · ' + when(w.at) + (w.page ? ' · ' + esc(String(w.page).replace(/^https?:\/\/[^/]+/, '')) : '') + '</small><pre>' + esc(Object.keys(w.fields || {}).filter(function (k) { return !/^(eventId|button|cta|draftId)$/.test(k); }).map(function (k) { return k + ': ' + w.fields[k]; }).join('\n')) + '</pre></div>'; }).join('');
     var d = dlg();
     d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
       '<div class="pl-dtags">' + typeTag(l.type) + tag(STAGE, l.stage) + '</div>' +
       '<dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + row('Latest', esc(l.latest)) + '</dl>' +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
-      (trail ? '<h3 class="pl-h">Caller notes</h3>' + trail : '') + (forms ? '<h3 class="pl-h">Website forms</h3>' + forms : '') +
+      (recs ? '<h3 class="pl-h">Recorded calls (Fathom)</h3>' + recs : '') + (trail ? '<h3 class="pl-h">Caller notes</h3>' + trail : '') + (forms ? '<h3 class="pl-h">Website forms</h3>' + forms : '') +
       '<h3 class="pl-h">Your update</h3><div class="pl-edit"><label>Stage<select id="pl-d-stage"><option value="">Automatic</option><option value="won"' + (l.stageOverride === 'won' ? ' selected' : '') + '>Won (became a client)</option><option value="lost"' + (l.stageOverride === 'lost' ? ' selected' : '') + '>Lost</option></select></label>' +
       '<label>Type<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label>' +
       '<label class="pl-note">Notes<textarea id="pl-d-note" rows="3" placeholder="Anything the team should know">' + esc(l.note) + '</textarea></label></div>' +
