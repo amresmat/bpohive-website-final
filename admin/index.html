@@ -73,6 +73,8 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfe}
 .login input{height:46px;padding:0 12px;border:1px solid var(--line);border-radius:6px}
 .login button{width:100%;height:48px;margin-top:16px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-weight:600;cursor:pointer}
 .lerr{min-height:20px;margin:10px 0 0;color:var(--red);font-size:14px}
+.lhint{font-weight:400;color:var(--muted)}.lh2{margin:0 0 6px;font-family:"DM Sans",Inter,sans-serif;font-size:22px}.lsub{margin:0 0 16px;color:var(--muted);font-size:14px}
+.top .who{margin-left:auto;color:rgba(255,255,255,.75);font-size:14px}.top .who:not([hidden])+.out{margin-left:12px}.top .out{white-space:nowrap}@media(max-width:860px){.top .who{display:none}}
 dialog{width:min(640px,calc(100% - 28px));padding:0;border:0;border-radius:12px;box-shadow:0 30px 80px rgba(8,21,33,.35)}
 dialog::backdrop{background:rgba(8,21,33,.5)}
 .dl{padding:26px}.dl h2{margin:0 0 4px;font-family:"DM Sans",Inter,sans-serif;font-size:22px}
@@ -134,6 +136,15 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
 .pl-edit{display:grid;grid-template-columns:220px 220px 1fr;gap:12px;align-items:start}.pl-edit label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#344d5c}
 .pl-edit select{height:40px}.pl-edit select,.pl-edit textarea{min-height:40px;padding:8px 10px;border:1px solid #d3e0e8;border-radius:6px;background:#fff;font-weight:400}
 @media(max-width:860px){.pl-edit{grid-template-columns:1fr}.bar select{flex:1 1 45%}.pl-table table{min-width:0}.pl-table thead{display:none}.pl-table tr{display:block;padding:12px 14px;border-bottom:1px solid #edf3f7}.pl-table td{display:block;padding:2px 0!important;border:0;background:none!important;box-shadow:none!important}.pl-table td.pl-when{font-weight:700}tr.pl-m-needs{background:#fffaf0;box-shadow:inset 4px 0 0 #e0a526}.pl-latest{max-width:none}}
+.pl-src-row{display:grid;grid-template-columns:200px minmax(0,1fr) 240px auto;gap:12px;align-items:end;padding:16px;border-bottom:1px solid #edf3f7}
+.pl-src-row label,.pl-team-add label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#344d5c}
+.pl-src-row input,.pl-src-row select,.pl-team-add input,.pl-t-ag,.pl-inv-row input{height:40px;padding:0 10px;border:1px solid #d3e0e8;border-radius:6px;background:#fff;font-weight:400;min-width:0}
+.pl-src-act{display:flex;gap:10px;align-items:center;height:40px}.pl-src-act a{font-weight:600;font-size:14px}
+.pl-src-st{grid-column:1/-1;color:var(--muted)}.pl-src-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px}
+.pl-team-add{display:grid;grid-template-columns:1fr 1.3fr 1fr auto;gap:12px;align-items:end}
+.pl-inv-row{display:flex;gap:8px;margin-top:8px}.pl-inv-row input{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.pl-t-ag{height:30px;width:170px}.pl-trail pre.pl-notes{color:#344d5c}
+@media(max-width:860px){.pl-src-row,.pl-team-add{grid-template-columns:1fr}}
 .menu{display:none}
 @media(max-width:860px){.wrap{grid-template-columns:1fr}.side{display:none;position:fixed;top:62px;left:0;right:0;bottom:0;z-index:15;overflow:auto}.side.open{display:block}.menu{display:inline-flex}main{padding:20px 16px 60px}.dl dl{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
 </style>
@@ -142,9 +153,18 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
 <section class="login" id="login" hidden>
   <img src="/assets/logo/bpohivelogo.png" alt="BPO Hive">
   <form id="login-form">
-    <label>Admin password<input type="password" name="password" autocomplete="current-password" required autofocus></label>
+    <label>Email <span class="lhint">(team members only, leave empty for the main admin)</span><input type="email" name="email" autocomplete="username"></label>
+    <label style="margin-top:12px">Password<input type="password" name="password" autocomplete="current-password" required autofocus></label>
     <button type="submit">Sign in</button>
     <p class="lerr" id="login-err" role="alert"></p>
+  </form>
+  <form id="invite-form" hidden>
+    <h2 class="lh2">Welcome<span id="inv-name"></span></h2>
+    <p class="lsub">Choose a password for your BPO Hive Pipeline sign-in. Use at least 8 characters. Your email is <b id="inv-email"></b>.</p>
+    <label>New password<input type="password" name="password" minlength="8" autocomplete="new-password" required></label>
+    <label style="margin-top:12px">Repeat password<input type="password" name="password2" minlength="8" autocomplete="new-password" required></label>
+    <button type="submit">Save and sign in</button>
+    <p class="lerr" id="invite-err" role="alert"></p>
   </form>
 </section>
 
@@ -152,6 +172,7 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
   <header class="top">
     <button class="btn menu" id="menu" type="button">Menu</button>
     <img src="/assets/logo/bpohivelogo-white.png" alt="BPO Hive">
+    <span class="who" id="who" hidden></span>
     <button class="out" id="logout" type="button">Sign out</button>
   </header>
   <div class="wrap">
@@ -183,6 +204,7 @@ function listFolder(folder){return gh('/contents/'+folder+'?ref='+BRANCH).then(f
 
 /* ---------- Navigation ---------- */
 function buildNav(){
+  if(SESSION.role==='caller'){$('side').innerHTML='<h4>Leads</h4>'+(window.BH_PIPELINE?window.BH_PIPELINE.nav():'');return}
   var h='<h4>Leads</h4>'+(window.BH_PIPELINE?window.BH_PIPELINE.nav():'')+'<a href="#entries">Form entries</a>'+(window.BH_FOLLOWUP?'<a href="#followup">Follow-up emails</a>':'')+(window.BH_INSIGHT?window.BH_INSIGHT.nav():'')+'<h4>Content</h4>';
   CFG.collections.forEach(function(c){if(c.folder)h+='<a href="#c/'+c.name+'">'+esc(c.label)+'</a>'});
   CFG.collections.forEach(function(c){if(c.files){h+='<h4>'+esc(c.label)+'</h4>';c.files.forEach(function(f){h+='<a href="#f/'+c.name+'/'+f.name+'">'+esc(f.label||f.name)+'</a>'})}});
@@ -191,7 +213,8 @@ function buildNav(){
 }
 function markNav(){var h=location.hash||'#entries';[].forEach.call($('side').querySelectorAll('a'),function(a){var href=a.getAttribute('href');a.classList.toggle('on',href===h||(href.length>1&&h.indexOf(href+'/')===0))});$('side').classList.remove('open')}
 function route(){
-  var h=(location.hash||'#entries').slice(1).split('/');markNav();
+  if(SESSION.role==='caller'&&(location.hash||'').indexOf('#pipeline')!==0){location.replace('#pipeline');}
+  var h=(location.hash||(SESSION.role==='caller'?'#pipeline':'#entries')).slice(1).split('/');markNav();
   if(h[0]==='insight'&&window.BH_INSIGHT)return window.BH_INSIGHT.route(h.slice(1),main);
   if(h[0]==='followup'&&window.BH_FOLLOWUP)return window.BH_FOLLOWUP.view(main);
   if(h[0]==='pipeline'&&window.BH_PIPELINE)return window.BH_PIPELINE.route(h.slice(1),main);
@@ -360,14 +383,24 @@ function csv(){
 
 /* ---------- Sign-in ---------- */
 function showLogin(){$('app').hidden=true;$('login').hidden=false;var p=$('login-form').password;if(p)p.focus()}
+var INVITE=new URLSearchParams(location.search).get('invite');
+function showInvite(){
+  $('app').hidden=true;$('login').hidden=false;$('login-form').hidden=true;$('invite-form').hidden=false;
+  fetch('/api/admin/login?invite='+encodeURIComponent(INVITE),{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'This invite link does not work.');return j})}).then(function(j){$('inv-name').textContent=', '+j.name;$('inv-email').textContent=j.email;$('invite-form').password.focus()}).catch(function(e){$('invite-err').textContent=e.message;$('invite-form').querySelector('button').disabled=true});
+}
+$('invite-form').onsubmit=function(e){e.preventDefault();var f=this;$('invite-err').textContent='';
+  if(f.password.value!==f.password2.value){$('invite-err').textContent='The two passwords are not the same.';return}
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({invite:INVITE,password:f.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Could not save the password')})}).then(function(){INVITE=null;history.replaceState(null,'','/admin/#pipeline');f.reset();$('invite-form').hidden=true;$('login-form').hidden=false;start()}).catch(function(e){$('invite-err').textContent=e.message})};
 function start(){
+  if(INVITE)return showInvite();
   fetch('/api/admin/session',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(s){
     SESSION=s;if(!s.signedIn)return showLogin();
+    if(s.role==='caller'){CFG={collections:[]};$('who').hidden=false;$('who').textContent=s.name;$('login').hidden=true;$('app').hidden=false;buildNav();route();return}
     return fetch('/admin/config.yml',{cache:'no-store'}).then(function(r){return r.json()}).then(function(c){CFG=c;$('login').hidden=true;$('app').hidden=false;buildNav();route()});
   }).catch(function(){main.innerHTML='<div class="empty">Could not load the admin. Refresh to try again.</div>';$('app').hidden=false});
 }
 $('login-form').onsubmit=function(e){e.preventDefault();$('login-err').textContent='';
-  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({password:this.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Sign in failed')})}).then(function(){$('login-form').reset();start()}).catch(function(e){$('login-err').textContent=e.message})};
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({email:this.email.value.trim(),password:this.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Sign in failed')})}).then(function(){$('login-form').reset();start()}).catch(function(e){$('login-err').textContent=e.message})};
 $('logout').onclick=function(){fetch('/api/admin/login',{method:'DELETE',credentials:'same-origin'}).then(function(){location.reload()})};
 $('menu').onclick=function(){$('side').classList.toggle('open')};
 document.querySelector('#detail .x').onclick=function(){$('detail').close()};
