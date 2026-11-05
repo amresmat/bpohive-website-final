@@ -41,6 +41,17 @@ global.fetch = async (url, opt = {}) => {
   if (url.includes('/scheduled_events?')) return json({ collection: EVENTS, pagination: { next_page: null } });
   const m = url.match(/scheduled_events\/(EV\d)\/invitees/); if (m) return json({ collection: INVITEES[m[1]] });
   if (url.endsWith('/invitee_no_shows')) return json({ resource: { uri: 'https://api.calendly.com/invitee_no_shows/NS1' } });
+  if (url.startsWith('https://api.fathom.ai/external/v1/meetings')) {
+    assert.equal(opt.headers['X-Api-Key'], 'fk');
+    return json({ next_cursor: null, items: [
+      { recording_id: 501, title: 'BPO Hive x Northwind', share_url: 'https://fathom.video/share/abc', scheduled_start_time: iso(now + 864e5), recording_start_time: iso(now + 864e5 + 60e3), created_at: iso(now), recorded_by: { name: 'Abdullah H.', email: 'abdullah@bpohive.com' },
+        calendar_invitees: [{ name: 'Abdullah H.', email: 'abdullah@bpohive.com', is_external: false }, { name: 'Jane Cooper', email: 'jane@northwind.io', is_external: true }],
+        transcript: [{ speaker: { display_name: 'Abdullah H.' }, text: 'Hi' }, { speaker: { display_name: 'Jane Cooper', matched_calendar_invitee_email: 'jane@northwind.io' }, text: 'Hello' }],
+        default_summary: { markdown_formatted: '## Summary\nWants 20 meetings a month.' }, action_items: [{ description: 'Send proposal' }] },
+      { recording_id: 502, title: 'Waiting room', scheduled_start_time: iso(now - 864e5), created_at: iso(now), recorded_by: { name: 'Amr' },
+        calendar_invitees: [{ name: 'Stranger', email: 'x@unknown.com', is_external: true }], transcript: [{ speaker: { display_name: 'Amr' }, text: 'Hello?' }] }
+    ] });
+  }
   return { ok: false, status: 404, text: async () => '{}' };
 };
 const pl = require('../lib/pipeline.cjs');
@@ -93,4 +104,23 @@ test('website, sheets and Calendly merge into one pipeline; outcomes sync to Cal
   const c2 = s2.leads.find(l => l.name === 'Cenk Temiz');
   assert.equal(c2.stage, 'won'); assert.equal(c2.note, 'Signed the validation sprint');
   await assert.rejects(pl.setOutcome('EV1', 'maybe'), /Unknown/);
+});
+
+test('Fathom recordings attach to the lead and mark the meeting as showed when the prospect spoke', async () => {
+  process.env.FATHOM_API_KEY = 'fk';
+  const solo = pl.slimRecording({ recording_id: 1, calendar_invitees: [{ name: 'P Q', email: 'p@q.com', is_external: true }], recorded_by: { name: 'Amr' }, transcript: [{ speaker: { display_name: 'Amr' } }] });
+  assert.equal(solo.externalSpoke, false);
+  const r = await pl.syncFathom({ force: true });
+  assert.equal(r.saved, 2); assert.equal(r.backfilled, true);
+  const snap = await pl.snapshot({ sync: false });
+  const jane = snap.leads.find(l => l.email === 'jane@northwind.io');
+  assert.equal(jane.recordings.length, 1); assert.equal(jane.recordings[0].url, 'https://fathom.video/share/abc');
+  assert.deepEqual(jane.recordings[0].actions, ['Send proposal']);
+  const m = snap.meetings.find(x => x.id === 'EV2');
+  assert.equal(m.fathom.id, '501'); assert.equal(m.outcome, 'showed'); assert.equal(m.viaFathom, true);
+  assert.equal(snap.status.fathom.unlinked, 1);
+  // a manual mark still wins over Fathom
+  await pl.setOutcome('EV2', 'rescheduled');
+  const s2 = await pl.snapshot({ sync: false });
+  assert.equal(s2.meetings.find(x => x.id === 'EV2').outcome, 'rescheduled');
 });
