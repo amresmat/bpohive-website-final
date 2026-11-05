@@ -1,18 +1,17 @@
 // BPO Hive Pipeline sync — Google Apps Script (script.google.com), owned by amr@bpohive.com.
-// Every 15 minutes it reads the callers' "Hot Leads" sheets and sends them to bpohive.com/admin → Pipeline.
+// Every 15 minutes it reads the Lead Entry sheets listed in Admin → Pipeline → Sources and sends them to the Pipeline.
 // Setup (once): paste this file, paste appsscript.json from the comment at the bottom into the project's
-// manifest, then run "setup" and click Allow. To add a sheet, put its ID in SHEETS below.
+// manifest, then run "setup" and click Allow.
 var ENDPOINT = 'https://www.bpohive.com/api/pipeline/sheets';
-var SHEETS = [
-  '19r0AwkMBJlcrQEL9vZ5wtUDHxsJ-XDiTQhrwf2mX5HY', // Hot Leads Juwayriya
-  '1Ebdfps1QC1LY_GD7_48Uk8RjhCxXTMGFazDiOq50iEc', // Hot Leads Shayen
-  '1XlUYu3fb7dEXUP0JhxrzvaKV9RP59SOX72g5uf4eMqk', // Hot Leads Zeina
-  '1bCfXKPPcj_NEFvksAOsuqEeWTd2aTw0OSoJjxMu2MIg'  // Hot Leads Habiba
-];
+// Which sheets to read is set in bpohive.com/admin -> Pipeline -> Sources (no need to edit this script).
 
 function syncPipeline() {
+  var auth = { Authorization: 'Bearer ' + ScriptApp.getIdentityToken() };
+  var cfg = UrlFetchApp.fetch(ENDPOINT, { headers: auth, muteHttpExceptions: true });
+  if (cfg.getResponseCode() !== 200) { Logger.log('Could not get the sheet list: ' + cfg.getResponseCode() + ' ' + cfg.getContentText().slice(0, 300)); return; }
+  var ids = JSON.parse(cfg.getContentText()).sheets || [];
   var out = [];
-  SHEETS.forEach(function (id) {
+  ids.forEach(function (id) {
     try {
       var ss = SpreadsheetApp.openById(id);
       ss.getSheets().forEach(function (sh) {
@@ -26,8 +25,7 @@ function syncPipeline() {
   });
   var r = UrlFetchApp.fetch(ENDPOINT, {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-    headers: { Authorization: 'Bearer ' + ScriptApp.getIdentityToken() },
-    payload: JSON.stringify({ sheets: out })
+    headers: auth, payload: JSON.stringify({ sheets: out })
   });
   Logger.log(r.getResponseCode() + ' ' + r.getContentText().slice(0, 500));
 }
