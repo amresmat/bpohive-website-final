@@ -8,7 +8,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var DATA = null, MAIN = null, SUB = '', VIEW = '', LOADING = null;
   var F = { range: 30, type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
-  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed · mark it', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Dead', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
+  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed · mark it', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
   var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed · mark it', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { must_close: ['Must close', '#c0392b'], contract: ['Waiting on contract', '#7a5af5'], nurture: ['Nurture', '#1B7381'] };
   var HOT_RANK = { must_close: 0, contract: 1, nurture: 2 };
@@ -28,6 +28,9 @@
   function tag(map, k) { var s = map[k] || [k, 'st-off']; return '<span class="st ' + s[1] + '">' + esc(s[0]) + '</span>'; }
   function typeTag(ty) { return '<span class="ty ty-' + (ty === 'outbound' ? 'out' : 'in') + '">' + (ty === 'outbound' ? 'Outbound' : 'Inbound') + '</span>'; }
   function statusTag(k) { return tag(STATUS, k); }
+  // Dead leads are split in two: unqualified, and everyone else (not replying).
+  function deadBucket(l) { return l.status !== 'dead' ? '' : l.deadReason === 'unqualified' ? 'unqualified' : 'no_reply'; }
+  function leadTag(l) { return l.status === 'dead' ? '<span class="st st-off">' + (deadBucket(l) === 'unqualified' ? 'Unqualified' : 'Not replying') + '</span>' : statusTag(l.status); }
   function hotTag(k) { var h = HOT[k]; return h ? '<span class="pl-deal" style="--c:' + h[1] + '">' + esc(h[0]) + '</span>' : ''; }
   function seqTag(m) { return m.seq > 1 ? '<span class="pl-seq">Follow-up · meeting ' + m.seq + '</span>' : m.seq === 1 ? '<span class="pl-seq pl-seq1">1st meeting</span>' : ''; }
   function money(v) { return v ? '$' + Number(v).toLocaleString() : ''; }
@@ -60,8 +63,8 @@
     var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ' · ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ' · ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ' · Website forms live' : '');
     var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
-    var sub = isAdmin() ? 'Booked → Show or No-show → Shown (hot leads) → Dead or Won.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var tabs = [['', 'Dashboard', ''], ['booked', 'Booked', needs ? needs + ' to mark' : (DATA.meetings.filter(function (m) { return m.outcome === 'upcoming'; }).length || '')], ['shown', 'Shown', cnt('shown') || ''], ['noshow', 'No-shows', cnt('no_show') || ''], ['dead', 'Dead', cnt('dead') || ''], ['leads', 'All leads', DATA.leads.length]];
+    var sub = isAdmin() ? 'Booked → Show or No-show → Shown (hot leads) → Not replying, Unqualified or Won.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
+    var tabs = [['', 'Dashboard', ''], ['booked', 'Booked', needs ? needs + ' to mark' : (DATA.meetings.filter(function (m) { return m.outcome === 'upcoming'; }).length || '')], ['shown', 'Shown', cnt('shown') || ''], ['noshow', 'No-shows', cnt('no_show') || ''], ['noreply', 'Not replying', DATA.leads.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length || ''], ['unqualified', 'Unqualified', DATA.leads.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length || ''], ['leads', 'All leads', DATA.leads.length]];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
       (isAdmin() ? setup() : '') +
@@ -137,7 +140,7 @@
       bookedIn: booked.filter(function (m) { return m.type === 'inbound'; }), bookedOut: booked.filter(function (m) { return m.type !== 'inbound'; }),
       showed: held.filter(is('showed')), noshow: held.filter(is('no_show')), marked: held.filter(function (m) { return m.outcome !== 'needs'; }),
       needs: ms.filter(is('needs')),
-      hot: leads.filter(function (l) { return l.status === 'shown'; }), dead: leads.filter(function (l) { return l.status === 'dead'; }), won: leads.filter(function (l) { return l.status === 'won'; }),
+      hot: leads.filter(function (l) { return l.status === 'shown'; }), dead: leads.filter(function (l) { return l.status === 'dead'; }), noreply: leads.filter(function (l) { return deadBucket(l) === 'no_reply'; }), unq: leads.filter(function (l) { return deadBucket(l) === 'unqualified'; }), won: leads.filter(function (l) { return l.status === 'won'; }),
       cohort: leads.filter(function (l) { return inRange(l.firstAt); })
     };
   }
@@ -156,7 +159,7 @@
     var rows = [['Leads', c.length, '#9ccbf0'], ['Booked', booked.length, '#5fb0ec'], ['Showed', showed.length, '#0f7ac4'], ['Won', won.length, '#1e7a43']], top = Math.max(1, c.length);
     return '<div class="card pl-funnel"><h3>Funnel <small>leads that came in during this period</small></h3>' + rows.map(function (x, i) {
       return '<div class="pl-f-row"><span class="pl-f-l">' + esc(x[0]) + '</span><div class="pl-f-bar"><i style="width:' + Math.max(x[1] / top * 100, x[1] ? 2 : 0).toFixed(1) + '%;background:' + x[2] + '"></i></div><b>' + x[1] + '</b><small>' + (i ? (rows[i - 1][1] ? pct(x[1], rows[i - 1][1]) + '% of ' + rows[i - 1][0].toLowerCase() : '—') : '') + '</small></div>';
-    }).join('') + '<p class="ins-note" style="margin:8px 0 0">Of the ' + showed.length + ' who showed: <b>' + hot.length + ' still hot</b> · ' + dead.length + ' dead · ' + won.length + ' won</p></div>';
+    }).join('') + '<p class="ins-note" style="margin:8px 0 0">Of the ' + showed.length + ' who showed: <b>' + hot.length + ' still hot</b> · ' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying · ' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified · ' + won.length + ' won</p></div>';
   }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
@@ -168,7 +171,8 @@
       ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'of marked meetings', '#pipeline/view/rate'],
       ['Date passed', needs, needs ? 'mark show or no-show' : 'all caught up', '#pipeline/booked'],
       ['Hot leads', S.hot.length, 'in Shown now', '#pipeline/shown'],
-      ['Dead', S.dead.length, 'all time', '#pipeline/dead'],
+      ['Not replying', S.noreply.length, 'all time', '#pipeline/noreply'],
+      ['Unqualified', S.unq.length, 'all time', '#pipeline/unqualified'],
       ['Won', S.won.length, 'all time', '#pipeline/leads']
     ];
     var upcoming = S.ms.filter(function (m) { return m.outcome === 'upcoming' && t(m.start) < Date.now() + 7 * 864e5; }).sort(function (a, b) { return t(a.start) - t(b.start); });
@@ -275,16 +279,16 @@
   }
 
   /* ---------- No-shows and Dead ---------- */
-  function simpleList(kind) {
+  function simpleList(kind, bucket) {
     var q = F.q.trim().toLowerCase();
-    var rows = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === kind && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
+    var rows = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === kind && (!bucket || deadBucket(l) === bucket) && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
       .sort(function (a, b) { return kind === 'dead' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); });
-    var note = kind === 'dead' ? 'Unqualified, or not replying after many tries. If they book again they come back by themselves.' : 'Missed their meeting. When they rebook (Calendly or the sheet) they move back to Booked by themselves. Open one to log a follow-up or mark it dead.';
-    var head = kind === 'dead' ? '<th>Lead</th><th>Source</th><th>Why</th><th>Marked dead</th><th>Updates</th><th>Last update</th>' : '<th>Lead</th><th>Source</th><th>Missed</th><th>Booked on</th><th>No-shows</th><th>Last update</th>';
+    var note = kind === 'dead' ? (bucket === 'unqualified' ? 'Not a fit (budget, need or decision-maker). If they book again they come back by themselves.' : 'Not replying after many tries. If they book again they come back by themselves.') : 'Missed their meeting. When they rebook (Calendly or the sheet) they move back to Booked by themselves. Open one to log a follow-up or mark it dead.';
+    var head = kind === 'dead' ? '<th>Lead</th><th>Source</th><th>Moved here</th><th>Updates</th><th>Last update</th>' : '<th>Lead</th><th>Source</th><th>Missed</th><th>Booked on</th><th>No-shows</th><th>Last update</th>';
     return filters(false, false) + '<p class="ins-note" style="margin:-4px 0 10px"><b>' + rows.length + '</b> · ' + esc(note) + '</p>' +
       '<div class="card tablewrap pl-table" id="pl-leads">' + (rows.length ? '<table><thead><tr>' + head + '</tr></thead><tbody>' + rows.map(function (l) {
         var last = lastNote(l);
-        var mid = kind === 'dead' ? '<td>' + esc(REASON[l.deadReason] || '—') + '</td><td><small>' + esc(day(l.dealAt)) + '</small></td><td>' + (l.trail || []).filter(function (x) { return x.kind === 'note'; }).length + '</td>'
+        var mid = kind === 'dead' ? '<td><small>' + esc(day(l.dealAt)) + '</small></td><td>' + (l.trail || []).filter(function (x) { return x.kind === 'note'; }).length + '</td>'
           : '<td><small>' + esc(l.lastMeeting ? when(l.lastMeeting.start) : '—') + '</small></td><td><small>' + esc(l.lastBooked ? day(l.lastBooked) : '—') + '</small></td><td>' + (l.noShows || 1) + '</td>';
         return '<tr data-k="' + esc(l.key) + '"><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + '</td>' + mid + '<td class="pl-latest">' + esc(last ? last.text : '') + (last ? '<br><small>' + esc(ago(last.at)) + '</small>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' : '<div class="empty">Nobody here.</div>') + '</div>';
@@ -302,7 +306,7 @@
     return '<table><thead><tr><th>Came in</th><th>Lead</th><th>Source</th><th>Campaign · caller</th><th>Status</th><th>Latest</th><th>Meeting</th></tr></thead><tbody>' + shown.map(function (l) {
       var n = (l.meetings || []).length, ln = lastNote(l);
       var meet = l.next ? 'Next: ' + when(l.next) : (l.lastMeeting ? day(l.lastMeeting.start) + ' · ' + (OUT[l.lastMeeting.outcome] || [''])[0] : '—');
-      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + statusTag(l.status) + '</td><td class="pl-latest">' + esc(ln ? ln.text : (l.latest || '')) + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
+      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + leadTag(l) + '</td><td class="pl-latest">' + esc(ln ? ln.text : (l.latest || '')) + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
     }).join('') + '</tbody></table>';
   }
   function bindLeadRows(el) { [].forEach.call(el.querySelectorAll('tbody tr[data-k]'), function (tr) { tr.onclick = function () { openLead(tr.getAttribute('data-k')); }; }); }
@@ -328,7 +332,7 @@
     var OLD = { met: 'Shown', followup: 'Shown', proposal: 'Shown', negotiation: 'Shown', hold: 'Shown', lost: 'Dead', shown: 'Shown', won: 'Won', dead: 'Dead' };
     (l.trail || []).forEach(function (x) {
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
-      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : 'Marked ' + (OLD[x.to] || x.to) + (x.reason ? ' · ' + (REASON[x.reason] || x.reason) : ''), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
+      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ' · ' + day(x.due + 'T12:00:00') : ''), by: x.by });
       else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && HOT[x.hot] ? 'Marked ' + HOT[x.hot][0] : 'Tag removed', by: x.by, c: x.hot && HOT[x.hot] ? HOT[x.hot][1] : '#8a9aa6' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
@@ -361,10 +365,10 @@
     var ev = timeline(l, ms), nx = l.nextStep || {};
     var closed = l.status === 'dead' || l.status === 'won';
     var moves = closed ? '<button class="btn" type="button" data-deal="' + (l.shownAt ? 'shown' : '') + '">' + (l.shownAt ? 'Bring back to Shown' : 'Bring back') + '</button>'
-      : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Dead · unqualified</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Dead · not replying</button>';
+      : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + statusTag(l.status) + hotTag(l.hot) + (l.deadReason ? '<span class="st st-off">' + esc(REASON[l.deadReason]) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
+      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note is added to this lead\'s trail below with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
         '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
         '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
@@ -472,21 +476,21 @@
     if (!MAIN || !DATA) return;
     if (location.hash.indexOf('#pipeline') !== 0) return;
     if ((SUB === 'sources' || SUB === 'team') && !isAdmin()) SUB = '';
-    var body = SUB === 'booked' ? bookedView() : SUB === 'shown' ? shownView() : SUB === 'noshow' ? simpleList('no_show') : SUB === 'dead' ? simpleList('dead') : SUB === 'leads' ? leadsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
+    var body = SUB === 'booked' ? bookedView() : SUB === 'shown' ? shownView() : SUB === 'noshow' ? simpleList('no_show') : SUB === 'noreply' ? simpleList('dead', 'no_reply') : SUB === 'unqualified' ? simpleList('dead', 'unqualified') : SUB === 'leads' ? leadsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
     MAIN.innerHTML = head() + body;
     bindFilters();
     if (SUB === 'leads') drawLeadsTable();
     if (SUB === 'shown') bindShown();
-    if ((SUB === 'noshow' || SUB === 'dead') && $('pl-leads')) { bindLeadRows($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
+    if ((SUB === 'noshow' || SUB === 'noreply' || SUB === 'unqualified') && $('pl-leads')) { bindLeadRows($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
     bindMeetings(MAIN);
     var d = $('pl-dialog'); if (d && d.open) bindMeetings(d);
   }
-  var OLD_ROUTES = { opps: 'shown', meetings: 'booked' };
+  var OLD_ROUTES = { opps: 'shown', meetings: 'booked', dead: 'noreply' };
   function route(parts, main) {
     var p = OLD_ROUTES[parts[0]] || parts[0];
-    MAIN = main; SUB = ['booked', 'shown', 'noshow', 'dead', 'leads', 'view', 'sources', 'team'].indexOf(p) > -1 ? p : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
+    MAIN = main; SUB = ['booked', 'shown', 'noshow', 'noreply', 'unqualified', 'leads', 'view', 'sources', 'team'].indexOf(p) > -1 ? p : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
     if (MAIN) MAIN.scrollTop = 0;
     if (DATA) { draw(); return; }
     main.innerHTML = '<h1>Pipeline</h1><div class="empty">Loading leads and meetings…</div>';
