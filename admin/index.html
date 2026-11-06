@@ -290,6 +290,24 @@ tbody tr:hover{background:#F7F9F9}
 .ins-legend i{border-radius:1px}
 .note{border-radius:6px}
 @media(max-width:860px){.tabs{gap:0 16px;overflow-x:auto;flex-wrap:nowrap}.tab,.tabs a.tab{white-space:nowrap}.pl-tl li{grid-template-columns:1fr}.pl-tl time{padding:0 0 4px}.pl-tl-b{border-left:0;padding-left:0}.pl-tl-note .pl-tl-b{padding-left:11px}}
+/* Stages board and call recordings */
+.pl-stages{grid-auto-columns:minmax(250px,1fr)}
+.pl-stages .pl-col{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:0 10px 10px}
+.pl-stages .pl-col header{margin:0 -10px;padding:12px 12px 4px;border-top:3px solid var(--c);border-radius:6px 6px 0 0}
+.pl-stages .pl-col header b{font-size:15px;color:var(--ink)}.pl-stages .pl-col header span{font-size:15px;font-weight:700;color:var(--c);font-variant-numeric:tabular-nums}
+.pl-col-sub{margin:0 0 10px;font-size:12.5px;line-height:1.35;color:var(--muted,#5b6770)}
+.pl-stages .pl-card{border-radius:4px;box-shadow:none}.pl-stages .pl-card:hover,.pl-stages .pl-card:focus-visible{border-color:var(--c);outline:none}
+.pl-stages .pl-c-top{align-items:flex-start}.pl-stages .pl-c-next{font-weight:500}
+.pl-play{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 11px 0 9px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--teal-d);font:600 13px/1 Inter,Arial,sans-serif;cursor:pointer}
+.pl-play i{width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent currentColor}
+.pl-play:hover{border-color:var(--teal);background:#f1f7f8}
+.pl-c-foot .pl-play,.pl-c-foot .pl-rec{margin-left:auto}.pl-c-foot .pl-rec{font-size:13px;font-weight:600}
+.pl-player{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}.pl-player audio{height:36px;width:100%;max-width:340px}.pl-player a{font-size:12.5px;color:var(--blue)}
+.pl-player-f iframe{width:100%;max-width:420px;height:64px;border:1px solid var(--line);border-radius:4px}
+.pl-card .pl-player{width:100%}.pl-card .pl-player audio{max-width:none}
+.pl-recs{margin:16px 0 4px;padding:12px 14px;border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:4px;background:#fff}
+.pl-recs-row+.pl-recs-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}.pl-recs-row small{color:var(--muted,#5b6770)}
+@media(max-width:860px){.pl-stages{grid-auto-columns:86%}}
 </style>
 </head>
 <body>
