@@ -46,6 +46,7 @@ module.exports = async (req, res) => {
       case 'lead': return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }));
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
       case 'sources': return res.status(200).json({ sources: await pl.setSources(b.sources) });
+      case 'event-types': return res.status(200).json({ skipped: await pl.setSkippedEvents(b.skipped) });
       case 'team-add': { const r = await team.addUser(b); return res.status(200).json({ user: r.user, invite: link(r.token) }); }
       case 'team-update': return res.status(200).json({ user: await team.updateUser(String(b.id || ''), b) });
       case 'team-invite': { const r = await team.reinvite(String(b.id || '')); return res.status(200).json({ user: r.user, invite: link(r.token) }); }
