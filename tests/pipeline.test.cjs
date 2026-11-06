@@ -177,3 +177,50 @@ test('team members sign in with their own password and only see their own leads'
   await team.reinvite(user.id);
   assert.equal((await call(handler, { cookie, query: { sync: '0' } })).status, 401);
 });
+
+test('a lead keeps how they first came in; follow-ups are numbered; non-sales Calendly events are left out', () => {
+  const day = 864e5;
+  const mt = (id, name, start, inv, status = 'active') => ({ id, name, start: iso(start), end: iso(start + 1800e3), status, created: iso(start - 2 * day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(start - 2 * day) }, inv)] });
+  const data = () => ({
+    entries: [{ id: 'c1', form: 'Calendly booking', at: iso(now - 9 * day), fields: { email: 'pop@site.com', company: 'Popco' } }],
+    sheets: [{ id: 'S1', name: 'BPO Hive USA', rows: [{ at: iso(now - 40 * day), name: 'Shamez Foster', company: 'Best Choice Roofing', email: 's.foster@bestchoice.com', caller: 'Shayen' }] }],
+    meetings: [
+      mt('A1', 'Discovery Call', now - 30 * day, { name: 'Shamez Foster', email: 's.foster@bestchoice.com' }),
+      mt('A2', 'Discovery Call', now - 25 * day, { name: 'Shamez Foster', email: 's.foster@bestchoice.com', rescheduled: true }, 'canceled'),
+      mt('A3', 'BPO Hive Discovery Call', now - 20 * day, { name: 'Shamez Foster', email: 's.foster@bestchoice.com', utm: { source: 'bpohive.com', medium: 'website' } }),
+      mt('B1', 'BPO Hive Discovery Call', now + 4 * day, { name: 'Jack Foster', email: 'jack@crg123.com', qa: [{ q: 'Company name', a: 'Center Realty Group' }] }),
+      mt('C1', 'Discovery Call', now + 2 * day, { name: 'Web Person', email: 'web@acme.com', utm: { source: 'bpohive.com', medium: 'website', campaign: 'strategy_call' } }),
+      mt('D1', 'Discovery Call', now - 8 * day, { name: 'Pop Up', email: 'pop@site.com' }),
+      mt('E1', 'Discovery Call', now - 6 * day, { name: 'Mail Lead', email: 'mail@lead.com', utm: { source: 'salesfinity', medium: 'email' } }),
+      mt('I1', 'Interviews BPO Hive', now - 3 * day, { name: 'Job Seeker', email: 'job@gmail.com' })
+    ],
+    leadOv: {}, recordings: [], outcomes: {}, skipEvents: null
+  });
+  const r = pl.build(data());
+  const lead = e => r.leads.find(l => l.email === e);
+  const sh = lead('s.foster@bestchoice.com');
+  assert.equal(sh.type, 'outbound', 'a later booking from the website does not turn an outbound lead inbound');
+  assert.equal(sh.origin, 'Lead Entry sheet');
+  assert.deepEqual(['A1', 'A2', 'A3'].map(id => r.meetings.find(m => m.id === id).seq), [1, 0, 2], 'the cancelled one is not counted');
+  const jack = lead('jack@crg123.com');
+  assert.equal(jack.type, 'outbound', 'booked through a Calendly link the team sent'); assert.equal(jack.origin, 'Calendly link (not from the website)');
+  assert.equal(lead('web@acme.com').type, 'inbound'); assert.equal(lead('web@acme.com').origin, 'Booked on the website');
+  assert.equal(lead('pop@site.com').type, 'inbound', 'booked in the website pop-up');
+  assert.equal(lead('mail@lead.com').type, 'outbound', 'utm from an email sequence is not the website');
+  assert.equal(r.meetings.find(m => m.id === 'B1').type, 'outbound');
+  assert.ok(!lead('job@gmail.com') && !r.meetings.find(m => m.id === 'I1'), 'interviews are left out');
+  assert.deepEqual(r.eventTypes.find(e => e.name === 'Interviews BPO Hive'), { name: 'Interviews BPO Hive', meetings: 1, skipped: true });
+  const r2 = pl.build(Object.assign(data(), { skipEvents: ['BPO Hive Discovery Call'] }));
+  assert.ok(r2.meetings.find(m => m.id === 'I1') && !r2.meetings.find(m => m.id === 'B1'), 'the saved list replaces the default');
+  const r3 = pl.build(Object.assign(data(), { leadOv: { 'e:jack@crg123.com': { type: 'inbound' } } }));
+  assert.equal(r3.leads.find(l => l.email === 'jack@crg123.com').type, 'inbound', 'a type set by hand wins');
+});
+
+test('the event-types setting is saved and used', async () => {
+  await pl.setSkippedEvents(['Vendor Meeting', ' Vendor Meeting ', '']);
+  assert.equal(S.get('pl:evskip'), JSON.stringify(['Vendor Meeting']));
+  await assert.rejects(pl.setSkippedEvents('x'), /Unknown/);
+  assert.equal(pl.webBooking({ source: 'bpohive.com', medium: 'website' }), true);
+  assert.equal(pl.webBooking({}), false);
+  S.delete('pl:evskip');
+});
