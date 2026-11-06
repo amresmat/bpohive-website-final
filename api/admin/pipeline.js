@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const link = t => 'https://www.bpohive.com/admin/?invite=' + encodeURIComponent(t);
     switch (b.action) {
       case 'outcome': return res.status(200).json(await pl.setOutcome(String(b.id || ''), String(b.outcome || '')));
-      case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, value: b.value, next: b.next }, b.by));
+      case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, reason: b.reason, value: b.value, next: b.next }, b.by));
       case 'note-delete': return res.status(200).json(await pl.deleteNote(String(b.key || ''), String(b.id || '')));
       case 'lead': return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }));
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
