@@ -191,6 +191,93 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
 @media(max-width:860px){.pl-src-row,.pl-team-add{grid-template-columns:1fr}}
 .menu{display:none}
 @media(max-width:860px){.wrap{grid-template-columns:1fr}.side{display:none;position:fixed;top:62px;left:0;right:0;bottom:0;z-index:15;overflow:auto}.side.open{display:block}.menu{display:inline-flex}main{padding:20px 16px 60px}.dl dl{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
+
+@font-face{font-family:"Source Serif 4";src:url(/assets/fonts/source-serif-4-latin-wght-normal.woff2) format("woff2");font-weight:200 900;font-display:swap}
+/* Headings, lead names and the big numbers use a book serif, close to the brand's Athelas. */
+h1,.dl h2,.pl-vhead h2,.ins-tile b,.lh2{font-family:"Source Serif 4",Georgia,serif;letter-spacing:-.01em}
+h1{font-weight:600;font-size:30px}.dl h2{font-weight:600;font-size:24px}.ins-tile b{font-weight:500;font-size:30px}
+/* ---- Desk ledger theme: BPO Hive brand ink and teal, ruled rows like the team's call sheets ---- */
+:root{--navy:#20292F;--ink:#20292F;--muted:#5B6870;--line:#E0E5E8;--soft:#F3F5F6;--blue:#2A6A9E;--teal:#1B7381;--teal-d:#155C67;--amber:#94590A;--red:#A3392D;--green:#2B6E4C}
+body{font-size:14.5px;background:var(--soft)}
+td,time,.ins-tile b,.pl-f-row b,.tab b{font-variant-numeric:tabular-nums}
+h1{font-weight:700;letter-spacing:-.02em}
+.side h4{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600;color:var(--muted)}
+.side a.on{background:#E7F0F1;color:var(--teal-d)}
+th{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line)}
+.card,.pl-ev{border-radius:6px;box-shadow:none}
+.btn,.mini,.bar input,.bar select{border-radius:4px}
+.btn{transition:background .12s,border-color .12s}.btn:hover{border-color:#B7C2C8}
+.btn.pri{border-color:var(--teal);background:var(--teal)}.btn.pri:hover{background:var(--teal-d);border-color:var(--teal-d)}
+.btn:focus-visible,.mini:focus-visible,.tab:focus-visible,a:focus-visible,.pl-orow:focus-visible,.pl-chips button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+dialog{border-radius:8px}.dl .x{border-radius:4px}
+/* section index instead of pill tabs */
+.tabs{gap:0 22px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab,.tabs a.tab{padding:10px 0 9px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted);font-weight:600;margin-bottom:-1px}
+.tab:hover,.tabs a.tab:hover{color:var(--ink)}
+.tab.on,.tabs a.tab.on{background:none;color:var(--ink);border-bottom-color:var(--teal)}
+.tab b,.tab.on b{margin-left:6px;padding:0;background:none;color:var(--muted);font-size:13px;font-weight:600}
+.tabs .tab.pl-hot b{background:none;color:var(--teal)}
+.pl-mtabs{border-bottom:0;gap:0 18px;margin:-6px 0 12px}.pl-mtabs .tab{font-size:14px;padding:6px 0}
+/* one ruled strip of numbers instead of a wall of boxes */
+.ins-tiles{gap:0;border:1px solid var(--line);border-radius:6px;background:#fff;overflow:hidden;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.card.pl-funnel h3{padding:0}
+.ins-tile{border:0;border-radius:0;background:none;box-shadow:-1px 0 0 var(--line),0 -1px 0 var(--line);padding:14px 16px 12px}
+.ins-tile small{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--muted)}
+.ins-tile b{font-size:28px;font-weight:600;letter-spacing:-.02em;margin:4px 0 2px}
+.ins-tile span{font-size:12.5px}
+.pl-tile-hot{background:none;border:0}.pl-tile-hot b{color:var(--teal)}
+.pl-view{padding-top:8px;font-size:12.5px;font-weight:600;color:var(--blue);text-decoration:underline;text-decoration-color:#C3D2DD;text-underline-offset:3px}.pl-view:hover{text-decoration-color:currentColor}
+.pl-back a{color:var(--blue);font-weight:600}
+.pl-vlinks a{border-radius:4px}
+/* status and source as text, not pills */
+.st,.ty{padding:0;border-radius:0;background:none!important;font-size:13px;font-weight:600}
+.st:before{content:"";display:inline-block;width:7px;height:7px;margin:0 6px 1px 0;border-radius:50%;background:currentColor;vertical-align:middle}
+.st-new{color:var(--muted)}.st-work{color:var(--muted)}.st-booked{color:var(--blue)}.st-needs{color:var(--amber)}.st-showed{color:var(--green)}.st-noshow{color:var(--red)}.st-won{color:var(--green)}.st-off{color:var(--muted)}
+.ty{font-weight:500;font-size:12.5px}.ty-in{color:var(--blue)}.ty-out{color:var(--teal)}
+.pl-deal{padding:1px 6px;border:1px solid var(--c);border-radius:3px;background:none;font-size:12px;font-weight:600}
+.pl-seq,.pl-seq1{margin-left:6px;padding:0;background:none;color:var(--muted);font-size:12.5px;font-weight:500}
+.pl-c-next{margin-top:4px;padding:0;background:none;border-radius:0;color:var(--ink);font-size:13px;font-weight:600}.pl-c-next.late{color:var(--red);background:none}
+.pl-via{color:var(--muted);font-weight:500}
+/* rows: no coloured stripes, the date carries the state */
+tr.pl-m-needs td{background:#FFFBF3}tr.pl-m-needs td:first-child,tr.pl-m-showed td:first-child,tr.pl-m-no_show td:first-child,tr.is-booked td:first-child,tr.is-submit td:first-child{box-shadow:none}
+tr.pl-m-needs .pl-when{color:var(--amber)}
+tbody tr:hover{background:#F7F9F9}
+.pl-outs .mini{border-radius:4px}.pl-outs .mini.pl-o-showed.big{border-color:var(--green);color:var(--green)}.pl-outs .mini.pl-o-no_show.big{border-color:var(--red);color:var(--red)}
+.pl-o-showed.on{background:var(--green)}.pl-o-no_show.on{background:var(--red)}
+/* filters read like sheet tabs */
+.pl-chips{gap:4px 18px;margin:0 0 14px;align-items:center}
+.pl-chips button{padding:3px 0;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted);font-weight:600}
+.pl-chips button b{margin-left:4px;font-weight:600}
+.pl-chips button.on{border-color:var(--teal);background:none;color:var(--ink)}.pl-chips button.on b{color:var(--ink)}
+.pl-chips button.pl-add{margin-left:auto;padding:0 12px;height:34px;border:1px solid var(--teal);border-radius:4px;color:var(--teal)}
+.pl-chips button.pl-add:hover{background:#E7F0F1}
+/* Shown: a ruled list beside the open lead */
+.pl-olist{padding:0}.pl-orow{border-radius:0;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pl-orow.on{background:#EDF4F5;box-shadow:none}.pl-orow.on b{color:var(--teal-d)}
+.pl-orow-a{color:var(--muted)}
+/* notes box and the trail as a call log */
+.pl-upd{border:1px solid var(--line);border-radius:6px;background:#fff;padding:16px}
+.pl-upd textarea,.pl-a-note textarea{border-radius:4px;border-color:#CBD4D9}.pl-upd textarea:focus{outline:2px solid rgba(27,115,129,.25);border-color:var(--teal)}
+.pl-upd-row input,.pl-upd-row select{border-radius:4px}
+.btn.pl-b-won{border-color:var(--green);color:var(--green)}.btn.pl-b-dead{border-color:#D9B5AF;color:var(--red)}
+.pl-tl{padding:0;border-top:1px solid var(--line)}
+.pl-tl li{grid-template-columns:150px 1fr;gap:0;padding:10px 0;border-bottom:1px solid var(--line)}
+.pl-tl li:before,.pl-tl li:after{display:none}
+.pl-tl time{padding:1px 14px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+.pl-tl-b{padding-left:14px;border-left:1px solid var(--line)}
+.pl-tl-b b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.pl-tl-note .pl-tl-b{background:none;border:0;border-left:2px solid var(--teal);border-radius:0;padding:0 0 0 13px}
+.pl-tl-note .pl-tl-b b{color:var(--teal-d)}.pl-tl-note pre{color:var(--ink);font-size:15px}
+.pl-tl-stage .pl-tl-b b{color:var(--c,var(--ink))}
+.pl-by{color:var(--muted);font-size:12.5px;margin-left:4px}
+.pl-tl-del{font-size:12px;text-decoration:underline;text-decoration-color:#C9D1D6}
+.pl-rec{font-weight:600;color:var(--blue)}
+/* funnel: one hue, thin bars */
+.pl-f-bar{height:14px;border-radius:2px;background:#EEF1F2}.pl-f-bar i{border-radius:2px}
+.pl-f-row b{font-weight:600}
+.ins-legend i{border-radius:1px}
+.note{border-radius:6px}
+@media(max-width:860px){.tabs{gap:0 16px;overflow-x:auto;flex-wrap:nowrap}.tab,.tabs a.tab{white-space:nowrap}.pl-tl li{grid-template-columns:1fr}.pl-tl time{padding:0 0 4px}.pl-tl-b{border-left:0;padding-left:0}.pl-tl-note .pl-tl-b{padding-left:11px}}
 </style>
 </head>
 <body>
