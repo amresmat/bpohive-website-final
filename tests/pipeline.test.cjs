@@ -339,3 +339,21 @@ test('someone who books several times is one lead, even with a new email or a ty
   assert.equal(JSON.parse(H.get('pl:leadov').get('e:raji@acme.com')).hot, 'contract');
   assert.equal(H.get('pl:trail').has('e:rn@gmail.com'), false);
 });
+
+test('a deleted lead is left out until it books again, and can be brought back', async () => {
+  const day = 864e5, t0 = Date.now() - 10 * day;
+  const mt = (id, at, inv) => ({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(at - day) }, inv)], override: { outcome: 'showed' } });
+  const base = () => ({ since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, trails: {}, leadOv: {}, manual: [{ id: 'x', name: 'David Awad', type: 'outbound', at: iso(t0) }],
+    meetings: [mt('D1', t0, { name: 'Dana Fox', email: 'dana@fox.com' })] });
+  assert.equal(pl.build(base()).leads.length, 2);
+  const r = pl.build(Object.assign(base(), { hidden: { 'n:david awad|': { at: Date.now(), name: 'David Awad' }, 'e:dana@fox.com': { at: Date.now() } } }));
+  assert.equal(r.leads.length, 0);
+  assert.equal(r.meetings.length, 0);
+  assert.deepEqual(r.deleted.map(d => d.name).sort(), ['Dana Fox', 'David Awad']);
+  const again = base(); again.meetings.push(mt('D2', Date.now() + 2 * day, { name: 'Dana Fox', email: 'dana@fox.com' })); again.meetings[1].created = iso(Date.now() + 1000);
+  assert.equal(pl.build(Object.assign(again, { hidden: { 'e:dana@fox.com': { at: Date.now() } } })).leads.length, 2, 'booking again brings them back');
+  await pl.deleteLead('n:david awad|', { name: 'David Awad' }, 'Amr');
+  assert.ok(H.get('pl:hidden').has('n:david awad|'));
+  await pl.restoreLead('n:david awad|');
+  assert.equal(H.get('pl:hidden').has('n:david awad|'), false);
+});
