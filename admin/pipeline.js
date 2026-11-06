@@ -275,23 +275,25 @@
     var chips = [['', 'All hot leads', all.length]].concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
     return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '').replace(/<select id="pl-type">[\s\S]*?<\/select>/, '') + '</div>' +
       '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
-      '<div class="pl-split"><div class="card pl-olist">' + (rows.length ? rows.map(function (l) {
-        var last = lastNote(l), nx = l.nextStep;
-        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b><span>' + hotTag(l.hot) + ' ' + typeTag(l.type) + '</span></span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(', ')) + '</small>' +
-          (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '') +
-          '<span class="pl-orow-n">' + (last ? esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '') : '<i>No update yet</i>') + '</span><small class="pl-orow-a">' + (l.attempts ? l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show, ' : '') + (l.lastActivity ? 'last ' + esc(ago(l.lastActivity)) : '') + '</small></button>';
-      }).join('') : '<div class="empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>' +
-      '<div class="card pl-pane" id="pl-pane"></div></div>';
+      '<div class="pl-hcards">' + (rows.length ? rows.map(function (l) {
+        var last = lastNote(l), nx = l.nextStep, rs = recsOf(l);
+        return '<article class="pl-hcard" data-k="' + esc(l.key) + '" tabindex="0">' +
+          '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
+            '<span class="pl-h-meta">' + typeTag(l.type) + (l.callers[0] ? '<small>' + esc(l.callers.join(', ')) + '</small>' : '') + (l.shownAt ? '<small>Showed ' + esc(day(l.shownAt)) + '</small>' : '') + '</span></div>' +
+          '<div class="pl-h-now">' + (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '') +
+            (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') + '</div>' +
+          '<div class="pl-h-side"><span class="pl-h-count"><b>' + (l.attempts || 0) + '</b> update' + (l.attempts === 1 ? '' : 's') + ' since the show</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
+            '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
+      }).join('') : '<div class="card empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>';
   }
   function bindShown() {
     var add = $('pl-add'); if (add) add.onclick = addLeadDialog;
     [].forEach.call(MAIN.querySelectorAll('[data-hf]'), function (b) { b.onclick = function () { HOTF = b.getAttribute('data-hf'); draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
-    var pane = $('pl-pane'), narrow = window.matchMedia('(max-width: 860px)').matches;
-    [].forEach.call(MAIN.querySelectorAll('.pl-orow'), function (r) {
-      r.onclick = function () { SEL = r.getAttribute('data-k'); if (narrow) { openLead(SEL); return; } [].forEach.call(MAIN.querySelectorAll('.pl-orow'), function (x) { x.classList.toggle('on', x === r); }); openLead(SEL, pane); };
+    [].forEach.call(MAIN.querySelectorAll('.pl-hcard'), function (c) {
+      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player')) return; SEL = c.getAttribute('data-k'); openLead(SEL); };
+      c.onkeydown = function (e) { if (e.key === 'Enter') { SEL = c.getAttribute('data-k'); openLead(SEL); } };
     });
-    if (pane && SEL && !narrow) openLead(SEL, pane);
   }
 
   /* ---------- Call recordings (the link from the Lead Entry sheet) ---------- */
@@ -332,6 +334,21 @@
     a.insertAdjacentHTML('afterend', '<small class="pl-via">Can\'t play this one here.</small>'); a.remove();
   }, true);
 
+  function delBtn(l, label) { return isAdmin() ? '<button type="button" class="pl-del" data-label="' + esc(label || 'Delete') + '" data-del-lead="' + esc(l.key) + '" aria-label="Delete ' + esc(l.name || 'lead') + '">' + esc(label || 'Delete') + '</button>' : ''; }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-del-lead], [data-restore]'); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    if (b.hasAttribute('data-restore')) { b.disabled = true; api('POST', { action: 'lead-restore', key: b.getAttribute('data-restore') }).then(function () { return load(false); }).then(draw).catch(fail); return; }
+    if (!b.getAttribute('data-sure')) {
+      b.setAttribute('data-sure', '1'); b.classList.add('sure'); b.textContent = 'Click again to delete';
+      setTimeout(function () { if (b.isConnected && !b.disabled) { b.removeAttribute('data-sure'); b.classList.remove('sure'); b.textContent = b.getAttribute('data-label') || 'Delete'; } }, 4000);
+      return;
+    }
+    var l = leadByKey(b.getAttribute('data-del-lead')); if (!l) return;
+    b.disabled = true; b.textContent = 'Deleting…';
+    api('POST', { action: 'lead-delete', key: l.key, name: l.name, company: l.company, by: myName() }).then(function () { var d = $('pl-dialog'); if (d && d.open) d.close(); if (SEL === l.key) SEL = ''; return load(false); }).then(draw).catch(fail);
+  }, true);
+
   /* ---------- Stages: every lead in one stage, side by side ---------- */
   var STAGES = [
     ['booked', 'Booked', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or the date passed and needs marking'],
@@ -348,7 +365,7 @@
     return '<article class="pl-card" data-k="' + esc(l.key) + '" tabindex="0"><div class="pl-c-top"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + hotTag(l.hot) + '</div>' +
       '<span class="pl-c-co">' + esc([l.company, (l.callers || [])[0]].filter(Boolean).join(', ')) + '</span>' + line +
       (st === 'shown' && last ? '<p class="pl-c-note">' + esc(last.text.slice(0, 110)) + (last.text.length > 110 ? '…' : '') + '</p>' : '') +
-      '<div class="pl-c-foot">' + typeTag(l.type) + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + '</div></article>';
+      '<div class="pl-c-foot">' + typeTag(l.type) + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</div></article>';
   }
   function stagesView() {
     var q = F.q.trim().toLowerCase();
@@ -462,14 +479,15 @@
       : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' + recSection(l) +
-      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note is added to this lead\'s trail below with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
+      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + recSection(l) +
+      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note goes on this lead\'s trail with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
         '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
-        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
-      '<h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) +
+        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + delBtn(l, 'Delete lead') + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
+      '</div>' +
+      '<aside class="pl-dtrail"><h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) + '</aside></div>' +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
       '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Also booked as', esc((l.aliases || []).map(function (k) { var v = k.slice(2).split('|'); return v[0] + (v[1] ? ' (' + v[1] + ')' : ''); }).join(', '))) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
-      (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
+      (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details>' + '</div>';
     if (!pane) d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
     [].forEach.call(d.querySelectorAll('tr[data-k]'), function (tr) { tr.onclick = null; });
@@ -506,13 +524,19 @@
         return '<div class="pl-src-row" data-i="' + i + '"><label>Name<input type="text" data-f="name" value="' + esc(x.name) + '" placeholder="BPO Hive USA"></label><label class="pl-src-url">Google Sheet link<input type="text" data-f="url" value="' + esc(x.url) + '" placeholder="https://docs.google.com/spreadsheets/d/…"></label><label>Time zone for appointment times<select data-f="tz">' + tzOpts(x.tz) + '</select></label><div class="pl-src-act">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open ↗</a>' : '') + '<button type="button" class="mini" data-del="' + i + '">Remove</button></div>' +
           '<small class="pl-src-st">' + (f ? (f.error ? 'Problem: ' + esc(f.error) : f.rows + ' rows, synced ' + ago(f.syncedAt)) : 'Not synced yet') + '</small></div>';
       }).join('') + '<div class="pl-src-foot"><button type="button" class="btn" id="pl-src-add">+ Add a sheet</button><button type="button" class="btn pri" id="pl-src-save">Save sources</button><span id="pl-src-msg" class="ins-note" style="margin:0"></span></div></div>' +
-      sinceCard() + eventTypesCard() +
+      sinceCard() + deletedCard() + eventTypesCard() +
       '<p class="ins-note">Columns are found by their names (Prospect Name, Business Name, Agent Name, Appointment Date, Appointment Time, Timezone, Prospect Email, Call Recording Link, Confirmation Status, Show Status…), so you can add or move columns. If a row has its own Timezone (EST, GST…), that wins over the time zone above.</p>';
   }
   function sinceCard() {
     var v = DATA.status.since || '';
     return '<h3 class="pl-h" style="margin-top:22px">Start date</h3><p class="sub" style="margin-top:-4px">Meetings and leads before this date are left out of the Pipeline. Leave it empty to show everything.</p>' +
       '<div class="card pl-ev" style="padding:14px 16px"><div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid #CBD4D9;border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div></div>';
+  }
+  function deletedCard() {
+    var list = DATA.status.deleted || [];
+    if (!list.length) return '';
+    return '<h3 class="pl-h" style="margin-top:22px">Deleted leads</h3><p class="sub" style="margin-top:-4px">Left out of the Pipeline. Their notes are kept, so you can bring any of them back. If one books again, they come back by themselves.</p>' +
+      '<div class="card pl-ev">' + list.map(function (d) { return '<div class="pl-ev-row" style="cursor:default"><span><b>' + esc(d.name || '(no name)') + '</b>' + (d.company ? ', ' + esc(d.company) : '') + '</span><small>Deleted ' + esc(day(d.at)) + (d.by ? ' by ' + esc(d.by) : '') + '</small><button type="button" class="btn" data-restore="' + esc(d.key) + '">Bring back</button></div>'; }).join('') + '</div>';
   }
   function eventTypesCard() {
     var list = (DATA.status.calendly && DATA.status.calendly.eventTypes) || [];
