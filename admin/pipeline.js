@@ -42,7 +42,7 @@
   function isAdmin() { return DATA && DATA.role === 'admin'; }
   function campaignOf(l) { return (l.campaigns || [])[0] || ''; }
   function inRange(ts) { return !F.range || t(ts) >= Date.now() - F.range * 864e5; }
-  function leadByKey(k) { return DATA.leads.find(function (l) { return l.key === k; }); }
+  function leadByKey(k) { return DATA.leads.find(function (l) { return l.key === k; }) || DATA.leads.find(function (l) { return (l.aliases || []).indexOf(k) > -1; }); }
   function opts(list, cur, all) { return '<option value="">' + esc(all) + '</option>' + list.map(function (x) { return '<option value="' + esc(x) + '"' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); }
   function uniq(arr) { var s = {}; arr.forEach(function (x) { if (x) s[x] = 1; }); return Object.keys(s).sort(); }
   function matchesLead(l) {
@@ -382,7 +382,7 @@
         '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
       '<h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
-      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
+      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Also booked as', esc((l.aliases || []).map(function (k) { var v = k.slice(2).split('|'); return v[0] + (v[1] ? ' (' + v[1] + ')' : ''); }).join(', '))) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
       (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
     if (!pane) d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
@@ -391,18 +391,18 @@
     var by = function () { var v = q('pl-u-by').value.trim(); setMyName(v); return v; };
     var send = function (b, extra) {
       b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
-      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', Object.assign({ action: 'update', key: l.key, also: l.aliases || [], note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     if (q('pl-u-save')) q('pl-u-save').onclick = function () { send(this, {}); };
     if (q('pl-u-note')) q('pl-u-note').onkeydown = function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(q('pl-u-save'), {}); } };
     if (q('pl-u-done')) q('pl-u-done').onclick = function () { send(this, { next: { text: '', due: '' } }); };
     [].forEach.call(d.querySelectorAll('[data-deal]'), function (b) { b.onclick = function () { send(b, { deal: b.getAttribute('data-deal'), reason: b.getAttribute('data-r') || '', from: l.status }); }; });
     [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
-      b.onclick = function () { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Click again to delete'; return; } b.disabled = true; api('POST', { action: 'note-delete', key: l.key, id: b.getAttribute('data-del') }).then(reopen).catch(fail); };
+      b.onclick = function () { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Click again to delete'; return; } b.disabled = true; api('POST', { action: 'note-delete', key: l.key, also: l.aliases || [], id: b.getAttribute('data-del') }).then(reopen).catch(fail); };
     });
     if (q('pl-d-save')) q('pl-d-save').onclick = function () {
       var b = this; b.disabled = true; q('pl-d-msg').textContent = 'Saving…';
-      api('POST', { action: 'lead', key: l.key, type: q('pl-d-type').value }).then(reopen).catch(function (e) { q('pl-d-msg').textContent = e.message; b.disabled = false; });
+      api('POST', { action: 'lead', key: l.key, also: l.aliases || [], type: q('pl-d-type').value }).then(reopen).catch(function (e) { q('pl-d-msg').textContent = e.message; b.disabled = false; });
     };
     if (!pane && !d.open) d.showModal();
   }
