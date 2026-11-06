@@ -153,13 +153,21 @@
     rate: ['Marked meetings', 'marked', 'The meetings the show rate is worked out from (shows + no-shows).']
   };
   function viewLink(href, label) { return '<a class="pl-view" href="' + href + '">' + (label || 'View') + '</a>'; }
-  function funnel(S) {
-    var c = S.cohort, booked = c.filter(function (l) { return (l.meetings || []).length; }), showed = c.filter(function (l) { return l.shownAt || l.status === 'won'; });
-    var won = c.filter(function (l) { return l.status === 'won'; }), hot = c.filter(function (l) { return l.status === 'shown'; }), dead = showed.filter(function (l) { return l.status === 'dead'; });
-    var rows = [['Leads', c.length, '#B9D3D6'], ['Booked', booked.length, '#7FAFB4'], ['Showed', showed.length, '#1B7381'], ['Won', won.length, '#20292F']], top = Math.max(1, c.length);
-    return '<div class="card pl-funnel"><h3>Funnel <small>leads that came in during this period</small></h3>' + rows.map(function (x, i) {
-      return '<div class="pl-f-row"><span class="pl-f-l">' + esc(x[0]) + '</span><div class="pl-f-bar"><i style="width:' + Math.max(x[1] / top * 100, x[1] ? 2 : 0).toFixed(1) + '%;background:' + x[2] + '"></i></div><b>' + x[1] + '</b><small>' + (i ? (rows[i - 1][1] ? pct(x[1], rows[i - 1][1]) + '% of ' + rows[i - 1][0].toLowerCase() : '—') : '') + '</small></div>';
-    }).join('') + '<p class="ins-note" style="margin:8px 0 0">Of the ' + showed.length + ' who showed: <b>' + hot.length + ' still hot</b>, ' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying, ' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified, ' + won.length + ' won</p></div>';
+  // Booked -> Show -> Closed, counted per lead, for everyone booked in the period (the source filter
+  // is ignored here so the three funnels always sit side by side).
+  function funnel() {
+    var ms = DATA.meetings.filter(function (m) { return (!F.campaign || (m.campaigns || []).indexOf(F.campaign) > -1) && (!F.caller || (m.callers || []).indexOf(F.caller) > -1) && inRange(m.created); });
+    var keys = {}; ms.forEach(function (m) { if (m.leadKey) keys[m.leadKey] = 1; });
+    var cohort = DATA.leads.filter(function (l) { return keys[l.key]; });
+    var col = function (title, list, tone) {
+      var b = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
+      var steps = [['Booked', b, ''], ['Show', sh, b ? pct(sh, b) + '% of booked' : ''], ['Closed', cl, sh ? pct(cl, sh) + '% of shows' : '']];
+      return '<div class="pl-fun pl-fun-' + tone + '"><h4>' + esc(title) + '</h4>' + steps.map(function (x, i) {
+        return '<div class="pl-fun-step"><div class="pl-fun-top"><span>' + x[0] + '</span><b>' + x[1] + '</b></div><div class="pl-fun-bar"><i style="width:' + (b ? Math.max(x[1] / b * 100, x[1] ? 3 : 0) : 0).toFixed(1) + '%"></i></div><small>' + (x[2] || '&nbsp;') + '</small></div>';
+      }).join('') + '<p class="pl-fun-end">' + (b ? pct(cl, b) + '% of bookings closed' : 'Nothing booked yet') + '</p></div>';
+    };
+    return '<div class="card pl-funnel"><h3>Booked, show, closed <small>people booked during this period, counted once each</small></h3><div class="pl-funs">' +
+      col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
   }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
@@ -181,7 +189,7 @@
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
       '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile' + (x[0] === 'Hot leads' ? ' pl-tile-hot' : '') + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
-      funnel(S) +
+      funnel() +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
       bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +

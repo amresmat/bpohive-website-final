@@ -196,6 +196,16 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
 /* Headings, lead names and the big numbers use a book serif, close to the brand's Athelas. */
 h1,.dl h2,.pl-vhead h2,.ins-tile b,.lh2{font-family:"Source Serif 4",Georgia,serif;letter-spacing:-.01em}
 h1{font-weight:600;font-size:30px}.dl h2{font-weight:600;font-size:24px}.ins-tile b{font-weight:500;font-size:30px}
+.pl-funs{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin:0 -18px -16px}
+.pl-fun{padding:14px 18px 16px;border-left:1px solid var(--line)}.pl-fun:first-child{border-left:0}
+.pl-fun h4{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--ink)}
+.pl-fun-step{margin-bottom:10px}.pl-fun-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted);font-weight:600}
+.pl-fun-top b{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.pl-fun-bar{height:10px;margin:4px 0 3px;background:#EEF1F2;border-radius:2px;overflow:hidden}.pl-fun-bar i{display:block;height:100%;border-radius:2px;background:var(--c)}
+.pl-fun small{color:var(--muted);font-size:12.5px}
+.pl-fun-all{--c:#20292F}.pl-fun-in{--c:#2A6A9E}.pl-fun-out{--c:#1B7381}
+.pl-fun-end{margin:4px 0 0;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;font-weight:600;color:var(--ink)}
+@media(max-width:860px){.pl-funs{grid-template-columns:1fr}.pl-fun{border-left:0;border-top:1px solid var(--line)}.pl-fun:first-child{border-top:0}}
 /* ---- Desk ledger theme: BPO Hive brand ink and teal, ruled rows like the team's call sheets ---- */
 :root{--navy:#20292F;--ink:#20292F;--muted:#5B6870;--line:#E0E5E8;--soft:#F3F5F6;--blue:#2A6A9E;--teal:#1B7381;--teal-d:#155C67;--amber:#94590A;--red:#A3392D;--green:#2B6E4C}
 body{font-size:14.5px;background:var(--soft)}
