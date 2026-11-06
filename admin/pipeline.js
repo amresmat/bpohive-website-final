@@ -10,6 +10,8 @@
   var F = { range: 30, type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
   var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed · mark it', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Dead', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
   var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed · mark it', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  var HOT = { must_close: ['Must close', '#c0392b'], contract: ['Waiting on contract', '#7a5af5'], nurture: ['Nurture', '#1B7381'] };
+  var HOT_RANK = { must_close: 0, contract: 1, nurture: 2 };
   var REASON = { unqualified: 'Unqualified', no_reply: 'Not replying', other: 'Other' };
   var BTNS = [['showed', 'Show'], ['no_show', 'No-show'], ['rescheduled', 'Rescheduled'], ['cancelled', 'Cancelled']];
 
@@ -26,6 +28,7 @@
   function tag(map, k) { var s = map[k] || [k, 'st-off']; return '<span class="st ' + s[1] + '">' + esc(s[0]) + '</span>'; }
   function typeTag(ty) { return '<span class="ty ty-' + (ty === 'outbound' ? 'out' : 'in') + '">' + (ty === 'outbound' ? 'Outbound' : 'Inbound') + '</span>'; }
   function statusTag(k) { return tag(STATUS, k); }
+  function hotTag(k) { var h = HOT[k]; return h ? '<span class="pl-deal" style="--c:' + h[1] + '">' + esc(h[0]) + '</span>' : ''; }
   function seqTag(m) { return m.seq > 1 ? '<span class="pl-seq">Follow-up · meeting ' + m.seq + '</span>' : m.seq === 1 ? '<span class="pl-seq pl-seq1">1st meeting</span>' : ''; }
   function money(v) { return v ? '$' + Number(v).toLocaleString() : ''; }
   function clock(ts) { var d = new Date(ts); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
@@ -225,27 +228,43 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
+  function addLeadDialog() {
+    var d = dlg();
+    d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>Add a lead</h2><p class="ins-note" style="margin:4px 0 14px">For someone you met outside Calendly and the Lead Entry sheets. They go straight to Shown.</p>' +
+      '<div class="pl-upd-row pl-add-f"><label>Name<input type="text" id="pl-a-name"></label><label>Company<input type="text" id="pl-a-co"></label><label>Country<input type="text" id="pl-a-country"></label><label>Phone<input type="text" id="pl-a-phone"></label><label>Email<input type="text" id="pl-a-email"></label><label>Source<select id="pl-a-type"><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></label></div>' +
+      '<label class="pl-a-note">What they need / first update<textarea id="pl-a-note" rows="3"></textarea></label>' +
+      '<div class="pl-upd-act"><button class="btn pri" id="pl-a-save" type="button">Add to Shown</button><span id="pl-a-msg" class="ins-note" style="margin:0"></span></div></div>';
+    d.querySelector('.x').onclick = function () { d.close(); };
+    var q = function (id) { return d.querySelector('#' + id); };
+    q('pl-a-save').onclick = function () {
+      var b = this; b.disabled = true; q('pl-a-msg').textContent = 'Adding…';
+      api('POST', { action: 'lead-add', name: q('pl-a-name').value, company: q('pl-a-co').value, country: q('pl-a-country').value, phone: q('pl-a-phone').value, email: q('pl-a-email').value, type: q('pl-a-type').value, note: q('pl-a-note').value, by: myName() })
+        .then(function (r) { SEL = r.key; d.close(); return load(false); }).then(draw).catch(function (e) { q('pl-a-msg').textContent = e.message; b.disabled = false; });
+    };
+    if (!d.open) d.showModal();
+  }
   function lastNote(l) { return (l.trail || []).filter(function (x) { return x.kind === 'note'; }).slice(-1)[0]; }
   function shownView() {
     var q = F.q.trim().toLowerCase();
     var all = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === 'shown' && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
-      .sort(function (a, b) { return (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
+      .sort(function (a, b) { var ra = a.hot in HOT_RANK ? HOT_RANK[a.hot] : 9, rb = b.hot in HOT_RANK ? HOT_RANK[b.hot] : 9; return ra - rb || (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
     var idle = function (l) { return l.lastActivity && Date.now() - l.lastActivity > 14 * 864e5; };
     var due = function (l) { return l.nextStep && l.nextStep.due && new Date(l.nextStep.due + 'T00:00:00') <= new Date(); };
-    var rows = HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
+    var rows = HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOT[HOTF] ? all.filter(function (l) { return l.hot === HOTF; }) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
     if (!rows.some(function (l) { return l.key === SEL; })) SEL = rows[0] ? rows[0].key : '';
-    var chips = [['', 'All hot leads', all.length], ['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]];
+    var chips = [['', 'All hot leads', all.length]].concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
     return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '').replace(/<select id="pl-type">[\s\S]*?<\/select>/, '') + '</div>' +
-      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + '</div>' +
+      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
       '<div class="pl-split"><div class="card pl-olist">' + (rows.length ? rows.map(function (l) {
         var last = lastNote(l), nx = l.nextStep;
-        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b>' + typeTag(l.type) + '</span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small>' +
+        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b><span>' + hotTag(l.hot) + ' ' + typeTag(l.type) + '</span></span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small>' +
           (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">→ ' + esc(nx.text) + (nx.due ? ' · ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">→ Meeting ' + esc(when(l.next)) + '</span>' : '') +
           '<span class="pl-orow-n">' + (last ? esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '') : '<i>No update yet</i>') + '</span><small class="pl-orow-a">' + (l.attempts ? l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show · ' : '') + (l.lastActivity ? 'last ' + esc(ago(l.lastActivity)) : '') + '</small></button>';
       }).join('') : '<div class="empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>' +
       '<div class="card pl-pane" id="pl-pane"></div></div>';
   }
   function bindShown() {
+    var add = $('pl-add'); if (add) add.onclick = addLeadDialog;
     [].forEach.call(MAIN.querySelectorAll('[data-hf]'), function (b) { b.onclick = function () { HOTF = b.getAttribute('data-hf'); draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
     var pane = $('pl-pane'), narrow = window.matchMedia('(max-width: 860px)').matches;
@@ -311,6 +330,7 @@
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Update', body: x.text, by: x.by, id: x.id });
       else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : 'Marked ' + (OLD[x.to] || x.to) + (x.reason ? ' · ' + (REASON[x.reason] || x.reason) : ''), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ' · ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && HOT[x.hot] ? 'Marked ' + HOT[x.hot][0] : 'Tag removed', by: x.by, c: x.hot && HOT[x.hot] ? HOT[x.hot][1] : '#8a9aa6' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
     });
     ms.forEach(function (m) {
@@ -344,13 +364,13 @@
       : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Dead · unqualified</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Dead · not replying</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + statusTag(l.status) + (l.deadReason ? '<span class="st st-off">' + esc(REASON[l.deadReason]) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
+      '<div class="pl-dtags">' + typeTag(l.type) + statusTag(l.status) + hotTag(l.hot) + (l.deadReason ? '<span class="st st-off">' + esc(REASON[l.deadReason]) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Add an update</h3><textarea id="pl-u-note" rows="3" placeholder="What happened? e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
-        '<div class="pl-upd-row pl-upd-3"><label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
+        '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
         '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Save update</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
       '<h3 class="pl-h">History</h3>' + timelineHtml(l, ev) +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
-      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
+      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
       (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
     if (!pane) d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
@@ -359,7 +379,7 @@
     var by = function () { var v = q('pl-u-by').value.trim(); setMyName(v); return v; };
     var send = function (b, extra) {
       b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
-      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, extra)).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     if (q('pl-u-save')) q('pl-u-save').onclick = function () { send(this, {}); };
     if (q('pl-u-done')) q('pl-u-done').onclick = function () { send(this, { next: { text: '', due: '' } }); };
