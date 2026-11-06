@@ -327,7 +327,7 @@
     var ev = [];
     var OLD = { met: 'Shown', followup: 'Shown', proposal: 'Shown', negotiation: 'Shown', hold: 'Shown', lost: 'Dead', shown: 'Shown', won: 'Won', dead: 'Dead' };
     (l.trail || []).forEach(function (x) {
-      if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Update', body: x.text, by: x.by, id: x.id });
+      if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
       else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : 'Marked ' + (OLD[x.to] || x.to) + (x.reason ? ' · ' + (REASON[x.reason] || x.reason) : ''), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ' · ' + day(x.due + 'T12:00:00') : ''), by: x.by });
       else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && HOT[x.hot] ? 'Marked ' + HOT[x.hot][0] : 'Tag removed', by: x.by, c: x.hot && HOT[x.hot] ? HOT[x.hot][1] : '#8a9aa6' });
@@ -365,10 +365,10 @@
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
       '<div class="pl-dtags">' + typeTag(l.type) + statusTag(l.status) + hotTag(l.hot) + (l.deadReason ? '<span class="st st-off">' + esc(REASON[l.deadReason]) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
-      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Add an update</h3><textarea id="pl-u-note" rows="3" placeholder="What happened? e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
+      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note is added to this lead\'s trail below with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
         '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
-        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Save update</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
-      '<h3 class="pl-h">History</h3>' + timelineHtml(l, ev) +
+        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
+      '<h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
       '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
       (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
@@ -379,9 +379,10 @@
     var by = function () { var v = q('pl-u-by').value.trim(); setMyName(v); return v; };
     var send = function (b, extra) {
       b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
-      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     if (q('pl-u-save')) q('pl-u-save').onclick = function () { send(this, {}); };
+    if (q('pl-u-note')) q('pl-u-note').onkeydown = function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(q('pl-u-save'), {}); } };
     if (q('pl-u-done')) q('pl-u-done').onclick = function () { send(this, { next: { text: '', due: '' } }); };
     [].forEach.call(d.querySelectorAll('[data-deal]'), function (b) { b.onclick = function () { send(b, { deal: b.getAttribute('data-deal'), reason: b.getAttribute('data-r') || '', from: l.status }); }; });
     [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
