@@ -7,7 +7,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var DATA = null, MAIN = null, SUB = '', VIEW = '', LOADING = null;
-  var F = { range: 30, type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
+  var F = { range: 30, from: '', to: '', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
+  function iso10(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
   var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { must_close: ['Must close', '#c0392b'], contract: ['Waiting on contract', '#7a5af5'], nurture: ['Nurture', '#1B7381'] };
@@ -41,7 +42,13 @@
   function setMyName(v) { try { localStorage.setItem('bh_pl_name', v); } catch (e) {} }
   function isAdmin() { return DATA && DATA.role === 'admin'; }
   function campaignOf(l) { return (l.campaigns || [])[0] || ''; }
-  function inRange(ts) { return !F.range || t(ts) >= Date.now() - F.range * 864e5; }
+  function inRange(ts) {
+    if (F.range === 'custom') {
+      var a = F.from ? +new Date(F.from + 'T00:00:00') : -Infinity, b = F.to ? +new Date(F.to + 'T00:00:00') + 864e5 : Infinity;
+      return t(ts) >= a && t(ts) < b;
+    }
+    return !F.range || t(ts) >= Date.now() - F.range * 864e5;
+  }
   function leadByKey(k) { return DATA.leads.find(function (l) { return l.key === k; }) || DATA.leads.find(function (l) { return (l.aliases || []).indexOf(k) > -1; }); }
   function opts(list, cur, all) { return '<option value="">' + esc(all) + '</option>' + list.map(function (x) { return '<option value="' + esc(x) + '"' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); }
   function uniq(arr) { var s = {}; arr.forEach(function (x) { if (x) s[x] = 1; }); return Object.keys(s).sort(); }
@@ -85,7 +92,7 @@
     var camps = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.campaigns || []; })));
     var callers = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.callers || []; })));
     return '<div class="bar">' +
-      (withRange ? '<select id="pl-range">' + [[7, 'Last 7 days'], [30, 'Last 30 days'], [90, 'Last 90 days'], [0, 'All time']].map(function (r) { return '<option value="' + r[0] + '"' + (F.range === r[0] ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select>' : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
+      (withRange ? '<select id="pl-range">' + [[7, 'Last 7 days'], [30, 'Last 30 days'], [90, 'Last 90 days'], [0, 'All time'], ['custom', 'Custom dates']].map(function (r) { return '<option value="' + r[0] + '"' + (F.range === r[0] ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select>' + (F.range === 'custom' ? '<label class="pl-dates">From <input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label><label class="pl-dates">to <input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label>' : '') : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
       '<select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
       '<select id="pl-campaign">' + opts(camps, F.campaign, 'All campaigns') + '</select>' +
       (isAdmin() ? '<select id="pl-caller">' + opts(callers, F.caller, 'All callers') + '</select>' : '') +
@@ -93,7 +100,8 @@
       '</div>';
   }
   function bindFilters() {
-    [['pl-range', 'range', true], ['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = x[2] ? +el.value : el.value; draw(); }; });
+    [['pl-range', 'range', true], ['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = x[2] && el.value !== 'custom' ? +el.value : el.value; if (F.range === 'custom' && !F.from && !F.to) { var d = new Date(); F.to = iso10(d); d.setDate(d.getDate() - 29); F.from = iso10(d); } draw(); }; });
+    ['from', 'to'].forEach(function (k) { var el = $('pl-' + k); if (el) el.onchange = function () { F[k] = el.value; draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; drawLeadsTable(); };
     var rf = $('pl-refresh'); if (rf) rf.onclick = function () { rf.disabled = true; rf.textContent = 'Syncing…'; (isAdmin() ? api('POST', { action: 'sync' }).catch(function () {}) : Promise.resolve()).then(function () { return load(isAdmin() ? false : true); }).then(draw).catch(fail); };
   }
