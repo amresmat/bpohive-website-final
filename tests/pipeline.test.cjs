@@ -279,3 +279,20 @@ test('leads added by hand go to Shown; hot tags and an imported trail keep their
   assert.deepEqual(l.trail.map(x => x.kind), ['note', 'note', 'hot']);
   await assert.rejects(pl.addManualLead({ name: '' }), /name/);
 });
+
+test('a start date leaves out older meetings and leads', async () => {
+  const day = 864e5, start = Date.parse('2026-09-01T00:00:00Z');
+  const mt = (id, at, inv) => ({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(at - day) }, inv)], override: { outcome: 'showed' } });
+  const data = () => ({ since: '2026-09-01', entries: [{ id: 'w', form: 'Contact', at: iso(start - 5 * day), fields: { name: 'Old Web', email: 'old@web.com' } }], sheets: [], recordings: [], outcomes: {}, skipEvents: null, leadOv: {}, trails: {},
+    meetings: [mt('O1', start - 20 * day, { name: 'Old Lead', email: 'old@x.com' }), mt('N1', start + 3 * day, { name: 'New Lead', email: 'new@x.com' }), mt('B1', start - 30 * day, { name: 'Both', email: 'both@x.com' }), mt('B2', start + 10 * day, { name: 'Both', email: 'both@x.com' })] });
+  const d0 = data();
+  d0.meetings.push(Object.assign(mt('T1', start - 40 * day, { name: 'Noted Lead', email: 'noted@x.com' }), { override: null }), Object.assign(mt('B0', start - 50 * day, { name: 'Both', email: 'both@x.com' }), { override: null }));
+  d0.trails = { 'e:noted@x.com': [{ id: 'n', at: start + 5 * day, kind: 'note', text: 'Still talking', by: 'Amr' }] };
+  const r = pl.build(d0);
+  assert.deepEqual(r.leads.map(l => l.email).sort(), ['both@x.com', 'new@x.com', 'noted@x.com'], 'old leads go, unless something happened after the start date');
+  assert.deepEqual(r.meetings.map(m => m.id).sort(), ['B1', 'B2', 'N1'], 'a kept lead keeps its older marked meetings; old unmarked ones are dropped');
+  assert.equal(pl.build(Object.assign(data(), { since: '' })).meetings.length, 4);
+  assert.equal(await pl.setSince('2026-09-01'), '2026-09-01');
+  await assert.rejects(pl.setSince('soon'), /date/);
+  await pl.setSince('');
+});
