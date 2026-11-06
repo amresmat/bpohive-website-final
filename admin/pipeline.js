@@ -8,6 +8,10 @@
   var F = { range: 30, type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
   var STAGE = { new: ['New', 'st-new'], working: ['Working', 'st-work'], booked: ['Meeting booked', 'st-booked'], needs: ['Needs marking', 'st-needs'], showed: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], cancelled: ['Cancelled', 'st-off'], won: ['Won', 'st-won'], lost: ['Lost', 'st-off'] };
   var OUT = { upcoming: ['Upcoming', 'st-booked'], needs: ['Needs marking', 'st-needs'], showed: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  // Opportunity stages (the sales funnel after the first meeting). Same order as lib/pipeline.cjs.
+  var DEAL = { met: ['Discovery call done', '#0f7ac4'], followup: ['Follow-up meeting', '#1B7381'], proposal: ['Proposal sent', '#7a5af5'], negotiation: ['Negotiation', '#c27b00'], won: ['Won', '#1e7a43'], hold: ['On hold', '#8a9aa6'], lost: ['Lost', '#c0392b'] };
+  var OPEN = ['met', 'followup', 'proposal', 'negotiation'];
+  var FUN = ['met', 'followup', 'proposal', 'negotiation', 'won'];
   var BTNS = [['showed', 'Showed'], ['no_show', 'No-show'], ['rescheduled', 'Rescheduled'], ['cancelled', 'Cancelled']];
 
   function api(method, payload, qs) {
@@ -23,6 +27,13 @@
   function tag(map, k) { var s = map[k] || [k, 'st-off']; return '<span class="st ' + s[1] + '">' + esc(s[0]) + '</span>'; }
   function typeTag(ty) { return '<span class="ty ty-' + (ty === 'outbound' ? 'out' : 'in') + '">' + (ty === 'outbound' ? 'Outbound' : 'Inbound') + '</span>'; }
   function seqTag(m) { return m.seq > 1 ? '<span class="pl-seq">Follow-up · meeting ' + m.seq + '</span>' : m.seq === 1 ? '<span class="pl-seq pl-seq1">1st meeting</span>' : ''; }
+  function dealTag(k) { var d = DEAL[k]; return d ? '<span class="pl-deal" style="--c:' + d[1] + '">' + esc(d[0]) + '</span>' : ''; }
+  function money(v) { return v ? '$' + Number(v).toLocaleString() : ''; }
+  function clock(ts) { var d = new Date(ts); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  function dueTxt(n) { if (!n || !n.due) return ''; var d = new Date(n.due + 'T12:00:00'); var days = Math.round((new Date(n.due + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5); return days < 0 ? 'overdue ' + (-days) + 'd' : days === 0 ? 'today' : days === 1 ? 'tomorrow' : d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }); }
+  function overdue(n) { return n && n.due && new Date(n.due + 'T23:59:59') < new Date(); }
+  function myName() { try { return localStorage.getItem('bh_pl_name') || ''; } catch (e) { return ''; } }
+  function setMyName(v) { try { localStorage.setItem('bh_pl_name', v); } catch (e) {} }
   function isAdmin() { return DATA && DATA.role === 'admin'; }
   function campaignOf(l) { return (l.campaigns || [])[0] || ''; }
   function inRange(ts) { return !F.range || t(ts) >= Date.now() - F.range * 864e5; }
@@ -47,7 +58,8 @@
     var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ' · ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ' · ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ' · Website forms live' : '');
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
     var sub = isAdmin() ? 'Every inbound and outbound lead, and every meeting.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var tabs = [['', 'Dashboard', ''], ['leads', 'Leads', DATA.leads.length], ['meetings', 'Meetings', needs ? needs + (isAdmin() ? ' to mark' : ' not marked') : '']];
+    var openN = DATA.leads.filter(function (l) { return OPEN.indexOf(l.deal) > -1; }).length;
+    var tabs = [['', 'Dashboard', ''], ['opps', 'Opportunities', openN || ''], ['leads', 'Leads', DATA.leads.length], ['meetings', 'Meetings', needs ? needs + (isAdmin() ? ' to mark' : ' not marked') : '']];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
       (isAdmin() ? setup() : '') +
@@ -123,7 +135,8 @@
       inbound: leads.filter(function (l) { return l.type === 'inbound'; }), outbound: leads.filter(function (l) { return l.type !== 'inbound'; }),
       first: booked.filter(function (m) { return !(m.seq > 1); }), followups: booked.filter(function (m) { return m.seq > 1; }),
       showed: held.filter(is('showed')), noshow: held.filter(is('no_show')), marked: held.filter(function (m) { return m.outcome !== 'needs'; }),
-      needs: ms.filter(is('needs')), won: DATA.leads.filter(matchesLead).filter(function (l) { return l.stage === 'won'; })
+      needs: ms.filter(is('needs')), won: DATA.leads.filter(matchesLead).filter(function (l) { return l.deal === 'won'; }),
+      opps: DATA.leads.filter(matchesLead).filter(function (l) { return OPEN.indexOf(l.deal) > -1; })
     };
   }
   var VIEWS = {
@@ -137,8 +150,26 @@
     noshow: ['No-shows', 'meetings', 'noshow', 'Meetings in this period the prospect missed.'],
     rate: ['Marked meetings', 'meetings', 'marked', 'The meetings the show rate is worked out from (showed + no-show).'],
     needs: ['Needs marking', 'meetings', 'needs', 'These meetings already happened. Mark each one so the show rate stays right.'],
-    won: ['Won', 'leads', 'won', 'Leads marked as won (became a client).']
+    won: ['Won', 'leads', 'won', 'Leads marked as won (became a client).'],
+    opps: ['Open opportunities', 'leads', 'opps', 'Everyone who met with us and is still in play.']
   };
+  // How far each lead that came in during the period got. Lost / on-hold leads count up to the stage they left.
+  function reach(l) {
+    var d = l.deal === 'lost' || l.deal === 'hold' ? l.dealFrom : l.deal;
+    var i = FUN.indexOf(d);
+    if (i > -1) return 3 + i;
+    if (l.deal === 'lost' || l.deal === 'hold') return (l.meetings || []).length ? 3 : 1;
+    return (l.meetings || []).length ? 2 : 1;
+  }
+  function funnel(S) {
+    var steps = [['New leads', 1], ['Booked a meeting', 2], ['Showed up', 3], ['Follow-up meeting', 4], ['Proposal sent', 5], ['Negotiation', 6], ['Won', 7]];
+    var r = S.leads.map(reach), top = Math.max(1, S.leads.length);
+    var rows = steps.map(function (st, i) { var n = r.filter(function (x) { return x >= st[1]; }).length; return { label: st[0], n: n }; });
+    return '<div class="card pl-funnel"><h3>Sales funnel <small>leads that came in during this period, and how far they got</small></h3>' + rows.map(function (x, i) {
+      var prev = i ? rows[i - 1].n : 0, w = Math.max(x.n / top * 100, x.n ? 2 : 0);
+      return '<div class="pl-f-row"><span class="pl-f-l">' + esc(x.label) + '</span><div class="pl-f-bar"><i style="width:' + w.toFixed(1) + '%;background:' + ['#9ccbf0', '#5fb0ec', '#0f7ac4', '#1B7381', '#7a5af5', '#c27b00', '#1e7a43'][i] + '"></i></div><b>' + x.n + '</b><small>' + (i ? (prev ? pct(x.n, prev) + '% of previous' : '—') : '') + '</small></div>';
+    }).join('') + '</div>';
+  }
   function viewLink(k, label) { return '<a class="pl-view" href="#pipeline/view/' + k + '">' + (label || 'View') + ' →</a>'; }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
@@ -150,6 +181,7 @@
       ['No-show', noshow, '', 'noshow'],
       ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'of marked meetings', 'rate'],
       ['Needs marking', needs, needs ? 'not marked yet' : 'all caught up', 'needs'],
+      ['Open opportunities', S.opps.length, S.opps.reduce(function (a, l) { return a + (l.value || 0); }, 0) ? esc(money(S.opps.reduce(function (a, l) { return a + (l.value || 0); }, 0)) + ' in play') : 'met us, still in play', 'opps'],
       ['Won', S.won.length, 'all time', 'won']
     ];
     var ms = S.ms;
@@ -158,12 +190,64 @@
     var lc = weekly(DATA.leads.filter(matchesLead), function (l) { return l.firstAt; }, function (l) { return l.type; }, weeks);
     var mc = weekly(ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
-      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
+      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + (x[3] === 'opps' ? '<a class="pl-view" href="#pipeline/opps">Open board →</a>' : viewLink(x[3])) + '</div>'; }).join('') + '</div>' +
+      funnel(S) +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#0f7ac4'], ['outbound', 'Outbound', '#1B7381']], 'New leads per week') +
       bars(mc, [['showed', 'Showed', '#1e7a43'], ['no_show', 'No-show', '#c0392b'], ['needs', 'Not marked yet', '#e0a526'], ['rescheduled', 'Rescheduled', '#9fb2bf'], ['cancelled', 'Cancelled', '#cfd9e0']], 'Meetings per week') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       '<div style="height:14px"></div>' + breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
+  }
+
+  /* ---------- Opportunities board (like Pipedrive / HubSpot deal boards) ---------- */
+  var SHOW_LOST = false;
+  function card(l) {
+    var last = (l.trail || []).filter(function (x) { return x.kind === 'note'; }).slice(-1)[0];
+    var idle = l.lastActivity ? Math.floor((Date.now() - l.lastActivity) / 864e5) : 0;
+    var stale = OPEN.indexOf(l.deal) > -1 && idle >= 14;
+    var nx = l.nextStep;
+    return '<div class="pl-card' + (stale ? ' stale' : '') + '" draggable="' + (isAdmin() ? 'true' : 'false') + '" data-k="' + esc(l.key) + '" data-d="' + esc(l.deal) + '">' +
+      '<div class="pl-c-top"><b>' + esc(l.name || l.email) + '</b>' + (l.value ? '<span class="pl-c-val">' + esc(money(l.value)) + '</span>' : '') + '</div>' +
+      '<small class="pl-c-co">' + esc(l.company || l.email || '') + '</small>' +
+      (nx ? '<div class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">→ ' + esc(nx.text) + (nx.due ? ' · ' + esc(dueTxt(nx)) : '') + '</div>' : (l.next ? '<div class="pl-c-next">→ Meeting ' + esc(when(l.next)) + '</div>' : '')) +
+      (last ? '<p class="pl-c-note">' + esc(last.text.slice(0, 140)) + (last.text.length > 140 ? '…' : '') + '<br><small>' + esc(last.by || '') + ' · ' + esc(ago(last.at)) + '</small></p>' : '') +
+      '<div class="pl-c-foot">' + typeTag(l.type) + (l.callers.length ? '<small>' + esc(l.callers[0]) + '</small>' : '') + '<small class="pl-c-idle">' + (stale ? '⚠ no update in ' + idle + 'd' : l.lastActivity ? ago(l.lastActivity) : '') + '</small></div></div>';
+  }
+  function board() {
+    var q = F.q.trim().toLowerCase();
+    var all = DATA.leads.filter(matchesLead).filter(function (l) { return l.deal && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); });
+    var cols = ['met', 'followup', 'proposal', 'negotiation', 'won', 'hold'].concat(SHOW_LOST ? ['lost'] : []);
+    var lostN = all.filter(function (l) { return l.deal === 'lost'; }).length;
+    var by = function (k) { return all.filter(function (l) { return l.deal === k; }).sort(function (a, b) { return (b.lastActivity || 0) - (a.lastActivity || 0); }); };
+    var open = all.filter(function (l) { return OPEN.indexOf(l.deal) > -1; }), val = open.reduce(function (a, l) { return a + (l.value || 0); }, 0);
+    return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '') + '</div>' +
+      '<p class="ins-note" style="margin:-4px 0 12px"><b>' + open.length + ' open</b>' + (val ? ' · ' + esc(money(val)) + ' in play' : '') + ' · Everyone who showed up to a meeting lands in <b>Discovery call done</b>; a follow-up meeting moves them to <b>Follow-up</b>. ' + (isAdmin() ? 'Drag a card to move it, or open it to add an update.' : '') + ' <a href="#" id="pl-lost">' + (SHOW_LOST ? 'Hide lost' : 'Show lost (' + lostN + ')') + '</a></p>' +
+      '<div class="pl-board">' + cols.map(function (k) {
+        var list = by(k), v = list.reduce(function (a, l) { return a + (l.value || 0); }, 0);
+        return '<section class="pl-col" data-col="' + k + '"><header style="--c:' + DEAL[k][1] + '"><b>' + esc(DEAL[k][0]) + '</b><span>' + list.length + (v ? ' · ' + esc(money(v)) : '') + '</span></header><div class="pl-cards">' + (list.length ? list.slice(0, 150).map(card).join('') : '<div class="pl-c-empty">Nobody here yet</div>') + '</div></section>';
+      }).join('') + '</div>';
+  }
+  function bindBoard() {
+    var lost = $('pl-lost'); if (lost) lost.onclick = function (e) { e.preventDefault(); SHOW_LOST = !SHOW_LOST; draw(); };
+    var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
+    var drag = null;
+    [].forEach.call(MAIN.querySelectorAll('.pl-card'), function (c) {
+      c.onclick = function () { openLead(c.getAttribute('data-k')); };
+      c.ondragstart = function (e) { drag = c; c.classList.add('drag'); try { e.dataTransfer.setData('text/plain', c.getAttribute('data-k')); e.dataTransfer.effectAllowed = 'move'; } catch (x) {} };
+      c.ondragend = function () { c.classList.remove('drag'); [].forEach.call(MAIN.querySelectorAll('.pl-col'), function (s) { s.classList.remove('over'); }); };
+    });
+    if (!isAdmin()) return;
+    [].forEach.call(MAIN.querySelectorAll('.pl-col'), function (col) {
+      col.ondragover = function (e) { if (!drag) return; e.preventDefault(); col.classList.add('over'); };
+      col.ondragleave = function (e) { if (!col.contains(e.relatedTarget)) col.classList.remove('over'); };
+      col.ondrop = function (e) {
+        e.preventDefault(); col.classList.remove('over'); if (!drag) return;
+        var k = drag.getAttribute('data-k'), from = drag.getAttribute('data-d'), to = col.getAttribute('data-col'); drag = null;
+        if (from === to) return;
+        var l = leadByKey(k); if (l) { l.deal = to; } draw();
+        api('POST', { action: 'update', key: k, deal: to, from: from, by: myName() }).then(function () { return load(false); }).then(draw).catch(fail);
+      };
+    });
   }
 
   /* ---------- View (the list behind a dashboard box) ---------- */
@@ -189,7 +273,9 @@
     return '<table><thead><tr><th>Came in</th><th>Lead</th><th>Type</th><th>Campaign · caller</th><th>Stage</th><th>Latest</th><th>Meeting</th></tr></thead><tbody>' + shown.map(function (l) {
       var n = (l.meetings || []).length;
       var meet = l.next ? 'Next: ' + when(l.next) : (l.lastMeeting ? day(l.lastMeeting.start) + ' · ' + (OUT[l.lastMeeting.outcome] || [''])[0] : '—');
-      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + tag(STAGE, l.stage) + '</td><td class="pl-latest">' + esc(l.latest || '') + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
+      var lastNote = (l.trail || []).filter(function (x) { return x.kind === 'note'; }).slice(-1)[0];
+      if (lastNote) l = Object.assign({}, l, { latest: lastNote.text });
+      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + (l.deal ? dealTag(l.deal) : tag(STAGE, l.stage)) + '</td><td class="pl-latest">' + esc(l.latest || '') + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
     }).join('') + '</tbody></table>';
   }
   function bindLeadRows(el) { [].forEach.call(el.querySelectorAll('tbody tr[data-k]'), function (tr) { tr.onclick = function () { openLead(tr.getAttribute('data-k')); }; }); }
@@ -242,29 +328,74 @@
     if (!d) { d = document.createElement('dialog'); d.id = 'pl-dialog'; d.className = 'pl-dialog'; document.body.appendChild(d); d.addEventListener('click', function (e) { if (e.target === d) d.close(); }); }
     return d;
   }
+  // Everything that happened with a lead, newest first: the team's updates plus meetings, sheet entries,
+  // website forms and Fathom recordings, each with its date and time.
+  function timeline(l, ms) {
+    var ev = [];
+    (l.trail || []).forEach(function (x) {
+      if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Update', body: x.text, by: x.by, id: x.id });
+      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Stage set back to automatic' : 'Moved to ' + (DEAL[x.to] || [x.to])[0] + (x.from && DEAL[x.from] ? ' (from ' + DEAL[x.from][0] + ')' : ''), by: x.by, c: (DEAL[x.to] || [0, '#8a9aa6'])[1] });
+      else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next step: ' + x.text + (x.due ? ' · due ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Next step cleared' + (x.text ? ': ' + x.text : ''), by: x.by });
+      else if (x.kind === 'value') ev.push({ at: x.at, k: 'value', t: x.value ? 'Deal value set to ' + money(x.value) + ' / month' : 'Deal value removed', by: x.by });
+    });
+    ms.forEach(function (m) {
+      if (m.created && m.kind !== 'sheet') ev.push({ at: t(m.created), k: 'book', t: 'Booked ' + m.name + ' for ' + when(m.start), by: m.host ? 'with ' + m.host : '' });
+      if (t(m.start) <= Date.now() || m.outcome === 'cancelled' || m.outcome === 'rescheduled') {
+        var o = (OUT[m.outcome] || [m.outcome])[0];
+        ev.push({ at: t(m.start), k: 'meet-' + m.outcome, t: (m.seq > 1 ? 'Follow-up meeting ' + m.seq : m.seq === 1 ? 'First meeting' : 'Meeting') + ': ' + o, body: m.name + (m.sheet && m.sheet.notes ? '\n' + m.sheet.notes : ''), link: m.fathom && m.fathom.url ? [m.fathom.url, 'Fathom recording'] : m.sheet && m.sheet.recording ? [m.sheet.recording, 'Booking call'] : null });
+      }
+    });
+    (l.sheetRows || []).forEach(function (r) { if (t(r.at)) ev.push({ at: t(r.at), k: 'sheet', t: 'Logged in ' + r.sheet + (r.appt ? ' · appointment ' + when(r.appt) : ''), body: [r.trail || r.update, r.confirm && 'Confirmation: ' + r.confirm, r.show && 'Show status: ' + r.show].filter(Boolean).join('\n'), by: r.caller, link: r.recording ? [r.recording, 'Booking call'] : null }); });
+    (l.website || []).forEach(function (w) { ev.push({ at: t(w.at), k: 'web', t: 'Sent the ' + w.form + ' form', body: Object.keys(w.fields || {}).filter(function (k) { return !/^(eventId|button|cta|draftId)$/.test(k); }).map(function (k) { return k + ': ' + w.fields[k]; }).join('\n') }); });
+    (l.recordings || []).forEach(function (r) { ev.push({ at: t(r.start), k: 'rec', t: 'Recorded call: ' + (r.title || 'Call') + (r.spoke ? '' : ' (prospect did not speak)'), body: r.summary ? r.summary.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') : '', fold: true, by: r.recordedBy, link: r.url ? [r.url, 'Watch in Fathom'] : null }); });
+    if (l.note) ev.push({ at: l.firstAt || 0, k: 'note', t: 'Earlier note', body: l.note });
+    return ev.filter(function (e) { return e.at; }).sort(function (a, b) { return b.at - a.at; });
+  }
+  function timelineHtml(l, ev) {
+    if (!ev.length) return '<div class="empty">Nothing yet.</div>';
+    return '<ol class="pl-tl">' + ev.map(function (e) {
+      var body = e.body ? (e.fold ? '<details><summary>Summary</summary><pre>' + esc(e.body) + '</pre></details>' : '<pre>' + esc(e.body) + '</pre>') : '';
+      return '<li class="pl-tl-' + esc(e.k.split('-')[0]) + ' pl-tlk-' + esc(e.k) + '"' + (e.c ? ' style="--c:' + e.c + '"' : '') + '><time>' + esc(clock(e.at)) + '</time><div class="pl-tl-b"><b>' + esc(e.t) + '</b>' + (e.by ? ' <small>· ' + esc(e.by) + '</small>' : '') + body + (e.link ? '<a class="pl-rec" href="' + esc(e.link[0]) + '" target="_blank" rel="noopener">▶ ' + esc(e.link[1]) + '</a>' : '') + (e.id && isAdmin() ? '<button type="button" class="pl-tl-del" data-del="' + esc(e.id) + '" title="Delete this update">Delete</button>' : '') + '</div></li>';
+    }).join('') + '</ol>';
+  }
   function openLead(key) {
     var l = leadByKey(key); if (!l) return;
     var ms = l.meetings.map(function (id) { return DATA.meetings.find(function (m) { return m.id === id; }); }).filter(Boolean);
     var row = function (k, v) { return v ? '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>' : ''; };
-    var trail = l.sheetRows.map(function (r) { var facts = [r.vertical && 'Vertical: ' + r.vertical, r.appt && 'Appointment: ' + when(r.appt), r.confirm && 'Confirmation: ' + r.confirm, r.followup && 'Follow-up: ' + r.followup, r.show && 'Show status: ' + r.show, r.location && 'Location: ' + r.location].filter(Boolean); return '<div class="pl-trail"><small>' + esc(r.sheet) + (r.caller ? ' · ' + esc(r.caller) : '') + (r.at ? ' · entered ' + esc(r.at) : '') + '</small>' + (facts.length ? '<pre>' + esc(facts.join('\n')) + '</pre>' : '') + (r.trail || r.update ? '<pre class="pl-notes">' + esc(r.trail || r.update) + '</pre>' : '') + (r.recording ? '<a class="pl-rec" href="' + esc(r.recording) + '" target="_blank" rel="noopener">▶ Booking call recording</a>' : '') + '</div>'; }).join('');
-    var recs = (l.recordings || []).map(function (r) { return '<div class="pl-trail"><small>' + when(r.start) + (r.recordedBy ? ' · recorded by ' + esc(r.recordedBy) : '') + (r.spoke ? '' : ' · prospect did not speak') + '</small><div class="pl-rec-h"><b>' + esc(r.title || 'Call') + '</b>' + (r.url ? ' <a href="' + esc(r.url) + '" target="_blank" rel="noopener">▶ Watch in Fathom</a>' : '') + '</div>' + (r.summary ? '<details><summary>Summary</summary><pre>' + esc(r.summary.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')) + '</pre></details>' : '') + (r.actions && r.actions.length ? '<details><summary>Action items (' + r.actions.length + ')</summary><pre>' + esc(r.actions.map(function (a) { return '• ' + a; }).join('\n')) + '</pre></details>' : '') + '</div>'; }).join('');
-    var forms = l.website.map(function (w) { return '<div class="pl-trail"><small>' + esc(w.form) + ' · ' + when(w.at) + (w.page ? ' · ' + esc(String(w.page).replace(/^https?:\/\/[^/]+/, '')) : '') + '</small><pre>' + esc(Object.keys(w.fields || {}).filter(function (k) { return !/^(eventId|button|cta|draftId)$/.test(k); }).map(function (k) { return k + ': ' + w.fields[k]; }).join('\n')) + '</pre></div>'; }).join('');
+    var ev = timeline(l, ms), nx = l.nextStep || {};
+    var stageSel = '<select id="pl-u-deal"><option value="">' + (l.deal && l.dealAuto ? 'Automatic (' + esc(DEAL[l.deal][0]) + ')' : 'Not an opportunity yet') + '</option>' + Object.keys(DEAL).map(function (k) { return '<option value="' + k + '"' + (!l.dealAuto && l.deal === k ? ' selected' : '') + '>' + esc(DEAL[k][0]) + '</option>'; }).join('') + '</select>';
     var d = dlg();
     d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + tag(STAGE, l.stage) + '</div>' +
-      '<dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + row('Latest', esc(l.latest)) + '</dl>' +
+      '<div class="pl-dtags">' + typeTag(l.type) + (l.deal ? dealTag(l.deal) : tag(STAGE, l.stage)) + (l.value ? '<span class="pl-c-val">' + esc(money(l.value)) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + '</div>' +
+      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Add an update</h3><textarea id="pl-u-note" rows="3" placeholder="What happened? e.g. Called, wants pricing for 2 callers, sending proposal Thursday"></textarea>' +
+        '<div class="pl-upd-row"><label>Stage' + stageSel + '</label><label>Next step<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Send proposal"></label><label>Due<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Value / month ($)<input type="text" inputmode="numeric" id="pl-u-val" value="' + esc(l.value || '') + '" placeholder="0"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
+        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Save update</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Mark next step done</button>' : '') + '<span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
+      '<h3 class="pl-h">History</h3>' + timelineHtml(l, ev) +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
-      (recs ? '<h3 class="pl-h">Recorded calls (Fathom)</h3>' + recs : '') + (trail ? '<h3 class="pl-h">From the Lead Entry sheet</h3>' + trail : '') + (forms ? '<h3 class="pl-h">Website forms</h3>' + forms : '') +
-      (isAdmin() ? '<h3 class="pl-h">Your update</h3><div class="pl-edit"><label>Stage<select id="pl-d-stage"><option value="">Automatic</option><option value="won"' + (l.stageOverride === 'won' ? ' selected' : '') + '>Won (became a client)</option><option value="lost"' + (l.stageOverride === 'lost' ? ' selected' : '') + '>Lost</option></select></label>' +
-      '<label>Type<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label>' +
-      '<label class="pl-note">Notes<textarea id="pl-d-note" rows="3" placeholder="Anything the team should know">' + esc(l.note) + '</textarea></label></div>' +
-      '<div style="display:flex;gap:10px;align-items:center;margin-top:14px"><button class="btn pri" id="pl-d-save" type="button">Save</button><span id="pl-d-msg" style="color:#5d7280;font-size:14px"></span></div>' : '') + '</div>';
+      '<details class="pl-more"><summary>Contact details and settings</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
+      (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Type<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save type</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
     d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
     [].forEach.call(d.querySelectorAll('tr[data-k]'), function (tr) { tr.onclick = null; });
+    var reopen = function () { return load(false).then(function () { draw(); if (d.open) openLead(key); }); };
+    if ($('pl-u-save')) $('pl-u-save').onclick = function () {
+      var b = this, by = $('pl-u-by').value.trim(); setMyName(by); b.disabled = true; $('pl-u-msg').textContent = 'Saving…';
+      var dealSel = $('pl-u-deal').value, wasManual = !l.dealAuto ? l.deal : '';
+      var payload = { action: 'update', key: l.key, note: $('pl-u-note').value, by: by, value: $('pl-u-val').value, next: { text: $('pl-u-next').value, due: $('pl-u-due').value } };
+      if (dealSel !== wasManual) { payload.deal = dealSel; payload.from = l.deal || ''; }
+      api('POST', payload).then(reopen).catch(function (e) { $('pl-u-msg').textContent = e.message; b.disabled = false; });
+    };
+    if ($('pl-u-done')) $('pl-u-done').onclick = function () {
+      var b = this, by = $('pl-u-by').value.trim(); setMyName(by); b.disabled = true;
+      api('POST', { action: 'update', key: l.key, by: by, note: $('pl-u-note').value, next: { text: '', due: '' } }).then(reopen).catch(function (e) { $('pl-u-msg').textContent = e.message; b.disabled = false; });
+    };
+    [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
+      b.onclick = function () { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Click again to delete'; return; } b.disabled = true; api('POST', { action: 'note-delete', key: l.key, id: b.getAttribute('data-del') }).then(reopen).catch(fail); };
+    });
     if ($('pl-d-save')) $('pl-d-save').onclick = function () {
       var b = this; b.disabled = true; $('pl-d-msg').textContent = 'Saving…';
-      api('POST', { action: 'lead', key: l.key, stage: $('pl-d-stage').value, type: $('pl-d-type').value, note: $('pl-d-note').value }).then(function () { return load(false); }).then(function () { $('pl-d-msg').textContent = 'Saved'; draw(); setTimeout(function () { if (d.open) openLead(key); }, 300); }).catch(function (e) { $('pl-d-msg').textContent = e.message; }).then(function () { b.disabled = false; });
+      api('POST', { action: 'lead', key: l.key, type: $('pl-d-type').value }).then(reopen).catch(function (e) { $('pl-d-msg').textContent = e.message; b.disabled = false; });
     };
     if (!d.open) d.showModal();
   }
@@ -347,10 +478,11 @@
     if (!MAIN || !DATA) return;
     if (location.hash.indexOf('#pipeline') !== 0) return;
     if ((SUB === 'sources' || SUB === 'team') && !isAdmin()) SUB = '';
-    var body = SUB === 'leads' ? leadsView() : SUB === 'meetings' ? meetingsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
+    var body = SUB === 'opps' ? board() : SUB === 'leads' ? leadsView() : SUB === 'meetings' ? meetingsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
     MAIN.innerHTML = head() + body;
     bindFilters();
     if (SUB === 'leads') drawLeadsTable();
+    if (SUB === 'opps') bindBoard();
     if (SUB === 'view' && $('pl-leads')) bindLeadRows($('pl-leads'));
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
@@ -358,7 +490,7 @@
     var d = $('pl-dialog'); if (d && d.open) bindMeetings(d);
   }
   function route(parts, main) {
-    MAIN = main; SUB = ['leads', 'meetings', 'view', 'sources', 'team'].indexOf(parts[0]) > -1 ? parts[0] : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
+    MAIN = main; SUB = ['opps', 'leads', 'meetings', 'view', 'sources', 'team'].indexOf(parts[0]) > -1 ? parts[0] : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
     if (MAIN) MAIN.scrollTop = 0;
     if (DATA) { draw(); return; }
     main.innerHTML = '<h1>Pipeline</h1><div class="empty">Loading leads and meetings…</div>';
