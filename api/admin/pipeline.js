@@ -17,7 +17,7 @@ async function body(req) {
 function forCaller(snap, u) {
   const mine = new Set((u.agents || []).map(a => a.toLowerCase().trim()).filter(Boolean));
   const leads = snap.leads.filter(l => (l.callers || []).some(c => mine.has(String(c).toLowerCase().trim())))
-    .map(l => Object.assign({}, l, { note: '', website: [] }));
+    .map(l => Object.assign({}, l, { note: '', website: [], value: 0, trail: (l.trail || []).filter(x => x.kind === 'stage' || x.kind === 'next') }));
   const keys = new Set(leads.map(l => l.key));
   const meetings = snap.meetings.filter(m => m.leadKey && keys.has(m.leadKey));
   return { leads, meetings, role: 'caller', me: { name: u.name, agents: u.agents }, status: { calendly: { connected: snap.status.calendly.connected, lastSync: snap.status.calendly.lastSync }, sheets: { lastSync: snap.status.sheets.lastSync, files: snap.status.sheets.files.map(f => ({ name: f.name })) }, fathom: { connected: snap.status.fathom.connected, lastSync: snap.status.fathom.lastSync }, website: {} } };
@@ -43,6 +43,8 @@ module.exports = async (req, res) => {
     const link = t => 'https://www.bpohive.com/admin/?invite=' + encodeURIComponent(t);
     switch (b.action) {
       case 'outcome': return res.status(200).json(await pl.setOutcome(String(b.id || ''), String(b.outcome || '')));
+      case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, value: b.value, next: b.next }, b.by));
+      case 'note-delete': return res.status(200).json(await pl.deleteNote(String(b.key || ''), String(b.id || '')));
       case 'lead': return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }));
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
       case 'sources': return res.status(200).json({ sources: await pl.setSources(b.sources) });
