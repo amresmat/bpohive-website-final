@@ -225,29 +225,39 @@ test('the event-types setting is saved and used', async () => {
   S.delete('pl:evskip');
 });
 
-test('opportunities: showing up makes a lead an opportunity; updates are kept as a dated trail', async () => {
+test('shown / dead: a show goes to Shown and stays there; dead when unqualified or not replying', async () => {
   const day = 864e5;
-  const mt = (id, start, inv, outcome) => ({ id, name: 'Discovery Call', start: iso(start), end: iso(start + 1800e3), status: 'active', created: iso(start - 2 * day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(start - 2 * day) }, inv)], override: outcome ? { outcome } : null });
+  const mt = (id, start, inv, outcome, created) => ({ id, name: 'Discovery Call', start: iso(start), end: iso(start + 1800e3), status: 'active', created: iso(created || start - 2 * day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(start - 2 * day) }, inv)], override: outcome ? { outcome } : null });
   const base = { entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, leadOv: {}, trails: {},
     meetings: [mt('M1', now - 10 * day, { name: 'Ann Lee', email: 'ann@a.com' }, 'showed'), mt('M2', now + 2 * day, { name: 'Ann Lee', email: 'ann@a.com' }),
-      mt('M3', now - 5 * day, { name: 'Bo Kim', email: 'bo@b.com' }, 'showed'), mt('M4', now - 3 * day, { name: 'Cy Ray', email: 'cy@c.com' }, 'no_show')] };
-  let r = pl.build(JSON.parse(JSON.stringify(base)));
+      mt('M3', now - 5 * day, { name: 'Bo Kim', email: 'bo@b.com' }, 'showed'), mt('M4', now - 3 * day, { name: 'Cy Ray', email: 'cy@c.com' }, 'no_show'),
+      mt('M5', now + 1 * day, { name: 'Di Fox', email: 'di@d.com' }), mt('M6', now - 1 * day, { name: 'Ed Wu', email: 'ed@e.com' })] };
   const g = (r, e) => r.leads.find(l => l.email === e);
-  assert.equal(g(r, 'ann@a.com').deal, 'followup', 'showed, then a follow-up is booked');
-  assert.equal(g(r, 'bo@b.com').deal, 'met'); assert.equal(g(r, 'bo@b.com').dealAuto, true);
-  assert.equal(g(r, 'cy@c.com').deal, '', 'a no-show is not an opportunity yet');
-  await pl.updateLead('e:bo@b.com', { note: 'Wants pricing for 2 callers', deal: 'proposal', from: 'met', value: '$3,000', next: { text: 'Send proposal', due: '2026-11-12' } }, 'Amr');
-  await pl.updateLead('e:bo@b.com', { note: '', deal: 'proposal', value: '3000', next: { text: 'Send proposal', due: '2026-11-12' } }, 'Amr');
-  const trail = JSON.parse(H.get('pl:trail').get('e:bo@b.com'));
-  assert.deepEqual(trail.map(x => x.kind), ['stage', 'value', 'next', 'note'], 'saving again without changes adds nothing');
-  assert.equal(trail[0].by, 'Amr'); assert.ok(trail[0].at > 0); assert.equal(trail[1].value, 3000);
-  await pl.updateLead('e:bo@b.com', { deal: 'lost', from: 'proposal' }, 'Abdullah');
-  r = pl.build(Object.assign(JSON.parse(JSON.stringify(base)), { leadOv: { 'e:bo@b.com': JSON.parse(H.get('pl:leadov').get('e:bo@b.com')) }, trails: { 'e:bo@b.com': JSON.parse(H.get('pl:trail').get('e:bo@b.com')) } }));
+  let r = pl.build(JSON.parse(JSON.stringify(base)));
+  assert.equal(g(r, 'ann@a.com').status, 'shown', 'a follow-up booked after a show stays in Shown');
+  assert.equal(g(r, 'bo@b.com').status, 'shown'); assert.equal(g(r, 'bo@b.com').dealAuto, true);
+  assert.equal(g(r, 'cy@c.com').status, 'no_show'); assert.equal(g(r, 'di@d.com').status, 'booked'); assert.equal(g(r, 'ed@e.com').status, 'to_mark');
+  await pl.updateLead('e:bo@b.com', { note: 'Called, no answer', next: { text: 'Call again', due: '2026-11-12' } }, 'Amr');
+  await pl.updateLead('e:bo@b.com', { note: 'Called, no answer', next: { text: 'Call again', due: '2026-11-12' } }, 'Amr');
+  await pl.updateLead('e:bo@b.com', { next: { text: 'Call again', due: '2026-11-12' } }, 'Amr');
+  let trail = JSON.parse(H.get('pl:trail').get('e:bo@b.com'));
+  assert.deepEqual(trail.map(x => x.kind), ['next', 'note', 'note'], 'saving the same next step again adds nothing');
+  assert.equal(trail[0].by, 'Amr'); assert.ok(trail[0].at > 0);
+  await pl.updateLead('e:bo@b.com', { deal: 'dead', reason: 'no_reply', from: 'shown' }, 'Abdullah');
+  const ovs = () => ({ leadOv: { 'e:bo@b.com': JSON.parse(H.get('pl:leadov').get('e:bo@b.com')) }, trails: { 'e:bo@b.com': JSON.parse(H.get('pl:trail').get('e:bo@b.com')) } });
+  r = pl.build(Object.assign(JSON.parse(JSON.stringify(base)), ovs()));
   const bo = g(r, 'bo@b.com');
-  assert.equal(bo.deal, 'lost'); assert.equal(bo.dealFrom, 'proposal'); assert.equal(bo.stage, 'lost'); assert.equal(bo.value, 3000); assert.equal(bo.nextStep.text, 'Send proposal'); assert.equal(bo.trail.length, 5); assert.equal(bo.dealAuto, false);
+  assert.equal(bo.status, 'dead'); assert.equal(bo.deadReason, 'no_reply'); assert.equal(bo.attempts, 2); assert.equal(bo.nextStep.text, 'Call again'); assert.equal(bo.trail.slice(-1)[0].reason, 'no_reply');
+  // a dead lead who books again comes back by itself
+  const again = Object.assign(JSON.parse(JSON.stringify(base)), ovs());
+  again.meetings.push(mt('M7', now + 3 * day, { name: 'Bo Kim', email: 'bo@b.com' }, null, now + 60e3));
+  assert.equal(g(pl.build(again), 'bo@b.com').status, 'shown');
+  // old stage names still read correctly
+  assert.equal(g(pl.build(Object.assign(JSON.parse(JSON.stringify(base)), { leadOv: { 'e:ann@a.com': { deal: 'proposal' } } })), 'ann@a.com').status, 'shown');
+  assert.equal(g(pl.build(Object.assign(JSON.parse(JSON.stringify(base)), { leadOv: { 'e:ann@a.com': { deal: 'lost', dealAt: now } } })), 'ann@a.com').status, 'dead');
   await assert.rejects(pl.updateLead('e:bo@b.com', { deal: 'maybe' }), /Unknown/);
   await assert.rejects(pl.updateLead('e:bo@b.com', { next: { text: 'x', due: 'soon' } }), /date/);
-  const noteId = trail[3].id;
+  const noteId = trail[1].id;
   await pl.deleteNote('e:bo@b.com', noteId);
   assert.ok(!JSON.parse(H.get('pl:trail').get('e:bo@b.com')).some(x => x.id === noteId));
   await assert.rejects(pl.deleteNote('e:bo@b.com', trail[0].id), /Unknown/, 'only notes can be deleted');
