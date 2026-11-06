@@ -8,8 +8,10 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var DATA = null, MAIN = null, SUB = '', VIEW = '', LOADING = null;
   var F = { range: 30, type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
-  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed · mark it', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Dead', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
-  var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed · mark it', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Shown', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
+  var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  var HOT = { must_close: ['Must close', '#c0392b'], contract: ['Waiting on contract', '#7a5af5'], nurture: ['Nurture', '#1B7381'] };
+  var HOT_RANK = { must_close: 0, contract: 1, nurture: 2 };
   var REASON = { unqualified: 'Unqualified', no_reply: 'Not replying', other: 'Other' };
   var BTNS = [['showed', 'Show'], ['no_show', 'No-show'], ['rescheduled', 'Rescheduled'], ['cancelled', 'Cancelled']];
 
@@ -26,9 +28,13 @@
   function tag(map, k) { var s = map[k] || [k, 'st-off']; return '<span class="st ' + s[1] + '">' + esc(s[0]) + '</span>'; }
   function typeTag(ty) { return '<span class="ty ty-' + (ty === 'outbound' ? 'out' : 'in') + '">' + (ty === 'outbound' ? 'Outbound' : 'Inbound') + '</span>'; }
   function statusTag(k) { return tag(STATUS, k); }
-  function seqTag(m) { return m.seq > 1 ? '<span class="pl-seq">Follow-up · meeting ' + m.seq + '</span>' : m.seq === 1 ? '<span class="pl-seq pl-seq1">1st meeting</span>' : ''; }
+  // Dead leads are split in two: unqualified, and everyone else (not replying).
+  function deadBucket(l) { return l.status !== 'dead' ? '' : l.deadReason === 'unqualified' ? 'unqualified' : 'no_reply'; }
+  function leadTag(l) { return l.status === 'dead' ? '<span class="st st-off">' + (deadBucket(l) === 'unqualified' ? 'Unqualified' : 'Not replying') + '</span>' : statusTag(l.status); }
+  function hotTag(k) { var h = HOT[k]; return h ? '<span class="pl-deal" style="--c:' + h[1] + '">' + esc(h[0]) + '</span>' : ''; }
+  function seqTag(m) { var o = function (n) { return n + (n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'); }; return m.seq > 1 ? '<span class="pl-seq">' + o(m.seq) + ' meeting</span>' : m.seq === 1 ? '<span class="pl-seq pl-seq1">1st meeting</span>' : ''; }
   function money(v) { return v ? '$' + Number(v).toLocaleString() : ''; }
-  function clock(ts) { var d = new Date(ts); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  function clock(ts) { var d = new Date(ts); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
   function dueTxt(n) { if (!n || !n.due) return ''; var d = new Date(n.due + 'T12:00:00'); var days = Math.round((new Date(n.due + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5); return days < 0 ? 'overdue ' + (-days) + 'd' : days === 0 ? 'today' : days === 1 ? 'tomorrow' : d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }); }
   function overdue(n) { return n && n.due && new Date(n.due + 'T23:59:59') < new Date(); }
   function myName() { try { return localStorage.getItem('bh_pl_name') || ''; } catch (e) { return ''; } }
@@ -54,11 +60,11 @@
 
   function head() {
     var s = DATA.status, c = s.calendly, sh = s.sheets;
-    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ' · ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ' · ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ' · Website forms live' : '');
+    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ', Website forms live' : '');
     var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
-    var sub = isAdmin() ? 'Booked → Show or No-show → Shown (hot leads) → Dead or Won.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var tabs = [['', 'Dashboard', ''], ['booked', 'Booked', needs ? needs + ' to mark' : (DATA.meetings.filter(function (m) { return m.outcome === 'upcoming'; }).length || '')], ['shown', 'Shown', cnt('shown') || ''], ['noshow', 'No-shows', cnt('no_show') || ''], ['dead', 'Dead', cnt('dead') || ''], ['leads', 'All leads', DATA.leads.length]];
+    var sub = isAdmin() ? 'Booked, then a show or a no-show. Shows stay in Shown while you follow up, until they are won, not replying or unqualified.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
+    var tabs = [['', 'Dashboard', ''], ['booked', 'Booked', needs ? needs + ' to mark' : (DATA.meetings.filter(function (m) { return m.outcome === 'upcoming'; }).length || '')], ['shown', 'Shown', cnt('shown') || ''], ['noshow', 'No-shows', cnt('no_show') || ''], ['noreply', 'Not replying', DATA.leads.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length || ''], ['unqualified', 'Unqualified', DATA.leads.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length || ''], ['leads', 'All leads', DATA.leads.length]];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
       (isAdmin() ? setup() : '') +
@@ -134,7 +140,7 @@
       bookedIn: booked.filter(function (m) { return m.type === 'inbound'; }), bookedOut: booked.filter(function (m) { return m.type !== 'inbound'; }),
       showed: held.filter(is('showed')), noshow: held.filter(is('no_show')), marked: held.filter(function (m) { return m.outcome !== 'needs'; }),
       needs: ms.filter(is('needs')),
-      hot: leads.filter(function (l) { return l.status === 'shown'; }), dead: leads.filter(function (l) { return l.status === 'dead'; }), won: leads.filter(function (l) { return l.status === 'won'; }),
+      hot: leads.filter(function (l) { return l.status === 'shown'; }), dead: leads.filter(function (l) { return l.status === 'dead'; }), noreply: leads.filter(function (l) { return deadBucket(l) === 'no_reply'; }), unq: leads.filter(function (l) { return deadBucket(l) === 'unqualified'; }), won: leads.filter(function (l) { return l.status === 'won'; }),
       cohort: leads.filter(function (l) { return inRange(l.firstAt); })
     };
   }
@@ -146,26 +152,27 @@
     noshow: ['No-shows', 'noshow', 'Meetings in this period the prospect missed.'],
     rate: ['Marked meetings', 'marked', 'The meetings the show rate is worked out from (shows + no-shows).']
   };
-  function viewLink(href, label) { return '<a class="pl-view" href="' + href + '">' + (label || 'View') + ' →</a>'; }
+  function viewLink(href, label) { return '<a class="pl-view" href="' + href + '">' + (label || 'View') + '</a>'; }
   function funnel(S) {
     var c = S.cohort, booked = c.filter(function (l) { return (l.meetings || []).length; }), showed = c.filter(function (l) { return l.shownAt || l.status === 'won'; });
     var won = c.filter(function (l) { return l.status === 'won'; }), hot = c.filter(function (l) { return l.status === 'shown'; }), dead = showed.filter(function (l) { return l.status === 'dead'; });
-    var rows = [['Leads', c.length, '#9ccbf0'], ['Booked', booked.length, '#5fb0ec'], ['Showed', showed.length, '#0f7ac4'], ['Won', won.length, '#1e7a43']], top = Math.max(1, c.length);
+    var rows = [['Leads', c.length, '#B9D3D6'], ['Booked', booked.length, '#7FAFB4'], ['Showed', showed.length, '#1B7381'], ['Won', won.length, '#20292F']], top = Math.max(1, c.length);
     return '<div class="card pl-funnel"><h3>Funnel <small>leads that came in during this period</small></h3>' + rows.map(function (x, i) {
       return '<div class="pl-f-row"><span class="pl-f-l">' + esc(x[0]) + '</span><div class="pl-f-bar"><i style="width:' + Math.max(x[1] / top * 100, x[1] ? 2 : 0).toFixed(1) + '%;background:' + x[2] + '"></i></div><b>' + x[1] + '</b><small>' + (i ? (rows[i - 1][1] ? pct(x[1], rows[i - 1][1]) + '% of ' + rows[i - 1][0].toLowerCase() : '—') : '') + '</small></div>';
-    }).join('') + '<p class="ins-note" style="margin:8px 0 0">Of the ' + showed.length + ' who showed: <b>' + hot.length + ' still hot</b> · ' + dead.length + ' dead · ' + won.length + ' won</p></div>';
+    }).join('') + '<p class="ins-note" style="margin:8px 0 0">Of the ' + showed.length + ' who showed: <b>' + hot.length + ' still hot</b>, ' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying, ' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified, ' + won.length + ' won</p></div>';
   }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
     var sub = function (k, n, label) { return n ? '<a href="#pipeline/view/' + k + '">' + n + ' ' + label + '</a>' : '0 ' + label; };
     var tiles = [
-      ['Booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ' · ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
+      ['Booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ', ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
       ['Shows', showed, esc('of ' + S.held.length + ' held'), '#pipeline/view/showed'],
       ['No-shows', noshow, '', '#pipeline/view/noshow'],
       ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'of marked meetings', '#pipeline/view/rate'],
       ['Date passed', needs, needs ? 'mark show or no-show' : 'all caught up', '#pipeline/booked'],
       ['Hot leads', S.hot.length, 'in Shown now', '#pipeline/shown'],
-      ['Dead', S.dead.length, 'all time', '#pipeline/dead'],
+      ['Not replying', S.noreply.length, 'all time', '#pipeline/noreply'],
+      ['Unqualified', S.unq.length, 'all time', '#pipeline/unqualified'],
       ['Won', S.won.length, 'all time', '#pipeline/leads']
     ];
     var upcoming = S.ms.filter(function (m) { return m.outcome === 'upcoming' && t(m.start) < Date.now() + 7 * 864e5; }).sort(function (a, b) { return t(a.start) - t(b.start); });
@@ -175,8 +182,8 @@
     return filters(true, false) +
       '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile' + (x[0] === 'Hot leads' ? ' pl-tile-hot' : '') + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
       funnel(S) +
-      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#0f7ac4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
-      bars(mc, [['showed', 'Show', '#1e7a43'], ['no_show', 'No-show', '#c0392b'], ['needs', 'Not marked yet', '#e0a526'], ['rescheduled', 'Rescheduled', '#9fb2bf'], ['cancelled', 'Cancelled', '#cfd9e0']], 'Meetings per week') + '</div>' +
+      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
+      bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       '<div style="height:14px"></div>' + breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
@@ -184,7 +191,7 @@
   function viewPage() {
     var v = VIEWS[VIEW] || VIEWS.booked, rows = sets()[v[1]] || [];
     var more = { booked: [['bookedIn', 'Inbound'], ['bookedOut', 'Outbound']], bookedIn: [['booked', 'All'], ['bookedOut', 'Outbound']], bookedOut: [['booked', 'All'], ['bookedIn', 'Inbound']] }[VIEW] || [];
-    return '<p class="pl-back"><a href="#pipeline">← Dashboard</a></p><div class="pl-vhead"><h2>' + esc(v[0]) + ' <span>' + rows.length + '</span></h2>' + (more.length ? '<div class="pl-vlinks">' + more.map(function (x) { return '<a href="#pipeline/view/' + x[0] + '">' + esc(x[1]) + '</a>'; }).join('') + '</div>' : '') + '</div>' +
+    return '<p class="pl-back"><a href="#pipeline">Back to dashboard</a></p><div class="pl-vhead"><h2>' + esc(v[0]) + ' <span>' + rows.length + '</span></h2>' + (more.length ? '<div class="pl-vlinks">' + more.map(function (x) { return '<a href="#pipeline/view/' + x[0] + '">' + esc(x[1]) + '</a>'; }).join('') + '</div>' : '') + '</div>' +
       '<p class="ins-note" style="margin:-2px 0 10px">' + esc(v[2]) + '</p>' + filters(true, false) +
       '<div class="card tablewrap pl-table" id="pl-meetings">' + (rows.length ? meetingTable(rows.slice(0, 500), false) : '<div class="empty">Nothing here for this period.</div>') + '</div>';
   }
@@ -198,7 +205,7 @@
   function meetingTable(rows, compact) {
     return '<table><thead><tr><th>For</th><th>Booked on</th><th>Who</th><th>Source</th><th>Meeting</th><th>' + (compact ? 'Status' : 'Show or no-show') + '</th></tr></thead><tbody>' + rows.map(function (m) {
       var who = m.invitee.name || m.invitee.email || '(unknown)';
-      return '<tr class="pl-m-' + m.outcome + '" data-k="' + esc(m.leadKey || '') + '"><td class="pl-when">' + when(m.start) + '</td><td><small><span class="pl-mlabel">Booked on </span>' + (m.created ? esc(day(m.created)) : '—') + '</small></td><td><b>' + esc(who) + '</b><br><small>' + esc([m.company, m.invitee.email].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(m.type) + (m.callers.length ? '<br><small>' + esc(m.callers.join(', ')) + '</small>' : '') + '</td><td>' + esc(m.name) + (seqTag(m) ? ' ' + seqTag(m) : '') + (m.host ? '<br><small>with ' + esc(m.host) + '</small>' : '') + (m.sheet ? '<br><small>' + esc(m.sheet.source) + (m.sheet.confirm ? ' · ' + esc(m.sheet.confirm) : '') + '</small>' : '') + (m.sheet && m.sheet.recording ? '<br><a class="pl-rec" href="' + esc(m.sheet.recording) + '" target="_blank" rel="noopener">▶ Booking call</a>' : '') + (m.fathom && m.fathom.url ? '<br><a class="pl-rec" href="' + esc(m.fathom.url) + '" target="_blank" rel="noopener">▶ Fathom recording</a>' : '') + '</td><td>' + tag(OUT, m.outcome) + (m.viaFathom ? ' <small class="pl-via">from Fathom</small>' : '') + (m.viaSheet ? ' <small class="pl-via">from sheet</small>' : '') + (compact ? '' : outcomeButtons(m)) + '</td></tr>';
+      return '<tr class="pl-m-' + m.outcome + '" data-k="' + esc(m.leadKey || '') + '"><td class="pl-when">' + when(m.start) + '</td><td><small><span class="pl-mlabel">Booked on </span>' + (m.created ? esc(day(m.created)) : '—') + '</small></td><td><b>' + esc(who) + '</b><br><small>' + esc([m.company, m.invitee.email].filter(Boolean).join(', ')) + '</small></td><td>' + typeTag(m.type) + (m.callers.length ? '<br><small>' + esc(m.callers.join(', ')) + '</small>' : '') + '</td><td>' + esc(m.name) + (seqTag(m) ? ' ' + seqTag(m) : '') + (m.host ? '<br><small>with ' + esc(m.host) + '</small>' : '') + (m.sheet ? '<br><small>' + esc(m.sheet.source) + (m.sheet.confirm ? ', ' + esc(m.sheet.confirm) : '') + '</small>' : '') + (m.sheet && m.sheet.recording ? '<br><a class="pl-rec" href="' + esc(m.sheet.recording) + '" target="_blank" rel="noopener">Booking call recording</a>' : '') + (m.fathom && m.fathom.url ? '<br><a class="pl-rec" href="' + esc(m.fathom.url) + '" target="_blank" rel="noopener">Fathom recording</a>' : '') + '</td><td>' + tag(OUT, m.outcome) + (m.viaFathom ? ' <small class="pl-via">from Fathom</small>' : '') + (m.viaSheet ? ' <small class="pl-via">from sheet</small>' : '') + (compact ? '' : outcomeButtons(m)) + '</td></tr>';
     }).join('') + '</tbody></table>';
   }
   function bookedView() {
@@ -207,7 +214,7 @@
     if (!groups[F.mtab]) F.mtab = groups.needs.length ? 'needs' : 'upcoming';
     var rows = groups[F.mtab] || [];
     return filters(false, false).replace('<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">', '') +
-      '<div class="tabs pl-mtabs">' + [['needs', 'Date passed · mark it'], ['upcoming', 'Upcoming'], ['past', 'Already marked']].map(function (x) { return '<button type="button" class="tab' + (F.mtab === x[0] ? ' on' : '') + '" data-t="' + x[0] + '">' + x[1] + '<b>' + groups[x[0]].length + '</b></button>'; }).join('') + '</div>' +
+      '<div class="tabs pl-mtabs">' + [['needs', 'Date passed'], ['upcoming', 'Upcoming'], ['past', 'Already marked']].map(function (x) { return '<button type="button" class="tab' + (F.mtab === x[0] ? ' on' : '') + '" data-t="' + x[0] + '">' + x[1] + '<b>' + groups[x[0]].length + '</b></button>'; }).join('') + '</div>' +
       (F.mtab === 'needs' && rows.length && isAdmin() ? '<p class="ins-note" style="margin:-4px 0 10px">The date came. Click <b>Show</b> or <b>No-show</b>. A show goes straight to the <a href="#pipeline/shown">Shown</a> tab.</p>' : '') +
       '<div class="card tablewrap pl-table" id="pl-meetings">' + (rows.length ? meetingTable(rows.slice(0, 500), false) : '<div class="empty">' + (F.mtab === 'needs' ? 'All caught up. Every past meeting is marked.' : 'No meetings here.') + '</div>') + '</div>';
   }
@@ -225,27 +232,43 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
+  function addLeadDialog() {
+    var d = dlg();
+    d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>Add a lead</h2><p class="ins-note" style="margin:4px 0 14px">For someone you met outside Calendly and the Lead Entry sheets. They go straight to Shown.</p>' +
+      '<div class="pl-upd-row pl-add-f"><label>Name<input type="text" id="pl-a-name"></label><label>Company<input type="text" id="pl-a-co"></label><label>Country<input type="text" id="pl-a-country"></label><label>Phone<input type="text" id="pl-a-phone"></label><label>Email<input type="text" id="pl-a-email"></label><label>Source<select id="pl-a-type"><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></label></div>' +
+      '<label class="pl-a-note">What they need / first update<textarea id="pl-a-note" rows="3"></textarea></label>' +
+      '<div class="pl-upd-act"><button class="btn pri" id="pl-a-save" type="button">Add to Shown</button><span id="pl-a-msg" class="ins-note" style="margin:0"></span></div></div>';
+    d.querySelector('.x').onclick = function () { d.close(); };
+    var q = function (id) { return d.querySelector('#' + id); };
+    q('pl-a-save').onclick = function () {
+      var b = this; b.disabled = true; q('pl-a-msg').textContent = 'Adding…';
+      api('POST', { action: 'lead-add', name: q('pl-a-name').value, company: q('pl-a-co').value, country: q('pl-a-country').value, phone: q('pl-a-phone').value, email: q('pl-a-email').value, type: q('pl-a-type').value, note: q('pl-a-note').value, by: myName() })
+        .then(function (r) { SEL = r.key; d.close(); return load(false); }).then(draw).catch(function (e) { q('pl-a-msg').textContent = e.message; b.disabled = false; });
+    };
+    if (!d.open) d.showModal();
+  }
   function lastNote(l) { return (l.trail || []).filter(function (x) { return x.kind === 'note'; }).slice(-1)[0]; }
   function shownView() {
     var q = F.q.trim().toLowerCase();
     var all = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === 'shown' && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
-      .sort(function (a, b) { return (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
+      .sort(function (a, b) { var ra = a.hot in HOT_RANK ? HOT_RANK[a.hot] : 9, rb = b.hot in HOT_RANK ? HOT_RANK[b.hot] : 9; return ra - rb || (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
     var idle = function (l) { return l.lastActivity && Date.now() - l.lastActivity > 14 * 864e5; };
     var due = function (l) { return l.nextStep && l.nextStep.due && new Date(l.nextStep.due + 'T00:00:00') <= new Date(); };
-    var rows = HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
+    var rows = HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOT[HOTF] ? all.filter(function (l) { return l.hot === HOTF; }) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
     if (!rows.some(function (l) { return l.key === SEL; })) SEL = rows[0] ? rows[0].key : '';
-    var chips = [['', 'All hot leads', all.length], ['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]];
+    var chips = [['', 'All hot leads', all.length]].concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
     return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '').replace(/<select id="pl-type">[\s\S]*?<\/select>/, '') + '</div>' +
-      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + '</div>' +
+      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
       '<div class="pl-split"><div class="card pl-olist">' + (rows.length ? rows.map(function (l) {
         var last = lastNote(l), nx = l.nextStep;
-        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b>' + typeTag(l.type) + '</span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small>' +
-          (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">→ ' + esc(nx.text) + (nx.due ? ' · ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">→ Meeting ' + esc(when(l.next)) + '</span>' : '') +
-          '<span class="pl-orow-n">' + (last ? esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '') : '<i>No update yet</i>') + '</span><small class="pl-orow-a">' + (l.attempts ? l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show · ' : '') + (l.lastActivity ? 'last ' + esc(ago(l.lastActivity)) : '') + '</small></button>';
+        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b><span>' + hotTag(l.hot) + ' ' + typeTag(l.type) + '</span></span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(', ')) + '</small>' +
+          (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '') +
+          '<span class="pl-orow-n">' + (last ? esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '') : '<i>No update yet</i>') + '</span><small class="pl-orow-a">' + (l.attempts ? l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show, ' : '') + (l.lastActivity ? 'last ' + esc(ago(l.lastActivity)) : '') + '</small></button>';
       }).join('') : '<div class="empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>' +
       '<div class="card pl-pane" id="pl-pane"></div></div>';
   }
   function bindShown() {
+    var add = $('pl-add'); if (add) add.onclick = addLeadDialog;
     [].forEach.call(MAIN.querySelectorAll('[data-hf]'), function (b) { b.onclick = function () { HOTF = b.getAttribute('data-hf'); draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
     var pane = $('pl-pane'), narrow = window.matchMedia('(max-width: 860px)').matches;
@@ -256,18 +279,18 @@
   }
 
   /* ---------- No-shows and Dead ---------- */
-  function simpleList(kind) {
+  function simpleList(kind, bucket) {
     var q = F.q.trim().toLowerCase();
-    var rows = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === kind && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
+    var rows = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === kind && (!bucket || deadBucket(l) === bucket) && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
       .sort(function (a, b) { return kind === 'dead' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); });
-    var note = kind === 'dead' ? 'Unqualified, or not replying after many tries. If they book again they come back by themselves.' : 'Missed their meeting. When they rebook (Calendly or the sheet) they move back to Booked by themselves. Open one to log a follow-up or mark it dead.';
-    var head = kind === 'dead' ? '<th>Lead</th><th>Source</th><th>Why</th><th>Marked dead</th><th>Updates</th><th>Last update</th>' : '<th>Lead</th><th>Source</th><th>Missed</th><th>Booked on</th><th>No-shows</th><th>Last update</th>';
-    return filters(false, false) + '<p class="ins-note" style="margin:-4px 0 10px"><b>' + rows.length + '</b> · ' + esc(note) + '</p>' +
+    var note = kind === 'dead' ? (bucket === 'unqualified' ? 'Not a fit (budget, need or decision-maker). If they book again they come back by themselves.' : 'Not replying after many tries. If they book again they come back by themselves.') : 'Missed their meeting. When they rebook (Calendly or the sheet) they move back to Booked by themselves. Open one to log a follow-up or mark it dead.';
+    var head = kind === 'dead' ? '<th>Lead</th><th>Source</th><th>Moved here</th><th>Updates</th><th>Last update</th>' : '<th>Lead</th><th>Source</th><th>Missed</th><th>Booked on</th><th>No-shows</th><th>Last update</th>';
+    return filters(false, false) + '<p class="ins-note" style="margin:-4px 0 10px"><b>' + rows.length + '</b>, ' + esc(note) + '</p>' +
       '<div class="card tablewrap pl-table" id="pl-leads">' + (rows.length ? '<table><thead><tr>' + head + '</tr></thead><tbody>' + rows.map(function (l) {
         var last = lastNote(l);
-        var mid = kind === 'dead' ? '<td>' + esc(REASON[l.deadReason] || '—') + '</td><td><small>' + esc(day(l.dealAt)) + '</small></td><td>' + (l.trail || []).filter(function (x) { return x.kind === 'note'; }).length + '</td>'
+        var mid = kind === 'dead' ? '<td><small>' + esc(day(l.dealAt)) + '</small></td><td>' + (l.trail || []).filter(function (x) { return x.kind === 'note'; }).length + '</td>'
           : '<td><small>' + esc(l.lastMeeting ? when(l.lastMeeting.start) : '—') + '</small></td><td><small>' + esc(l.lastBooked ? day(l.lastBooked) : '—') + '</small></td><td>' + (l.noShows || 1) + '</td>';
-        return '<tr data-k="' + esc(l.key) + '"><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + '</td>' + mid + '<td class="pl-latest">' + esc(last ? last.text : '') + (last ? '<br><small>' + esc(ago(last.at)) + '</small>' : '') + '</td></tr>';
+        return '<tr data-k="' + esc(l.key) + '"><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(', ')) + '</small></td><td>' + typeTag(l.type) + '</td>' + mid + '<td class="pl-latest">' + esc(last ? last.text : '') + (last ? '<br><small>' + esc(ago(last.at)) + '</small>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' : '<div class="empty">Nobody here.</div>') + '</div>';
   }
 
@@ -280,10 +303,10 @@
     });
   }
   function leadTable(shown) {
-    return '<table><thead><tr><th>Came in</th><th>Lead</th><th>Source</th><th>Campaign · caller</th><th>Status</th><th>Latest</th><th>Meeting</th></tr></thead><tbody>' + shown.map(function (l) {
+    return '<table><thead><tr><th>Came in</th><th>Lead</th><th>Source</th><th>Campaign, caller</th><th>Status</th><th>Latest</th><th>Meeting</th></tr></thead><tbody>' + shown.map(function (l) {
       var n = (l.meetings || []).length, ln = lastNote(l);
-      var meet = l.next ? 'Next: ' + when(l.next) : (l.lastMeeting ? day(l.lastMeeting.start) + ' · ' + (OUT[l.lastMeeting.outcome] || [''])[0] : '—');
-      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + statusTag(l.status) + '</td><td class="pl-latest">' + esc(ln ? ln.text : (l.latest || '')) + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
+      var meet = l.next ? 'Next: ' + when(l.next) : (l.lastMeeting ? day(l.lastMeeting.start) + ', ' + (OUT[l.lastMeeting.outcome] || [''])[0] : '—');
+      return '<tr data-k="' + esc(l.key) + '"><td>' + day(l.firstAt) + '</td><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</small></td><td>' + typeTag(l.type) + (l.origin ? '<br><small>' + esc(l.origin) + '</small>' : '') + '</td><td>' + esc(campaignOf(l) || '—') + (l.callers.length ? '<br><small>' + esc(l.callers.join(', ')) + '</small>' : '') + '</td><td>' + leadTag(l) + '</td><td class="pl-latest">' + esc(ln ? ln.text : (l.latest || '')) + '</td><td><small>' + esc(meet) + (n > 1 ? '<br>' + n + ' meetings' : '') + '</small></td></tr>';
     }).join('') + '</tbody></table>';
   }
   function bindLeadRows(el) { [].forEach.call(el.querySelectorAll('tbody tr[data-k]'), function (tr) { tr.onclick = function () { openLead(tr.getAttribute('data-k')); }; }); }
@@ -308,9 +331,10 @@
     var ev = [];
     var OLD = { met: 'Shown', followup: 'Shown', proposal: 'Shown', negotiation: 'Shown', hold: 'Shown', lost: 'Dead', shown: 'Shown', won: 'Won', dead: 'Dead' };
     (l.trail || []).forEach(function (x) {
-      if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Update', body: x.text, by: x.by, id: x.id });
-      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : 'Marked ' + (OLD[x.to] || x.to) + (x.reason ? ' · ' + (REASON[x.reason] || x.reason) : ''), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
-      else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ' · ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
+      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
+      else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ', ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && HOT[x.hot] ? 'Marked ' + HOT[x.hot][0] : 'Tag removed', by: x.by, c: x.hot && HOT[x.hot] ? HOT[x.hot][1] : '#8a9aa6' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
     });
     ms.forEach(function (m) {
@@ -330,7 +354,7 @@
     if (!ev.length) return '<div class="empty">Nothing yet.</div>';
     return '<ol class="pl-tl">' + ev.map(function (e) {
       var body = e.body ? (e.fold ? '<details><summary>Summary</summary><pre>' + esc(e.body) + '</pre></details>' : '<pre>' + esc(e.body) + '</pre>') : '';
-      return '<li class="pl-tl-' + esc(e.k.split('-')[0]) + ' pl-tlk-' + esc(e.k) + '"' + (e.c ? ' style="--c:' + e.c + '"' : '') + '><time>' + esc(clock(e.at)) + '</time><div class="pl-tl-b"><b>' + esc(e.t) + '</b>' + (e.by ? ' <small>· ' + esc(e.by) + '</small>' : '') + body + (e.link ? '<a class="pl-rec" href="' + esc(e.link[0]) + '" target="_blank" rel="noopener">▶ ' + esc(e.link[1]) + '</a>' : '') + (e.id && isAdmin() ? '<button type="button" class="pl-tl-del" data-del="' + esc(e.id) + '" title="Delete this update">Delete</button>' : '') + '</div></li>';
+      return '<li class="pl-tl-' + esc(e.k.split('-')[0]) + ' pl-tlk-' + esc(e.k) + '"' + (e.c ? ' style="--c:' + e.c + '"' : '') + '><time>' + esc(clock(e.at)) + '</time><div class="pl-tl-b"><b>' + esc(e.t) + '</b>' + (e.by ? ' <small class="pl-by">' + esc(e.by) + '</small>' : '') + body + (e.link ? '<a class="pl-rec" href="' + esc(e.link[0]) + '" target="_blank" rel="noopener">' + esc(e.link[1]) + '</a>' : '') + (e.id && isAdmin() ? '<button type="button" class="pl-tl-del" data-del="' + esc(e.id) + '" title="Delete this update">Delete</button>' : '') + '</div></li>';
     }).join('') + '</ol>';
   }
   // A lead's update box and history, in the dialog or inside the given pane (Shown tab).
@@ -341,16 +365,16 @@
     var ev = timeline(l, ms), nx = l.nextStep || {};
     var closed = l.status === 'dead' || l.status === 'won';
     var moves = closed ? '<button class="btn" type="button" data-deal="' + (l.shownAt ? 'shown' : '') + '">' + (l.shownAt ? 'Bring back to Shown' : 'Bring back') + '</button>'
-      : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Dead · unqualified</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Dead · not replying</button>';
+      : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
-    d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + statusTag(l.status) + (l.deadReason ? '<span class="st st-off">' + esc(REASON[l.deadReason]) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
-      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Add an update</h3><textarea id="pl-u-note" rows="3" placeholder="What happened? e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
-        '<div class="pl-upd-row pl-upd-3"><label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
-        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Save update</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
-      '<h3 class="pl-h">History</h3>' + timelineHtml(l, ev) +
+    d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</div>' +
+      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div>' +
+      (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note is added to this lead\'s trail below with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
+        '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
+        '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
+      '<h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) +
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
-      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
+      '<details class="pl-more"><summary>Contact details</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Country', esc(l.country)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
       (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Source<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save source</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
     if (!pane) d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
@@ -359,9 +383,10 @@
     var by = function () { var v = q('pl-u-by').value.trim(); setMyName(v); return v; };
     var send = function (b, extra) {
       b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
-      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, extra)).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', Object.assign({ action: 'update', key: l.key, note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     if (q('pl-u-save')) q('pl-u-save').onclick = function () { send(this, {}); };
+    if (q('pl-u-note')) q('pl-u-note').onkeydown = function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(q('pl-u-save'), {}); } };
     if (q('pl-u-done')) q('pl-u-done').onclick = function () { send(this, { next: { text: '', due: '' } }); };
     [].forEach.call(d.querySelectorAll('[data-deal]'), function (b) { b.onclick = function () { send(b, { deal: b.getAttribute('data-deal'), reason: b.getAttribute('data-r') || '', from: l.status }); }; });
     [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
@@ -385,7 +410,7 @@
       '<div class="card pl-src">' + SRC_EDIT.map(function (x, i) {
         var f = x.id ? files[x.id] : null;
         return '<div class="pl-src-row" data-i="' + i + '"><label>Name<input type="text" data-f="name" value="' + esc(x.name) + '" placeholder="BPO Hive USA"></label><label class="pl-src-url">Google Sheet link<input type="text" data-f="url" value="' + esc(x.url) + '" placeholder="https://docs.google.com/spreadsheets/d/…"></label><label>Time zone for appointment times<select data-f="tz">' + tzOpts(x.tz) + '</select></label><div class="pl-src-act">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open ↗</a>' : '') + '<button type="button" class="mini" data-del="' + i + '">Remove</button></div>' +
-          '<small class="pl-src-st">' + (f ? (f.error ? '⚠ ' + esc(f.error) : f.rows + ' rows · synced ' + ago(f.syncedAt)) : 'Not synced yet') + '</small></div>';
+          '<small class="pl-src-st">' + (f ? (f.error ? 'Problem: ' + esc(f.error) : f.rows + ' rows, synced ' + ago(f.syncedAt)) : 'Not synced yet') + '</small></div>';
       }).join('') + '<div class="pl-src-foot"><button type="button" class="btn" id="pl-src-add">+ Add a sheet</button><button type="button" class="btn pri" id="pl-src-save">Save sources</button><span id="pl-src-msg" class="ins-note" style="margin:0"></span></div></div>' +
       eventTypesCard() +
       '<p class="ins-note">Columns are found by their names (Prospect Name, Business Name, Agent Name, Appointment Date, Appointment Time, Timezone, Prospect Email, Call Recording Link, Confirmation Status, Show Status…), so you can add or move columns. If a row has its own Timezone (EST, GST…), that wins over the time zone above.</p>';
@@ -451,21 +476,21 @@
     if (!MAIN || !DATA) return;
     if (location.hash.indexOf('#pipeline') !== 0) return;
     if ((SUB === 'sources' || SUB === 'team') && !isAdmin()) SUB = '';
-    var body = SUB === 'booked' ? bookedView() : SUB === 'shown' ? shownView() : SUB === 'noshow' ? simpleList('no_show') : SUB === 'dead' ? simpleList('dead') : SUB === 'leads' ? leadsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
+    var body = SUB === 'booked' ? bookedView() : SUB === 'shown' ? shownView() : SUB === 'noshow' ? simpleList('no_show') : SUB === 'noreply' ? simpleList('dead', 'no_reply') : SUB === 'unqualified' ? simpleList('dead', 'unqualified') : SUB === 'leads' ? leadsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
     MAIN.innerHTML = head() + body;
     bindFilters();
     if (SUB === 'leads') drawLeadsTable();
     if (SUB === 'shown') bindShown();
-    if ((SUB === 'noshow' || SUB === 'dead') && $('pl-leads')) { bindLeadRows($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
+    if ((SUB === 'noshow' || SUB === 'noreply' || SUB === 'unqualified') && $('pl-leads')) { bindLeadRows($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
     bindMeetings(MAIN);
     var d = $('pl-dialog'); if (d && d.open) bindMeetings(d);
   }
-  var OLD_ROUTES = { opps: 'shown', meetings: 'booked' };
+  var OLD_ROUTES = { opps: 'shown', meetings: 'booked', dead: 'noreply' };
   function route(parts, main) {
     var p = OLD_ROUTES[parts[0]] || parts[0];
-    MAIN = main; SUB = ['booked', 'shown', 'noshow', 'dead', 'leads', 'view', 'sources', 'team'].indexOf(p) > -1 ? p : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
+    MAIN = main; SUB = ['booked', 'shown', 'noshow', 'noreply', 'unqualified', 'leads', 'view', 'sources', 'team'].indexOf(p) > -1 ? p : ''; VIEW = SUB === 'view' ? (parts[1] || '') : '';
     if (MAIN) MAIN.scrollTop = 0;
     if (DATA) { draw(); return; }
     main.innerHTML = '<h1>Pipeline</h1><div class="empty">Loading leads and meetings…</div>';
