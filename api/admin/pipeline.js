@@ -46,6 +46,8 @@ module.exports = async (req, res) => {
       case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, reason: b.reason, hot: b.hot, value: b.value, next: b.next }, b.by, b.also));
       case 'lead-add': return res.status(200).json(await pl.addManualLead(b, b.by));
       case 'notes-import': return res.status(200).json(await pl.importNotes(String(b.key || ''), b.notes, b.by, b.also));
+      case 'lead-delete': return res.status(200).json(await pl.deleteLead(String(b.key || ''), b, b.by));
+      case 'lead-restore': return res.status(200).json(await pl.restoreLead(String(b.key || '')));
       case 'note-delete': return res.status(200).json(await pl.deleteNote(String(b.key || ''), String(b.id || ''), b.also));
       case 'lead': return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }, b.also));
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
