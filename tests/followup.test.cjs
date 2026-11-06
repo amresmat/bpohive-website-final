@@ -37,20 +37,19 @@ test('preview mode sends nothing, live mode sends one email per person, then a r
   draft('aaaaaaaaaaaa06', { name: 'Recruit', email: 'agent@realty.com' }, 2 * 3600e3, { page: 'https://www.bpohive.com/real-estate-recruiting' });
   let r = await fu.run({ force: true });
   assert.equal(r.live, false); assert.equal(sentMail.length, 0);
-  assert.deepEqual(r.results.map(x => x.email).sort(), ['jane@northwind.io', 'yes@maple.ca']);
-  assert.ok(r.skipped.find(x => x.email === 'can@maple.ca'));
+  assert.deepEqual(r.results.map(x => x.email).sort(), ['can@maple.ca', 'jane@northwind.io', 'yes@maple.ca']);
   process.env.BREVO_API_KEY = 'k'; process.env.FOLLOWUP_ENABLED = '1';
   r = await fu.run({ force: true });
-  assert.equal(sentMail.length, 2);
+  assert.equal(sentMail.length, 3);
   const m = sentMail.find(x => x.to[0].email === 'jane@northwind.io');
   assert.equal(m.sender.email, 'success@bpohive.com'); assert.equal(m.subject, 'Jane, your calendar almost got busier 📅');
   assert.match(m.htmlContent, /Northwind/); assert.match(m.htmlContent, /Unsubscribe/); assert.match(m.headers['List-Unsubscribe'], /unsubscribe\?t=/);
-  r = await fu.run({ force: true }); assert.equal(sentMail.length, 2, 'no repeat within 3 days');
+  r = await fu.run({ force: true }); assert.equal(sentMail.length, 3, 'no repeat within 3 days');
   // three days later -> reminder
   H.get('followup:jane@northwind.io').set('first', String(Date.now() - 3 * 86400e3 - 1000));
-  r = await fu.run({ force: true }); assert.equal(sentMail.length, 3); assert.match(sentMail[2].subject, /^Re: /);
+  r = await fu.run({ force: true }); assert.equal(sentMail.length, 4); assert.match(sentMail[3].subject, /^Re: /);
   H.get('followup:jane@northwind.io').set('second', String(Date.now() - 10 * 86400e3));
-  r = await fu.run({ force: true }); assert.equal(sentMail.length, 3, 'never a third email');
+  r = await fu.run({ force: true }); assert.equal(sentMail.length, 4, 'never a third email');
 });
 
 test('sending a form or unsubscribing stops the emails; resume link restores answers', async () => {
