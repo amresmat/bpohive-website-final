@@ -60,7 +60,7 @@
 
   function head() {
     var s = DATA.status, c = s.calendly, sh = s.sheets;
-    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ', Website forms live' : '');
+    var line = (s.since ? 'From ' + day(s.since + 'T12:00:00') + '. ' : '') + (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ', Website forms live' : '');
     var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
     var sub = isAdmin() ? 'Booked, then a show or a no-show. Shows stay in Shown while you follow up, until they are won, not replying or unqualified.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
@@ -412,8 +412,13 @@
         return '<div class="pl-src-row" data-i="' + i + '"><label>Name<input type="text" data-f="name" value="' + esc(x.name) + '" placeholder="BPO Hive USA"></label><label class="pl-src-url">Google Sheet link<input type="text" data-f="url" value="' + esc(x.url) + '" placeholder="https://docs.google.com/spreadsheets/d/…"></label><label>Time zone for appointment times<select data-f="tz">' + tzOpts(x.tz) + '</select></label><div class="pl-src-act">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open ↗</a>' : '') + '<button type="button" class="mini" data-del="' + i + '">Remove</button></div>' +
           '<small class="pl-src-st">' + (f ? (f.error ? 'Problem: ' + esc(f.error) : f.rows + ' rows, synced ' + ago(f.syncedAt)) : 'Not synced yet') + '</small></div>';
       }).join('') + '<div class="pl-src-foot"><button type="button" class="btn" id="pl-src-add">+ Add a sheet</button><button type="button" class="btn pri" id="pl-src-save">Save sources</button><span id="pl-src-msg" class="ins-note" style="margin:0"></span></div></div>' +
-      eventTypesCard() +
+      sinceCard() + eventTypesCard() +
       '<p class="ins-note">Columns are found by their names (Prospect Name, Business Name, Agent Name, Appointment Date, Appointment Time, Timezone, Prospect Email, Call Recording Link, Confirmation Status, Show Status…), so you can add or move columns. If a row has its own Timezone (EST, GST…), that wins over the time zone above.</p>';
+  }
+  function sinceCard() {
+    var v = DATA.status.since || '';
+    return '<h3 class="pl-h" style="margin-top:22px">Start date</h3><p class="sub" style="margin-top:-4px">Meetings and leads before this date are left out of the Pipeline. Leave it empty to show everything.</p>' +
+      '<div class="card pl-ev" style="padding:14px 16px"><div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid #CBD4D9;border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div></div>';
   }
   function eventTypesCard() {
     var list = (DATA.status.calendly && DATA.status.calendly.eventTypes) || [];
@@ -423,6 +428,10 @@
       '<div class="pl-src-foot"><button type="button" class="btn pri" id="pl-ev-save">Save event types</button><span id="pl-ev-msg" class="ins-note" style="margin:0"></span></div></div>';
   }
   function bindSources() {
+    if ($('pl-since-save')) $('pl-since-save').onclick = function () {
+      var b = this; b.disabled = true; $('pl-since-msg').textContent = 'Saving…';
+      api('POST', { action: 'since', since: $('pl-since').value }).then(function () { return load(false); }).then(function () { draw(); $('pl-since-msg').textContent = 'Saved.'; }).catch(function (e) { $('pl-since-msg').textContent = e.message; b.disabled = false; });
+    };
     if ($('pl-ev-save')) $('pl-ev-save').onclick = function () {
       var b = this; b.disabled = true; $('pl-ev-msg').textContent = 'Saving…';
       var skipped = [].filter.call(MAIN.querySelectorAll('[data-ev]'), function (c) { return !c.checked; }).map(function (c) { return c.getAttribute('data-ev'); });
