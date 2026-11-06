@@ -304,8 +304,11 @@ test('someone who books several times is one lead, even with a new email or a ty
     meetings: [
       mt('R1', t0, { name: 'Raji Nwasir', email: 'raji@acme.com', phone: '+1 (416) 555-0199' }),
       mt('R2', t0 + 3 * day, { name: 'raji nwaser', email: 'rn@gmail.com', phone: '4165550199' }),
-      mt('A1', t0, { name: 'Amr Abdelrazzak', email: 'amr@bpohive.com' }),
-      mt('A2', t0 + day, { name: 'Amr', email: 'amr.a@bpohive.com' }),
+      mt('A1', t0, { name: 'Amr Abdelrazzak', email: 'amr@bpohive.com', phone: '+20 11 26656543' }),
+      mt('A2', t0 + day, { name: 'Anr', email: 'amr_x@yahoo.com', phone: '+20 1126656543' }),
+      mt('A3', t0 + day, { name: 'Test Ignore', email: 'someone@example.com' }),
+      mt('C1', t0, { name: 'Omar Khan', email: 'omar@corp.com' }),
+      mt('C2', t0 + day, { name: 'Omar', email: 'o.khan@corp.com' }),
       mt('P1', t0, { name: 'Priya Novak', email: 'priya.n@falcon.com' }),
       mt('P2', t0, { name: 'Priya Moreau', email: 'priya.m@falcon.com' }),
       mt('G1', t0, { name: 'Sara', email: 'sara@gmail.com' }),
@@ -322,7 +325,10 @@ test('someone who books several times is one lead, even with a new email or a ty
   assert.equal(raji[0].hot, 'contract', 'what was saved under the other booking is kept');
   assert.deepEqual(raji[0].trail.map(x => x.text), ['older', 'first']);
   assert.equal(r.meetings.filter(m => m.seq === 2).length, 2, 'the second booking is a follow-up');
-  assert.equal(r.leads.filter(l => /amr/i.test(l.name)).length, 1, 'same company domain and first name = same lead');
+  assert.equal(r.leads.filter(l => /amr/i.test(l.name)).length, 0, 'bookings made with our own email addresses are tests and left out');
+  assert.equal(r.meetings.filter(m => /^A/.test(m.id)).length, 0);
+  assert.equal(r.leads.filter(l => /omar/i.test(l.name)).length, 1, 'same company domain and first name = same lead');
+  assert.equal(r.leads.filter(l => /test/i.test(l.name)).length, 0);
   assert.equal(r.leads.filter(l => /sara/i.test(l.name)).length, 2, 'gmail addresses are not joined by first name');
   assert.equal(r.leads.filter(l => /priya/i.test(l.name)).length, 2, 'two people at one company with the same first name stay apart');
   // The first edit moves the other booking's notes onto the main lead
