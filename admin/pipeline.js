@@ -199,6 +199,38 @@
       '<div style="height:14px"></div>' + breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
   }
 
+  /* ---------- Opportunities: one list of everyone who showed up, updated through the trail ---------- */
+  var OPPVIEW = (function () { try { return localStorage.getItem('bh_pl_oppview') || 'list'; } catch (e) { return 'list'; } })();
+  var SEL = '', OSTAGE = '';
+  function oppToggle() { return '<div class="pl-vt"><button type="button" data-v="list" class="' + (OPPVIEW === 'list' ? 'on' : '') + '">List</button><button type="button" data-v="board" class="' + (OPPVIEW === 'board' ? 'on' : '') + '">Board</button></div>'; }
+  function oppList() {
+    var q = F.q.trim().toLowerCase();
+    var all = DATA.leads.filter(matchesLead).filter(function (l) { return l.deal && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
+      .sort(function (a, b) { return (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
+    var rows = OSTAGE === 'open' ? all.filter(function (l) { return OPEN.indexOf(l.deal) > -1; }) : OSTAGE ? all.filter(function (l) { return l.deal === OSTAGE; }) : all;
+    if (!rows.some(function (l) { return l.key === SEL; })) SEL = rows[0] ? rows[0].key : '';
+    var chips = [['', 'All', all.length], ['open', 'Open', all.filter(function (l) { return OPEN.indexOf(l.deal) > -1; }).length]].concat(Object.keys(DEAL).map(function (k) { return [k, DEAL[k][0], all.filter(function (l) { return l.deal === k; }).length]; })).filter(function (c) { return c[0] === '' || c[0] === 'open' || c[2]; });
+    return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '') + oppToggle() + '</div>' +
+      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-os="' + c[0] + '" class="' + (OSTAGE === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + '</div>' +
+      '<div class="pl-split"><div class="card pl-olist">' + (rows.length ? rows.map(function (l) {
+        var last = (l.trail || []).filter(function (x) { return x.kind === 'note'; }).slice(-1)[0], nx = l.nextStep;
+        return '<button type="button" class="pl-orow' + (l.key === SEL ? ' on' : '') + '" data-k="' + esc(l.key) + '"><span class="pl-orow-t"><b>' + esc(l.name || l.email) + '</b>' + dealTag(l.deal) + '</span><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(' · ')) + '</small>' +
+          (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">→ ' + esc(nx.text) + (nx.due ? ' · ' + esc(dueTxt(nx)) : '') + '</span>' : '') +
+          '<span class="pl-orow-n">' + (last ? esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '') : '<i>No update yet</i>') + '</span><small class="pl-orow-a">' + (l.lastActivity ? 'Last activity ' + esc(ago(l.lastActivity)) : '') + '</small></button>';
+      }).join('') : '<div class="empty">Nobody here yet. Mark past meetings as Showed under Meetings and they appear here.</div>') + '</div>' +
+      '<div class="card pl-pane" id="pl-pane"></div></div>';
+  }
+  function bindOppList() {
+    [].forEach.call(MAIN.querySelectorAll('.pl-vt button'), function (b) { b.onclick = function () { OPPVIEW = b.getAttribute('data-v'); try { localStorage.setItem('bh_pl_oppview', OPPVIEW); } catch (e) {} draw(); }; });
+    [].forEach.call(MAIN.querySelectorAll('[data-os]'), function (b) { b.onclick = function () { OSTAGE = b.getAttribute('data-os'); draw(); }; });
+    var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
+    var pane = $('pl-pane'), narrow = window.matchMedia('(max-width: 860px)').matches;
+    [].forEach.call(MAIN.querySelectorAll('.pl-orow'), function (r) {
+      r.onclick = function () { SEL = r.getAttribute('data-k'); if (narrow) { openLead(SEL); return; } [].forEach.call(MAIN.querySelectorAll('.pl-orow'), function (x) { x.classList.toggle('on', x === r); }); openLead(SEL, pane); };
+    });
+    if (pane && SEL && !narrow) openLead(SEL, pane);
+  }
+
   /* ---------- Opportunities board (like Pipedrive / HubSpot deal boards) ---------- */
   var SHOW_LOST = false;
   function card(l) {
@@ -220,7 +252,7 @@
     var lostN = all.filter(function (l) { return l.deal === 'lost'; }).length;
     var by = function (k) { return all.filter(function (l) { return l.deal === k; }).sort(function (a, b) { return (b.lastActivity || 0) - (a.lastActivity || 0); }); };
     var open = all.filter(function (l) { return OPEN.indexOf(l.deal) > -1; }), val = open.reduce(function (a, l) { return a + (l.value || 0); }, 0);
-    return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '') + '</div>' +
+    return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '') + oppToggle() + '</div>' +
       '<p class="ins-note" style="margin:-4px 0 12px"><b>' + open.length + ' open</b>' + (val ? ' · ' + esc(money(val)) + ' in play' : '') + ' · Everyone who showed up to a meeting lands in <b>Discovery call done</b>; a follow-up meeting moves them to <b>Follow-up</b>. ' + (isAdmin() ? 'Drag a card to move it, or open it to add an update.' : '') + ' <a href="#" id="pl-lost">' + (SHOW_LOST ? 'Hide lost' : 'Show lost (' + lostN + ')') + '</a></p>' +
       '<div class="pl-board">' + cols.map(function (k) {
         var list = by(k), v = list.reduce(function (a, l) { return a + (l.value || 0); }, 0);
@@ -228,6 +260,7 @@
       }).join('') + '</div>';
   }
   function bindBoard() {
+    [].forEach.call(MAIN.querySelectorAll('.pl-vt button'), function (b) { b.onclick = function () { OPPVIEW = b.getAttribute('data-v'); try { localStorage.setItem('bh_pl_oppview', OPPVIEW); } catch (e) {} draw(); }; });
     var lost = $('pl-lost'); if (lost) lost.onclick = function (e) { e.preventDefault(); SHOW_LOST = !SHOW_LOST; draw(); };
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
     var drag = null;
@@ -319,7 +352,7 @@
         api('POST', { action: 'outcome', id: id, outcome: o }).then(function () { return load(false); }).then(draw).catch(fail);
       };
     });
-    [].forEach.call(root.querySelectorAll('tr[data-k]'), function (tr) { tr.onclick = function () { var k = tr.getAttribute('data-k'); if (k) openLead(k); }; });
+    [].forEach.call(root.querySelectorAll('tr[data-k]'), function (tr) { if (tr.closest('.pl-pane, .pl-dialog')) { tr.onclick = null; return; } tr.onclick = function () { var k = tr.getAttribute('data-k'); if (k) openLead(k); }; });
   }
 
   /* ---------- Lead detail ---------- */
@@ -350,7 +383,7 @@
     (l.website || []).forEach(function (w) { ev.push({ at: t(w.at), k: 'web', t: 'Sent the ' + w.form + ' form', body: Object.keys(w.fields || {}).filter(function (k) { return !/^(eventId|button|cta|draftId)$/.test(k); }).map(function (k) { return k + ': ' + w.fields[k]; }).join('\n') }); });
     (l.recordings || []).forEach(function (r) { ev.push({ at: t(r.start), k: 'rec', t: 'Recorded call: ' + (r.title || 'Call') + (r.spoke ? '' : ' (prospect did not speak)'), body: r.summary ? r.summary.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') : '', fold: true, by: r.recordedBy, link: r.url ? [r.url, 'Watch in Fathom'] : null }); });
     if (l.note) ev.push({ at: l.firstAt || 0, k: 'note', t: 'Earlier note', body: l.note });
-    return ev.filter(function (e) { return e.at; }).sort(function (a, b) { return b.at - a.at; });
+    return ev.filter(function (e) { return e.at; }).sort(function (a, b) { return b.at - a.at || (b.k === 'note' ? 1 : 0) - (a.k === 'note' ? 1 : 0); });
   }
   function timelineHtml(l, ev) {
     if (!ev.length) return '<div class="empty">Nothing yet.</div>';
@@ -359,14 +392,15 @@
       return '<li class="pl-tl-' + esc(e.k.split('-')[0]) + ' pl-tlk-' + esc(e.k) + '"' + (e.c ? ' style="--c:' + e.c + '"' : '') + '><time>' + esc(clock(e.at)) + '</time><div class="pl-tl-b"><b>' + esc(e.t) + '</b>' + (e.by ? ' <small>· ' + esc(e.by) + '</small>' : '') + body + (e.link ? '<a class="pl-rec" href="' + esc(e.link[0]) + '" target="_blank" rel="noopener">▶ ' + esc(e.link[1]) + '</a>' : '') + (e.id && isAdmin() ? '<button type="button" class="pl-tl-del" data-del="' + esc(e.id) + '" title="Delete this update">Delete</button>' : '') + '</div></li>';
     }).join('') + '</ol>';
   }
-  function openLead(key) {
+  // Shows a lead's update box and history in the dialog, or inside the given pane (Opportunities list).
+  function openLead(key, pane) {
     var l = leadByKey(key); if (!l) return;
     var ms = l.meetings.map(function (id) { return DATA.meetings.find(function (m) { return m.id === id; }); }).filter(Boolean);
     var row = function (k, v) { return v ? '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>' : ''; };
     var ev = timeline(l, ms), nx = l.nextStep || {};
     var stageSel = '<select id="pl-u-deal"><option value="">' + (l.deal && l.dealAuto ? 'Automatic (' + esc(DEAL[l.deal][0]) + ')' : 'Not an opportunity yet') + '</option>' + Object.keys(DEAL).map(function (k) { return '<option value="' + k + '"' + (!l.dealAuto && l.deal === k ? ' selected' : '') + '>' + esc(DEAL[k][0]) + '</option>'; }).join('') + '</select>';
-    var d = dlg();
-    d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
+    var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
+    d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(' · ')) + '</div>' +
       '<div class="pl-dtags">' + typeTag(l.type) + (l.deal ? dealTag(l.deal) : tag(STAGE, l.stage)) + (l.value ? '<span class="pl-c-val">' + esc(money(l.value)) + '</span>' : '') + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">→ ' + esc(l.nextStep.text) + (l.nextStep.due ? ' · ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + '</div>' +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Add an update</h3><textarea id="pl-u-note" rows="3" placeholder="What happened? e.g. Called, wants pricing for 2 callers, sending proposal Thursday"></textarea>' +
         '<div class="pl-upd-row"><label>Stage' + stageSel + '</label><label>Next step<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Send proposal"></label><label>Due<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Value / month ($)<input type="text" inputmode="numeric" id="pl-u-val" value="' + esc(l.value || '') + '" placeholder="0"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
@@ -375,29 +409,29 @@
       (ms.length ? '<h3 class="pl-h">Meetings</h3><div class="pl-table">' + meetingTable(ms, false) + '</div>' : '') +
       '<details class="pl-more"><summary>Contact details and settings</summary><dl>' + row('Email', l.email ? '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>' : '') + row('Phone', esc(l.phone)) + row('Came in', when(l.firstAt)) + row('How', esc(l.origin)) + row('Campaign', esc(l.campaigns.join(', '))) + row('Caller', esc(l.callers.join(', '))) + '</dl>' +
       (isAdmin() ? '<div class="pl-edit" style="margin-top:14px"><label>Type<select id="pl-d-type"><option value="">Automatic</option><option value="inbound"' + (l.typeOverride === 'inbound' ? ' selected' : '') + '>Inbound</option><option value="outbound"' + (l.typeOverride === 'outbound' ? ' selected' : '') + '>Outbound</option></select></label><div style="align-self:end"><button class="btn" id="pl-d-save" type="button">Save type</button> <span id="pl-d-msg" class="ins-note"></span></div></div>' : '') + '</details></div>';
-    d.querySelector('.x').onclick = function () { d.close(); };
+    if (!pane) d.querySelector('.x').onclick = function () { d.close(); };
     bindMeetings(d);
     [].forEach.call(d.querySelectorAll('tr[data-k]'), function (tr) { tr.onclick = null; });
-    var reopen = function () { return load(false).then(function () { draw(); if (d.open) openLead(key); }); };
-    if ($('pl-u-save')) $('pl-u-save').onclick = function () {
-      var b = this, by = $('pl-u-by').value.trim(); setMyName(by); b.disabled = true; $('pl-u-msg').textContent = 'Saving…';
-      var dealSel = $('pl-u-deal').value, wasManual = !l.dealAuto ? l.deal : '';
-      var payload = { action: 'update', key: l.key, note: $('pl-u-note').value, by: by, value: $('pl-u-val').value, next: { text: $('pl-u-next').value, due: $('pl-u-due').value } };
+    var reopen = function () { return load(false).then(function () { draw(); if (!pane && d.open) openLead(key); }); };
+    if (q('pl-u-save')) q('pl-u-save').onclick = function () {
+      var b = this, by = q('pl-u-by').value.trim(); setMyName(by); b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
+      var dealSel = q('pl-u-deal').value, wasManual = !l.dealAuto ? l.deal : '';
+      var payload = { action: 'update', key: l.key, note: q('pl-u-note').value, by: by, value: q('pl-u-val').value, next: { text: q('pl-u-next').value, due: q('pl-u-due').value } };
       if (dealSel !== wasManual) { payload.deal = dealSel; payload.from = l.deal || ''; }
-      api('POST', payload).then(reopen).catch(function (e) { $('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', payload).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
-    if ($('pl-u-done')) $('pl-u-done').onclick = function () {
-      var b = this, by = $('pl-u-by').value.trim(); setMyName(by); b.disabled = true;
-      api('POST', { action: 'update', key: l.key, by: by, note: $('pl-u-note').value, next: { text: '', due: '' } }).then(reopen).catch(function (e) { $('pl-u-msg').textContent = e.message; b.disabled = false; });
+    if (q('pl-u-done')) q('pl-u-done').onclick = function () {
+      var b = this, by = q('pl-u-by').value.trim(); setMyName(by); b.disabled = true;
+      api('POST', { action: 'update', key: l.key, by: by, note: q('pl-u-note').value, next: { text: '', due: '' } }).then(reopen).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
       b.onclick = function () { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Click again to delete'; return; } b.disabled = true; api('POST', { action: 'note-delete', key: l.key, id: b.getAttribute('data-del') }).then(reopen).catch(fail); };
     });
-    if ($('pl-d-save')) $('pl-d-save').onclick = function () {
-      var b = this; b.disabled = true; $('pl-d-msg').textContent = 'Saving…';
-      api('POST', { action: 'lead', key: l.key, type: $('pl-d-type').value }).then(reopen).catch(function (e) { $('pl-d-msg').textContent = e.message; b.disabled = false; });
+    if (q('pl-d-save')) q('pl-d-save').onclick = function () {
+      var b = this; b.disabled = true; q('pl-d-msg').textContent = 'Saving…';
+      api('POST', { action: 'lead', key: l.key, type: q('pl-d-type').value }).then(reopen).catch(function (e) { q('pl-d-msg').textContent = e.message; b.disabled = false; });
     };
-    if (!d.open) d.showModal();
+    if (!pane && !d.open) d.showModal();
   }
 
 
@@ -478,11 +512,11 @@
     if (!MAIN || !DATA) return;
     if (location.hash.indexOf('#pipeline') !== 0) return;
     if ((SUB === 'sources' || SUB === 'team') && !isAdmin()) SUB = '';
-    var body = SUB === 'opps' ? board() : SUB === 'leads' ? leadsView() : SUB === 'meetings' ? meetingsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
+    var body = SUB === 'opps' ? (OPPVIEW === 'board' ? board() : oppList()) : SUB === 'leads' ? leadsView() : SUB === 'meetings' ? meetingsView() : SUB === 'view' ? viewPage() : SUB === 'sources' ? sourcesView() : SUB === 'team' ? teamView() : dashboard();
     MAIN.innerHTML = head() + body;
     bindFilters();
     if (SUB === 'leads') drawLeadsTable();
-    if (SUB === 'opps') bindBoard();
+    if (SUB === 'opps') { if (OPPVIEW === 'board') bindBoard(); else bindOppList(); }
     if (SUB === 'view' && $('pl-leads')) bindLeadRows($('pl-leads'));
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
