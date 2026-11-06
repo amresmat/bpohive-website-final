@@ -153,7 +153,7 @@ dialog.pl-dialog{width:min(980px,calc(100% - 28px));max-height:calc(100vh - 40px
 <section class="login" id="login" hidden>
   <img src="/assets/logo/bpohivelogo.png" alt="BPO Hive">
   <form id="login-form">
-    <label>Email <span class="lhint">(team members only, leave empty for the main admin)</span><input type="email" name="email" autocomplete="username"></label>
+    <label>Email <span class="lhint">(team members only, leave empty for the main admin)</span><input type="text" name="email" autocomplete="off" inputmode="email" spellcheck="false"></label>
     <label style="margin-top:12px">Password<input type="password" name="password" autocomplete="current-password" required autofocus></label>
     <button type="submit">Sign in</button>
     <p class="lerr" id="login-err" role="alert"></p>
@@ -400,7 +400,7 @@ function start(){
   }).catch(function(){main.innerHTML='<div class="empty">Could not load the admin. Refresh to try again.</div>';$('app').hidden=false});
 }
 $('login-form').onsubmit=function(e){e.preventDefault();$('login-err').textContent='';
-  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({email:this.email.value.trim(),password:this.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Sign in failed')})}).then(function(){$('login-form').reset();start()}).catch(function(e){$('login-err').textContent=e.message})};
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({email:/@/.test(this.email.value)?this.email.value.trim():'',password:this.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Sign in failed')})}).then(function(){$('login-form').reset();start()}).catch(function(e){$('login-err').textContent=e.message})};
 $('logout').onclick=function(){fetch('/api/admin/login',{method:'DELETE',credentials:'same-origin'}).then(function(){location.reload()})};
 $('menu').onclick=function(){$('side').classList.toggle('open')};
 document.querySelector('#detail .x').onclick=function(){$('detail').close()};

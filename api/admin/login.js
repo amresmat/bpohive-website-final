@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
       res.setHeader('Set-Cookie', team.issue(res, u));
       return res.status(200).json({ ok: true, role: 'caller' });
     }
-    if (b.email) {
+    if (b.email && String(b.email).includes('@')) {
       const u = await team.login(String(b.email), String(b.password || ''));
       if (!u) return fail('Wrong email or password.');
       attempts.delete(key);
