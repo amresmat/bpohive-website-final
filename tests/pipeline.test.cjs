@@ -17,7 +17,7 @@ function cmd(c) { const [op, k, ...a] = c; switch (op) {
   case 'HGETALL': { const h = H.get(k); return h ? [...h].flat() : []; }
   case 'HGET': { const h = H.get(k); return h && h.has(a[0]) ? h.get(a[0]) : null; }
   case 'HSET': { const h = H.get(k) || new Map(); H.set(k, h); h.set(a[0], a[1]); return 1; }
-  case 'HDEL': { const h = H.get(k); return h && h.delete(a[0]) ? 1 : 0; }
+  case 'HDEL': { const h = H.get(k); return h ? a.filter(f => h.delete(f)).length : 0; }
   case 'LRANGE': { const l = L.get(k) || []; const e = num(a[1]); return l.slice(num(a[0]), e < 0 ? l.length : e + 1); }
   default: throw new Error('unsupported ' + op); } }
 
@@ -295,4 +295,47 @@ test('a start date leaves out older meetings and leads', async () => {
   assert.equal(await pl.setSince('2026-09-01'), '2026-09-01');
   await assert.rejects(pl.setSince('soon'), /date/);
   await pl.setSince('');
+});
+
+test('someone who books several times is one lead, even with a new email or a typo in the name', async () => {
+  const day = 864e5, t0 = Date.now() - 10 * day;
+  const mt = (id, at, inv) => ({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(at - day) }, inv)], override: { outcome: 'showed' } });
+  const data = () => ({ since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, trails: {}, leadOv: {},
+    meetings: [
+      mt('R1', t0, { name: 'Raji Nwasir', email: 'raji@acme.com', phone: '+1 (416) 555-0199' }),
+      mt('R2', t0 + 3 * day, { name: 'raji nwaser', email: 'rn@gmail.com', phone: '4165550199' }),
+      mt('A1', t0, { name: 'Amr Abdelrazzak', email: 'amr@bpohive.com', phone: '+20 11 26656543' }),
+      mt('A2', t0 + day, { name: 'Anr', email: 'amr_x@yahoo.com', phone: '+20 1126656543' }),
+      mt('A3', t0 + day, { name: 'Test Ignore', email: 'someone@example.com' }),
+      mt('C1', t0, { name: 'Omar Khan', email: 'omar@corp.com' }),
+      mt('C2', t0 + day, { name: 'Omar', email: 'o.khan@corp.com' }),
+      mt('P1', t0, { name: 'Priya Novak', email: 'priya.n@falcon.com' }),
+      mt('P2', t0, { name: 'Priya Moreau', email: 'priya.m@falcon.com' }),
+      mt('G1', t0, { name: 'Sara', email: 'sara@gmail.com' }),
+      mt('G2', t0, { name: 'Sara', email: 'sara.k@gmail.com' })
+    ] });
+  const d = data();
+  d.leadOv = { 'e:rn@gmail.com': { deal: 'shown', hot: 'contract', dealAt: 5 } };
+  d.trails = { 'e:raji@acme.com': [{ id: 'a', at: 2, kind: 'note', text: 'first' }], 'e:rn@gmail.com': [{ id: 'b', at: 1, kind: 'note', text: 'older' }] };
+  const r = pl.build(d);
+  const raji = r.leads.filter(l => /raji/i.test(l.name));
+  assert.equal(raji.length, 1, 'same phone = same lead');
+  assert.equal(raji[0].meetings.length, 2);
+  assert.deepEqual(raji[0].aliases, ['e:rn@gmail.com']);
+  assert.equal(raji[0].hot, 'contract', 'what was saved under the other booking is kept');
+  assert.deepEqual(raji[0].trail.map(x => x.text), ['older', 'first']);
+  assert.equal(r.meetings.filter(m => m.seq === 2).length, 2, 'the second booking is a follow-up');
+  assert.equal(r.leads.filter(l => /amr/i.test(l.name)).length, 0, 'bookings made with our own email addresses are tests and left out');
+  assert.equal(r.meetings.filter(m => /^A/.test(m.id)).length, 0);
+  assert.equal(r.leads.filter(l => /omar/i.test(l.name)).length, 1, 'same company domain and first name = same lead');
+  assert.equal(r.leads.filter(l => /test/i.test(l.name)).length, 0);
+  assert.equal(r.leads.filter(l => /sara/i.test(l.name)).length, 2, 'gmail addresses are not joined by first name');
+  assert.equal(r.leads.filter(l => /priya/i.test(l.name)).length, 2, 'two people at one company with the same first name stay apart');
+  // The first edit moves the other booking's notes onto the main lead
+  H.set('pl:trail', new Map(Object.entries(d.trails).map(([k, v]) => [k, JSON.stringify(v)]))); H.set('pl:leadov', new Map(Object.entries(d.leadOv).map(([k, v]) => [k, JSON.stringify(v)])));
+  await pl.updateLead(raji[0].key, { note: 'joined' }, 'Amr', raji[0].aliases);
+  const tr = JSON.parse(H.get('pl:trail').get('e:raji@acme.com'));
+  assert.deepEqual(tr.map(x => x.text), ['older', 'first', 'joined']);
+  assert.equal(JSON.parse(H.get('pl:leadov').get('e:raji@acme.com')).hot, 'contract');
+  assert.equal(H.get('pl:trail').has('e:rn@gmail.com'), false);
 });
