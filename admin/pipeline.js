@@ -290,7 +290,39 @@
     bindHcards(MAIN);
   }
 
+  /* ---------- Call summaries (from Fathom) ---------- */
+  function mdPlain(t) { return String(t || '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\*\*|__|`/g, '').replace(/^#+\s*/gm, '').replace(/^\s*[-*]\s+/gm, '').replace(/\n{2,}/g, '\n').trim(); }
+  function mdLite(t) {
+    var out = [], list = false;
+    String(t || '').replace(/\r/g, '').split('\n').forEach(function (line) {
+      var x = esc(line.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      var li = /^\s*[-*]\s+(.*)$/.exec(x), h = /^\s*#+\s*(.*)$/.exec(x);
+      if (li) { if (!list) { out.push('<ul>'); list = true; } out.push('<li>' + li[1] + '</li>'); return; }
+      if (list) { out.push('</ul>'); list = false; }
+      if (h) out.push('<h4>' + h[1] + '</h4>'); else if (x.trim()) out.push('<p>' + x + '</p>');
+    });
+    if (list) out.push('</ul>');
+    return out.join('');
+  }
+  function summaryOf(l) { return (l.recordings || []).filter(function (r) { return r.summary; }).sort(function (a, b) { return t(b.start) - t(a.start); }); }
+  function summaryGist(r) {
+    var txt = String(r.summary || ''), m = null;
+    ['key takeaways', 'takeaways', 'summary', 'meeting purpose'].some(function (h) { m = new RegExp('#+\\s*' + h + '[^\\n]*\\n([\\s\\S]*?)(\\n#+\\s|$)', 'i').exec(txt); return m; });
+    var g = mdPlain(m ? m[1] : txt).split('\n').filter(Boolean).slice(0, 3).join('; ');
+    return g.length > 240 ? g.slice(0, 237).replace(/\s+\S*$/, '') + '…' : g;
+  }
+  function summarySection(l) {
+    var rs = summaryOf(l); if (!rs.length) return '';
+    var one = function (r, open) {
+      return '<details class="pl-sum"' + (open ? ' open' : '') + '><summary><b>' + esc(r.title || 'Call') + '</b> <small>' + esc(when(r.start)) + (r.recordedBy ? ', recorded by ' + esc(r.recordedBy) : '') + '</small></summary>' +
+        '<div class="pl-sum-b">' + mdLite(r.summary) + ((r.actions || []).length ? '<h4>Action items</h4><ul>' + r.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' : '') +
+        (r.url ? '<p><a href="' + esc(r.url) + '" target="_blank" rel="noopener">Watch in Fathom</a></p>' : '') + '</div></details>';
+    };
+    return '<div class="pl-sums"><h3 class="pl-h" style="margin-top:0">Call summary' + (rs.length > 1 ? 's' : '') + '</h3>' + rs.map(function (r, i) { return one(r, i === 0); }).join('') + '</div>';
+  }
+
   /* ---------- Call recordings (the link from the Lead Entry sheet) ---------- */
+
   function audioUrl(u) {
     var m = /^https?:\/\/(?:www\.)?(?:voca\.ro|vocaroo\.com)\/(?:embed\/)?([A-Za-z0-9]+)/i.exec(u || ''); if (m) return 'https://media.vocaroo.com/mp3/' + m[1];
     if (/^https:\/\/[^\/]*twil+io[^\/]*\//i.test(u || '') || /^https:\/\/[^?#]+\.(mp3|wav|m4a|ogg|oga|webm|aac)([?#]|$)/i.test(u || '')) return u;
@@ -363,7 +395,7 @@
   }
   // One lead as a big horizontal card: who they are, where it stands, activity and actions.
   function hcard(l, st) {
-    var last = lastNote(l), nx = l.nextStep, rs = recsOf(l), lm = l.lastMeeting, line = '';
+    var last = lastNote(l), nx = l.nextStep, rs = recsOf(l), lm = l.lastMeeting, line = '', sm = summaryOf(l)[0];
     if (st === 'booked') line = l.status === 'to_mark' ? '<span class="pl-c-next late">Date passed' + (lm ? ' (' + esc(when(lm.start)) + ')' : '') + ', mark show or no-show</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '';
     else if (st === 'shown') line = nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '';
     else if (st === 'no_show') line = lm ? '<span class="pl-c-next late">Missed ' + esc(when(lm.start)) + (l.noShows > 1 ? ', ' + l.noShows + ' times' : '') + '</span>' : '';
@@ -375,7 +407,8 @@
       '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + (st === 'shown' ? tempTag(l.temp) : '') + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
         '<span class="pl-h-meta">' + typeTag(l.type) + (l.callers[0] ? '<small>' + esc(l.callers.join(', ')) + '</small>' : '') + (l.shownAt ? '<small>Showed ' + esc(day(l.shownAt)) + '</small>' : l.lastBooked ? '<small>Booked ' + esc(day(l.lastBooked)) + '</small>' : '') + '</span></div>' +
       '<div class="pl-h-now">' + line +
-        (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') + '</div>' +
+        (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') +
+        (sm ? '<p class="pl-h-sum"><b>Call summary, ' + esc(day(sm.start)) + '</b>' + esc(summaryGist(sm)) + '</p>' : '') + '</div>' +
       '<div class="pl-h-side">' + (st === 'shown' && isAdmin() ? tempSet(l) : '') + '<span class="pl-h-count">' + count + '</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
         '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
   }
@@ -505,7 +538,7 @@
       : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + tempTag(l.temp) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + recSection(l) +
+      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + tempTag(l.temp) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + summarySection(l) + recSection(l) +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note goes on this lead\'s trail with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
         '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-5' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Hot, warm or cold<select id="pl-u-temp">' + Object.keys(TEMP).map(function (k) { return '<option value="' + k + '"' + (l.temp === k ? ' selected' : '') + ' title="' + esc(TEMP[k][1]) + '">' + TEMP[k][0] + '</option>'; }).join('') + (l.temp ? '' : '<option value="" selected>Not set</option>') + '</select></label>' : '') + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
         '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + delBtn(l, 'Delete lead') + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
