@@ -357,3 +357,19 @@ test('a deleted lead is left out until it books again, and can be brought back',
   await pl.restoreLead('n:david awad|');
   assert.equal(H.get('pl:hidden').has('n:david awad|'), false);
 });
+
+test('leads in Showed get hot, warm or cold; old tags give a starting point', async () => {
+  const day = 864e5, t0 = Date.now() - 5 * day;
+  const mt = (id, inv) => ({ id, name: 'Discovery Call', start: iso(t0), end: iso(t0 + 1800e3), status: 'active', created: iso(t0 - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(t0 - day) }, inv)], override: { outcome: 'showed' } });
+  const d = { since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, trails: {},
+    meetings: [mt('A', { name: 'Ann Lee', email: 'ann@a.com' }), mt('B', { name: 'Bo Kim', email: 'bo@b.com' }), mt('C', { name: 'Cy Ray', email: 'cy@c.com' }), mt('D', { name: 'Di Fox', email: 'di@d.com' })],
+    leadOv: { 'e:ann@a.com': { hot: 'must_close' }, 'e:bo@b.com': { hot: 'nurture' }, 'e:cy@c.com': { hot: 'must_close', temp: 'warm' } } };
+  const by = Object.fromEntries(pl.build(d).leads.map(l => [l.name, l.temp]));
+  assert.deepEqual(by, { 'Ann Lee': 'hot', 'Bo Kim': 'cold', 'Cy Ray': 'warm', 'Di Fox': '' });
+  await pl.updateLead('e:di@d.com', { temp: 'warm' }, 'Amr');
+  const ov = JSON.parse(H.get('pl:leadov').get('e:di@d.com'));
+  assert.equal(ov.temp, 'warm');
+  assert.equal(JSON.parse(H.get('pl:trail').get('e:di@d.com')).pop().kind, 'temp');
+  await pl.updateLead('e:di@d.com', { temp: 'boiling' }, 'Amr');
+  assert.equal(JSON.parse(H.get('pl:leadov').get('e:di@d.com')).temp, '');
+});
