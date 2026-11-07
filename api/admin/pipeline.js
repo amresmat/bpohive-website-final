@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const link = t => 'https://www.bpohive.com/admin/?invite=' + encodeURIComponent(t);
     switch (b.action) {
       case 'outcome': return res.status(200).json(await pl.setOutcome(String(b.id || ''), String(b.outcome || '')));
-      case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, reason: b.reason, hot: b.hot, value: b.value, next: b.next }, b.by, b.also));
+      case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, reason: b.reason, hot: b.hot, temp: b.temp, value: b.value, next: b.next }, b.by, b.also));
       case 'lead-add': return res.status(200).json(await pl.addManualLead(b, b.by));
       case 'notes-import': return res.status(200).json(await pl.importNotes(String(b.key || ''), b.notes, b.by, b.also));
       case 'lead-delete': return res.status(200).json(await pl.deleteLead(String(b.key || ''), b, b.by));
