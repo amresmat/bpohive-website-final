@@ -373,3 +373,17 @@ test('leads in Showed get hot, warm or cold; old tags give a starting point', as
   await pl.updateLead('e:di@d.com', { temp: 'boiling' }, 'Amr');
   assert.equal(JSON.parse(H.get('pl:leadov').get('e:di@d.com')).temp, '');
 });
+
+test('a recorded call with no invitees is matched by time, or by the company in its title', () => {
+  const day = 864e5, t0 = Date.parse('2026-10-02T15:00:00Z');
+  const mt = (id, at, inv) => ({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(at - day) }, inv)], override: { outcome: 'showed' } });
+  const rec = (id, at, title, inv) => ({ id, title, start: iso(at), scheduled: '', url: 'https://fathom.video/x/' + id, recordedBy: 'Amr', invitees: inv || [], speakers: [], externalSpoke: false, summary: '## Summary\n- Wants 15 meetings a month', actions: ['Send pricing'] });
+  const d = { since: '', entries: [], sheets: [], outcomes: {}, skipEvents: null, trails: {}, leadOv: {}, manual: [{ id: 'm', name: 'David', company: 'Leonardo Worldwide', type: 'outbound', at: iso(t0 - 30 * day) }],
+    meetings: [mt('T', t0, { name: 'Tariq Damouk', email: 'tariq@italents.com' }), mt('M', t0 + 3 * 3600e3, { name: 'Moiz Baig', email: 'moiz@x.com' })],
+    recordings: [rec('r1', t0 + 4 * 60e3, 'Impromptu Zoom Meeting'), rec('r2', t0 + 9 * 3600e3, 'Impromptu Zoom Meeting'), rec('r3', t0 - 9 * day, 'BPO Hive & David | Leonardo Worldwide', [{ name: 'David Sgroi', email: '', external: true }])] };
+  const r = pl.build(d), by = Object.fromEntries(r.leads.map(l => [l.name, l.recordings.map(x => x.id)]));
+  assert.deepEqual(by['Tariq Damouk'], ['r1'], 'same start time');
+  assert.deepEqual(by['Moiz Baig'], [], 'too far from any meeting');
+  assert.deepEqual(by['David'], ['r3'], 'company in the title');
+  assert.equal(r.leads.find(l => l.name === 'Tariq Damouk').recordings[0].summary.includes('15 meetings'), true);
+});
