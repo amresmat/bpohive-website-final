@@ -266,7 +266,7 @@ test('shown / dead: a show goes to Shown and stays there; dead when unqualified 
 test('leads added by hand go to Shown; hot tags and an imported trail keep their dates', async () => {
   const r0 = await pl.addManualLead({ name: 'David Ross', company: 'Leonardo Worldwide', country: 'Canada', phone: '(416) 555-0100', type: 'outbound', note: 'Reviewing the contract' }, 'Amr');
   assert.equal(r0.key, 'n:david ross|leonardo worldwide');
-  await pl.updateLead(r0.key, { hot: 'must_close' }, 'Amr');
+  await pl.updateLead(r0.key, { hot: 'contract' }, 'Amr');
   const when = Date.parse('2026-09-26T12:00:00Z');
   const imp = await pl.importNotes(r0.key, [{ at: when, text: 'Had meeting, interested' }, { at: when, text: 'Had meeting, interested' }, { at: 'bad', text: 'x' }], 'Ranked Leads sheet');
   assert.equal(imp.added, 1, 'duplicates and bad dates are skipped');
@@ -274,7 +274,7 @@ test('leads added by hand go to Shown; hot tags and an imported trail keep their
   const base = { entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, meetings: [], manual: Object.values(manual),
     leadOv: { [r0.key]: JSON.parse(H.get('pl:leadov').get(r0.key)) }, trails: { [r0.key]: JSON.parse(H.get('pl:trail').get(r0.key)) } };
   const l = pl.build(base).leads.find(x => x.key === r0.key);
-  assert.equal(l.status, 'shown'); assert.equal(l.hot, 'must_close'); assert.equal(l.origin, 'Added by hand'); assert.equal(l.type, 'outbound'); assert.equal(l.country, 'Canada');
+  assert.equal(l.status, 'shown'); assert.equal(l.hot, 'contract'); assert.equal(l.origin, 'Added by hand'); assert.equal(l.type, 'outbound'); assert.equal(l.country, 'Canada');
   assert.equal(l.trail[0].at, when, 'the imported line keeps its own date and sorts first');
   assert.deepEqual(l.trail.map(x => x.kind), ['note', 'note', 'hot']);
   await assert.rejects(pl.addManualLead({ name: '' }), /name/);
@@ -356,4 +356,20 @@ test('a deleted lead is left out until it books again, and can be brought back',
   assert.ok(H.get('pl:hidden').has('n:david awad|'));
   await pl.restoreLead('n:david awad|');
   assert.equal(H.get('pl:hidden').has('n:david awad|'), false);
+});
+
+test('leads in Showed get hot, warm or cold; old tags give a starting point', async () => {
+  const day = 864e5, t0 = Date.now() - 5 * day;
+  const mt = (id, inv) => ({ id, name: 'Discovery Call', start: iso(t0), end: iso(t0 + 1800e3), status: 'active', created: iso(t0 - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(t0 - day) }, inv)], override: { outcome: 'showed' } });
+  const d = { since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, trails: {},
+    meetings: [mt('A', { name: 'Ann Lee', email: 'ann@a.com' }), mt('B', { name: 'Bo Kim', email: 'bo@b.com' }), mt('C', { name: 'Cy Ray', email: 'cy@c.com' }), mt('D', { name: 'Di Fox', email: 'di@d.com' })],
+    leadOv: { 'e:ann@a.com': { hot: 'must_close' }, 'e:bo@b.com': { hot: 'nurture' }, 'e:cy@c.com': { hot: 'must_close', temp: 'warm' } } };
+  const by = Object.fromEntries(pl.build(d).leads.map(l => [l.name, l.temp]));
+  assert.deepEqual(by, { 'Ann Lee': 'hot', 'Bo Kim': 'cold', 'Cy Ray': 'warm', 'Di Fox': '' });
+  await pl.updateLead('e:di@d.com', { temp: 'warm' }, 'Amr');
+  const ov = JSON.parse(H.get('pl:leadov').get('e:di@d.com'));
+  assert.equal(ov.temp, 'warm');
+  assert.equal(JSON.parse(H.get('pl:trail').get('e:di@d.com')).pop().kind, 'temp');
+  await pl.updateLead('e:di@d.com', { temp: 'boiling' }, 'Amr');
+  assert.equal(JSON.parse(H.get('pl:leadov').get('e:di@d.com')).temp, '');
 });
