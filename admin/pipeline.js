@@ -275,25 +275,13 @@
     var chips = [['', 'All hot leads', all.length]].concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
     return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '').replace(/<select id="pl-type">[\s\S]*?<\/select>/, '') + '</div>' +
       '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
-      '<div class="pl-hcards">' + (rows.length ? rows.map(function (l) {
-        var last = lastNote(l), nx = l.nextStep, rs = recsOf(l);
-        return '<article class="pl-hcard" data-k="' + esc(l.key) + '" tabindex="0">' +
-          '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
-            '<span class="pl-h-meta">' + typeTag(l.type) + (l.callers[0] ? '<small>' + esc(l.callers.join(', ')) + '</small>' : '') + (l.shownAt ? '<small>Showed ' + esc(day(l.shownAt)) + '</small>' : '') + '</span></div>' +
-          '<div class="pl-h-now">' + (nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '') +
-            (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') + '</div>' +
-          '<div class="pl-h-side"><span class="pl-h-count"><b>' + (l.attempts || 0) + '</b> update' + (l.attempts === 1 ? '' : 's') + ' since the show</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
-            '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
-      }).join('') : '<div class="card empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>';
+      '<div class="pl-hcards">' + (rows.length ? rows.map(function (l) { return hcard(l, 'shown'); }).join('') : '<div class="card empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>';
   }
   function bindShown() {
     var add = $('pl-add'); if (add) add.onclick = addLeadDialog;
     [].forEach.call(MAIN.querySelectorAll('[data-hf]'), function (b) { b.onclick = function () { HOTF = b.getAttribute('data-hf'); draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
-    [].forEach.call(MAIN.querySelectorAll('.pl-hcard'), function (c) {
-      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player')) return; SEL = c.getAttribute('data-k'); openLead(SEL); };
-      c.onkeydown = function (e) { if (e.key === 'Enter') { SEL = c.getAttribute('data-k'); openLead(SEL); } };
-    });
+    bindHcards(MAIN);
   }
 
   /* ---------- Call recordings (the link from the Lead Entry sheet) ---------- */
@@ -367,25 +355,51 @@
       (st === 'shown' && last ? '<p class="pl-c-note">' + esc(last.text.slice(0, 110)) + (last.text.length > 110 ? '…' : '') + '</p>' : '') +
       '<div class="pl-c-foot">' + typeTag(l.type) + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</div></article>';
   }
+  // One lead as a big horizontal card: who they are, where it stands, activity and actions.
+  function hcard(l, st) {
+    var last = lastNote(l), nx = l.nextStep, rs = recsOf(l), lm = l.lastMeeting, line = '';
+    if (st === 'booked') line = l.status === 'to_mark' ? '<span class="pl-c-next late">Date passed' + (lm ? ' (' + esc(when(lm.start)) + ')' : '') + ', mark show or no-show</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '';
+    else if (st === 'shown') line = nx ? '<span class="pl-c-next' + (overdue(nx) ? ' late' : '') + '">Next: ' + esc(nx.text) + (nx.due ? ', ' + esc(dueTxt(nx)) : '') + '</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '';
+    else if (st === 'no_show') line = lm ? '<span class="pl-c-next late">Missed ' + esc(when(lm.start)) + (l.noShows > 1 ? ', ' + l.noShows + ' times' : '') + '</span>' : '';
+    else if (st === 'won') line = l.dealAt ? '<span class="pl-c-next pl-c-won">Won ' + esc(day(l.dealAt)) + '</span>' : '';
+    else if (st === 'dead') line = '<span class="pl-c-next late">' + (deadBucket(l) === 'unqualified' ? 'Unqualified' : 'Not replying') + (l.dealAt ? ' since ' + esc(day(l.dealAt)) : '') + '</span>';
+    var nm = (l.meetings || []).length;
+    var count = st === 'shown' ? '<b>' + (l.attempts || 0) + '</b> update' + (l.attempts === 1 ? '' : 's') + ' since the show' : '<b>' + nm + '</b> meeting' + (nm === 1 ? '' : 's');
+    return '<article class="pl-hcard pl-hc-' + st + '" data-k="' + esc(l.key) + '" tabindex="0">' +
+      '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
+        '<span class="pl-h-meta">' + typeTag(l.type) + (l.callers[0] ? '<small>' + esc(l.callers.join(', ')) + '</small>' : '') + (l.shownAt ? '<small>Showed ' + esc(day(l.shownAt)) + '</small>' : l.lastBooked ? '<small>Booked ' + esc(day(l.lastBooked)) + '</small>' : '') + '</span></div>' +
+      '<div class="pl-h-now">' + line +
+        (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') + '</div>' +
+      '<div class="pl-h-side"><span class="pl-h-count">' + count + '</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
+        '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
+  }
+  function bindHcards(root) {
+    [].forEach.call(root.querySelectorAll('.pl-hcard'), function (c) {
+      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player')) return; SEL = c.getAttribute('data-k'); openLead(SEL); };
+      c.onkeydown = function (e) { if (e.key === 'Enter') { SEL = c.getAttribute('data-k'); openLead(SEL); } };
+    });
+  }
+  var STG = 'booked';
+  try { STG = localStorage.getItem('bh_pl_stage') || 'booked'; } catch (e) {}
   function stagesView() {
     var q = F.q.trim().toLowerCase();
     var leads = DATA.leads.filter(matchesLead).filter(function (l) { return !q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1; });
     var dead = leads.filter(function (l) { return l.status === 'dead'; });
     var order = function (st) { return function (a, b) { return st === 'booked' ? (a.status === 'to_mark' ? 0 : 1) - (b.status === 'to_mark' ? 0 : 1) || t(a.next) - t(b.next) : st === 'shown' ? (b.lastActivity || 0) - (a.lastActivity || 0) : st === 'won' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); }; };
+    if (!STAGES.some(function (s) { return s[0] === STG; })) STG = 'booked';
+    var cur = STAGES.filter(function (s) { return s[0] === STG; })[0];
+    var rows = leads.filter(cur[3]).sort(order(cur[0]));
     return filters(false, false) +
-      '<p class="ins-note" style="margin:-4px 0 10px">Each lead sits in one stage. Click a lead to open it and add notes.</p>' +
-      '<div class="pl-board pl-stages">' + STAGES.map(function (s) {
-        var rows = leads.filter(s[3]).sort(order(s[0]));
-        return '<section class="pl-col" style="--c:' + s[2] + '"><header><b>' + s[1] + '</b><span>' + rows.length + '</span></header><p class="pl-col-sub">' + esc(s[4]) + '</p><div class="pl-cards">' +
-          (rows.length ? rows.map(function (l) { return stageCard(l, s[0]); }).join('') : '<div class="pl-c-empty">Nobody here</div>') + '</div></section>';
+      '<div class="pl-stagebar">' + STAGES.map(function (s, i) {
+        var n = leads.filter(s[3]).length;
+        return '<button type="button" class="pl-stg' + (s[0] === STG ? ' on' : '') + '" data-stg="' + s[0] + '" style="--c:' + s[2] + '"><span class="pl-stg-n">' + n + '</span><span class="pl-stg-t"><b>' + (i + 1) + '. ' + s[1] + '</b><small>' + esc(s[4]) + '</small></span></button>';
       }).join('') + '</div>' +
-      (dead.length ? '<p class="ins-note">Out of the pipeline: <a href="#pipeline/noreply">' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying</a>, <a href="#pipeline/unqualified">' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified</a>.</p>' : '');
+      '<div class="pl-hcards" style="--c:' + cur[2] + '">' + (rows.length ? rows.map(function (l) { return hcard(l, cur[0]); }).join('') : '<div class="card empty">Nobody in ' + esc(cur[1]) + ' right now.</div>') + '</div>' +
+      (dead.length ? '<p class="ins-note" style="margin-top:14px">Out of the pipeline: <a href="#pipeline/noreply">' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying</a>, <a href="#pipeline/unqualified">' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified</a>.</p>' : '');
   }
   function bindStages() {
-    [].forEach.call(MAIN.querySelectorAll('.pl-stages .pl-card'), function (c) {
-      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player')) return; openLead(c.getAttribute('data-k')); };
-      c.onkeydown = function (e) { if (e.key === 'Enter') openLead(c.getAttribute('data-k')); };
-    });
+    bindHcards(MAIN);
+    [].forEach.call(MAIN.querySelectorAll('[data-stg]'), function (b) { b.onclick = function () { STG = b.getAttribute('data-stg'); try { localStorage.setItem('bh_pl_stage', STG); } catch (e) {} draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
   }
 
@@ -395,14 +409,8 @@
     var rows = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === kind && (!bucket || deadBucket(l) === bucket) && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
       .sort(function (a, b) { return kind === 'dead' || kind === 'won' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); });
     var note = kind === 'won' ? 'Closed and signed. Open one to see the full trail.' : kind === 'dead' ? (bucket === 'unqualified' ? 'Not a fit (budget, need or decision-maker). If they book again they come back by themselves.' : 'Not replying after many tries. If they book again they come back by themselves.') : 'Missed their meeting. When they rebook (Calendly or the sheet) they move back to Booked by themselves. Open one to log a follow-up or mark it dead.';
-    var head = kind === 'dead' || kind === 'won' ? '<th>Lead</th><th>Source</th><th>' + (kind === 'won' ? 'Won on' : 'Moved here') + '</th><th>Updates</th><th>Last update</th>' : '<th>Lead</th><th>Source</th><th>Missed</th><th>Booked on</th><th>No-shows</th><th>Last update</th>';
     return filters(false, false) + '<p class="ins-note" style="margin:-4px 0 10px"><b>' + rows.length + '</b>, ' + esc(note) + '</p>' +
-      '<div class="card tablewrap pl-table" id="pl-leads">' + (rows.length ? '<table><thead><tr>' + head + '</tr></thead><tbody>' + rows.map(function (l) {
-        var last = lastNote(l);
-        var mid = kind === 'dead' || kind === 'won' ? '<td><small>' + esc(day(l.dealAt)) + '</small></td><td>' + (l.trail || []).filter(function (x) { return x.kind === 'note'; }).length + '</td>'
-          : '<td><small>' + esc(l.lastMeeting ? when(l.lastMeeting.start) : '—') + '</small></td><td><small>' + esc(l.lastBooked ? day(l.lastBooked) : '—') + '</small></td><td>' + (l.noShows || 1) + '</td>';
-        return '<tr data-k="' + esc(l.key) + '"><td><b>' + esc(l.name || l.email || '(no name)') + '</b><br><small>' + esc([l.company, l.callers[0]].filter(Boolean).join(', ')) + '</small></td><td>' + typeTag(l.type) + '</td>' + mid + '<td class="pl-latest">' + esc(last ? last.text : '') + (last ? '<br><small>' + esc(ago(last.at)) + '</small>' : '') + '</td></tr>';
-      }).join('') + '</tbody></table>' : '<div class="empty">Nobody here.</div>') + '</div>';
+      '<div class="pl-hcards" id="pl-leads">' + (rows.length ? rows.map(function (l) { return hcard(l, kind); }).join('') : '<div class="card empty">Nobody here.</div>') + '</div>';
   }
 
   /* ---------- All leads ---------- */
@@ -609,7 +617,7 @@
     if (SUB === 'leads') drawLeadsTable();
     if (SUB === 'shown') bindShown();
     if (SUB === 'stages') bindStages();
-    if ((SUB === 'noshow' || SUB === 'won' || SUB === 'noreply' || SUB === 'unqualified') && $('pl-leads')) { bindLeadRows($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
+    if ((SUB === 'noshow' || SUB === 'won' || SUB === 'noreply' || SUB === 'unqualified') && $('pl-leads')) { bindHcards($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
     bindMeetings(MAIN);
