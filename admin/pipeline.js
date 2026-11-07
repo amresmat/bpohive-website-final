@@ -13,6 +13,11 @@
   var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { must_close: ['Must close', '#c0392b'], contract: ['Waiting on contract', '#7a5af5'], nurture: ['Nurture', '#1B7381'] };
   var HOT_RANK = { must_close: 0, contract: 1, nurture: 2 };
+  // Hot = actively engaging, warm = replying but not deciding now, cold = replying, longer timeframe.
+  var TEMP = { hot: ['Hot', 'Actively engaging'], warm: ['Warm', 'Replying, not deciding now'], cold: ['Cold', 'Replying, longer timeframe'] };
+  var TEMP_RANK = { hot: 0, warm: 1, cold: 2 };
+  function tempTag(k) { return TEMP[k] ? '<span class="pl-temp pl-temp-' + k + '" title="' + esc(TEMP[k][1]) + '">' + TEMP[k][0] + '</span>' : ''; }
+  function byTemp(a, b) { var ra = a.temp in TEMP_RANK ? TEMP_RANK[a.temp] : 3, rb = b.temp in TEMP_RANK ? TEMP_RANK[b.temp] : 3; var ha = a.hot in HOT_RANK ? HOT_RANK[a.hot] : 9, hb = b.hot in HOT_RANK ? HOT_RANK[b.hot] : 9; return ra - rb || ha - hb || (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); }
   var REASON = { unqualified: 'Unqualified', no_reply: 'Not replying', other: 'Other' };
   var BTNS = [['showed', 'Show'], ['no_show', 'No-show'], ['rescheduled', 'Rescheduled'], ['cancelled', 'Cancelled']];
 
@@ -267,14 +272,14 @@
   function shownView() {
     var q = F.q.trim().toLowerCase();
     var all = DATA.leads.filter(matchesLead).filter(function (l) { return l.status === 'shown' && (!q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1); })
-      .sort(function (a, b) { var ra = a.hot in HOT_RANK ? HOT_RANK[a.hot] : 9, rb = b.hot in HOT_RANK ? HOT_RANK[b.hot] : 9; return ra - rb || (overdue(b.nextStep) ? 1 : 0) - (overdue(a.nextStep) ? 1 : 0) || (b.lastActivity || 0) - (a.lastActivity || 0); });
+      .sort(byTemp);
     var idle = function (l) { return l.lastActivity && Date.now() - l.lastActivity > 14 * 864e5; };
     var due = function (l) { return l.nextStep && l.nextStep.due && new Date(l.nextStep.due + 'T00:00:00') <= new Date(); };
-    var rows = HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOT[HOTF] ? all.filter(function (l) { return l.hot === HOTF; }) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
+    var rows = HOTF.indexOf('t:') === 0 ? all.filter(function (l) { return (l.temp || 'none') === HOTF.slice(2); }) : HOTF === 'due' ? all.filter(due) : HOTF === 'idle' ? all.filter(idle) : HOT[HOTF] ? all.filter(function (l) { return l.hot === HOTF; }) : HOTF === 'inbound' || HOTF === 'outbound' ? all.filter(function (l) { return l.type === HOTF; }) : all;
     if (!rows.some(function (l) { return l.key === SEL; })) SEL = rows[0] ? rows[0].key : '';
-    var chips = [['', 'All hot leads', all.length]].concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
+    var chips = [['', 'All', all.length]].concat(Object.keys(TEMP).map(function (k) { return ['t:' + k, TEMP[k][0], all.filter(function (l) { return l.temp === k; }).length, k]; })).concat(all.some(function (l) { return !l.temp; }) ? [['t:none', 'Not set', all.filter(function (l) { return !l.temp; }).length]] : []).concat(Object.keys(HOT).map(function (k) { return [k, HOT[k][0], all.filter(function (l) { return l.hot === k; }).length]; })).concat([['due', 'Follow-up due', all.filter(due).length], ['idle', 'No update in 14+ days', all.filter(idle).length], ['inbound', 'Inbound', all.filter(function (l) { return l.type === 'inbound'; }).length], ['outbound', 'Outbound', all.filter(function (l) { return l.type !== 'inbound'; }).length]]).filter(function (c) { return c[0] === '' || !HOT[c[0]] || c[2]; });
     return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name or company" value="' + esc(F.q) + '">' + filters(false, false).replace(/^<div class="bar">|<\/div>$/g, '').replace(/<input id="pl-q"[^>]*>/, '').replace(/<select id="pl-type">[\s\S]*?<\/select>/, '') + '</div>' +
-      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
+      '<div class="pl-chips">' + chips.map(function (c) { return '<button type="button" data-hf="' + c[0] + '" class="' + (HOTF === c[0] ? 'on' : '') + (c[3] ? ' pl-chip-' + c[3] : '') + '">' + esc(c[1]) + ' <b>' + c[2] + '</b></button>'; }).join('') + (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>' +
       '<div class="pl-hcards">' + (rows.length ? rows.map(function (l) { return hcard(l, 'shown'); }).join('') : '<div class="card empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>';
   }
   function bindShown() {
@@ -365,17 +370,28 @@
     else if (st === 'dead') line = '<span class="pl-c-next late">' + (deadBucket(l) === 'unqualified' ? 'Unqualified' : 'Not replying') + (l.dealAt ? ' since ' + esc(day(l.dealAt)) : '') + '</span>';
     var nm = (l.meetings || []).length;
     var count = st === 'shown' ? '<b>' + (l.attempts || 0) + '</b> update' + (l.attempts === 1 ? '' : 's') + ' since the show' : '<b>' + nm + '</b> meeting' + (nm === 1 ? '' : 's');
-    return '<article class="pl-hcard pl-hc-' + st + '" data-k="' + esc(l.key) + '" tabindex="0">' +
-      '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
+    return '<article class="pl-hcard pl-hc-' + st + (st === 'shown' && l.temp ? ' pl-ht-' + l.temp : '') + '" data-k="' + esc(l.key) + '" tabindex="0">' +
+      '<div class="pl-h-who"><div class="pl-h-name"><b>' + esc(l.name || l.email || '(no name)') + '</b>' + (st === 'shown' ? tempTag(l.temp) : '') + hotTag(l.hot) + '</div><span class="pl-c-co">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</span>' +
         '<span class="pl-h-meta">' + typeTag(l.type) + (l.callers[0] ? '<small>' + esc(l.callers.join(', ')) + '</small>' : '') + (l.shownAt ? '<small>Showed ' + esc(day(l.shownAt)) + '</small>' : l.lastBooked ? '<small>Booked ' + esc(day(l.lastBooked)) + '</small>' : '') + '</span></div>' +
       '<div class="pl-h-now">' + line +
         (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') + '</div>' +
-      '<div class="pl-h-side"><span class="pl-h-count">' + count + '</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
+      '<div class="pl-h-side">' + (st === 'shown' && isAdmin() ? tempSet(l) : '') + '<span class="pl-h-count">' + count + '</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
         '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
   }
+  function tempSet(l) {
+    return '<span class="pl-tset" role="group" aria-label="Hot, warm or cold">' + Object.keys(TEMP).map(function (k) { return '<button type="button" class="pl-tset-' + k + (l.temp === k ? ' on' : '') + '" data-temp-set="' + k + '" data-k="' + esc(l.key) + '" title="' + esc(TEMP[k][1]) + '" aria-pressed="' + (l.temp === k) + '">' + TEMP[k][0] + '</button>'; }).join('') + '</span>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-temp-set]'); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var l = leadByKey(b.getAttribute('data-k')); if (!l) return;
+    var to = b.getAttribute('data-temp-set'); if (l.temp === to && l.tempSet) return;
+    [].forEach.call(b.parentNode.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); x.disabled = true; });
+    api('POST', { action: 'update', key: l.key, also: l.aliases || [], temp: to, by: myName() || 'Admin' }).then(function () { return load(false); }).then(draw).catch(fail);
+  }, true);
   function bindHcards(root) {
     [].forEach.call(root.querySelectorAll('.pl-hcard'), function (c) {
-      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player')) return; SEL = c.getAttribute('data-k'); openLead(SEL); };
+      c.onclick = function (e) { if (e.target.closest('a, audio, .pl-player, .pl-tset')) return; SEL = c.getAttribute('data-k'); openLead(SEL); };
       c.onkeydown = function (e) { if (e.key === 'Enter') { SEL = c.getAttribute('data-k'); openLead(SEL); } };
     });
   }
@@ -385,7 +401,7 @@
     var q = F.q.trim().toLowerCase();
     var leads = DATA.leads.filter(matchesLead).filter(function (l) { return !q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1; });
     var dead = leads.filter(function (l) { return l.status === 'dead'; });
-    var order = function (st) { return function (a, b) { return st === 'booked' ? (a.status === 'to_mark' ? 0 : 1) - (b.status === 'to_mark' ? 0 : 1) || t(a.next) - t(b.next) : st === 'shown' ? (b.lastActivity || 0) - (a.lastActivity || 0) : st === 'won' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); }; };
+    var order = function (st) { return function (a, b) { return st === 'booked' ? (a.status === 'to_mark' ? 0 : 1) - (b.status === 'to_mark' ? 0 : 1) || t(a.next) - t(b.next) : st === 'shown' ? byTemp(a, b) : st === 'won' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); }; };
     if (!STAGES.some(function (s) { return s[0] === STG; })) STG = 'booked';
     var cur = STAGES.filter(function (s) { return s[0] === STG; })[0];
     var rows = leads.filter(cur[3]).sort(order(cur[0]));
@@ -453,6 +469,7 @@
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
       else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ', ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      else if (x.kind === 'temp') ev.push({ at: x.at, k: 'stage', t: TEMP[x.temp] ? 'Marked ' + TEMP[x.temp][0] + ' (' + TEMP[x.temp][1].toLowerCase() + ')' : 'Hot, warm or cold cleared', by: x.by, c: x.temp === 'hot' ? '#A3392D' : x.temp === 'warm' ? '#C28A0A' : x.temp === 'cold' ? '#2A6A9E' : '#8a9aa6' });
       else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && HOT[x.hot] ? 'Marked ' + HOT[x.hot][0] : 'Tag removed', by: x.by, c: x.hot && HOT[x.hot] ? HOT[x.hot][1] : '#8a9aa6' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
     });
@@ -487,9 +504,9 @@
       : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
     d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</div>' +
-      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + recSection(l) +
+      '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + tempTag(l.temp) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + recSection(l) +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note goes on this lead\'s trail with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
-        '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-4' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
+        '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-5' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Hot, warm or cold<select id="pl-u-temp">' + Object.keys(TEMP).map(function (k) { return '<option value="' + k + '"' + (l.temp === k ? ' selected' : '') + ' title="' + esc(TEMP[k][1]) + '">' + TEMP[k][0] + '</option>'; }).join('') + (l.temp ? '' : '<option value="" selected>Not set</option>') + '</select></label>' : '') + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
         '<div class="pl-upd-act"><button class="btn pri" id="pl-u-save" type="button">Add note</button>' + (l.nextStep ? '<button class="btn" id="pl-u-done" type="button">Follow-up done</button>' : '') + '<span class="pl-moves">' + moves + delBtn(l, 'Delete lead') + '</span><span id="pl-u-msg" class="ins-note" style="margin:0"></span></div></div>' : '') +
       '</div>' +
       '<aside class="pl-dtrail"><h3 class="pl-h">Trail <small class="ins-note" style="font-weight:400">newest first</small></h3>' + timelineHtml(l, ev) + '</aside></div>' +
@@ -503,7 +520,7 @@
     var by = function () { var v = q('pl-u-by').value.trim(); setMyName(v); return v; };
     var send = function (b, extra) {
       b.disabled = true; q('pl-u-msg').textContent = 'Saving…';
-      api('POST', Object.assign({ action: 'update', key: l.key, also: l.aliases || [], note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
+      api('POST', Object.assign({ action: 'update', key: l.key, also: l.aliases || [], note: q('pl-u-note').value, by: by(), next: { text: q('pl-u-next').value, due: q('pl-u-due').value } }, q('pl-u-hot') ? { hot: q('pl-u-hot').value } : {}, q('pl-u-temp') && q('pl-u-temp').value && (q('pl-u-temp').value !== l.temp || !l.tempSet) ? { temp: q('pl-u-temp').value } : {}, extra)).then(function (r) { if (r && r.changed === 0) { q('pl-u-msg').textContent = 'Type a note first.'; b.disabled = false; q('pl-u-note').focus(); return; } return reopen(); }).catch(function (e) { q('pl-u-msg').textContent = e.message; b.disabled = false; });
     };
     if (q('pl-u-save')) q('pl-u-save').onclick = function () { send(this, {}); };
     if (q('pl-u-note')) q('pl-u-note').onkeydown = function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(q('pl-u-save'), {}); } };
