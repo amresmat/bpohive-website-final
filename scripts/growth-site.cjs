@@ -53,7 +53,7 @@ You bring an accurate offer, approved claims and someone to take the meetings. Y
 
 ## What we measure
 
-We report activity, conversations, qualified interest, booked meetings and held meetings as separate numbers, so a busy week never hides a weak fit. Rejected meetings, cancellations and no-shows are reviewed next to the wins. Across our campaigns we have booked 21,200+ appointments and our clients have attributed $25M+ in revenue to them.
+We report activity, conversations, qualified interest, booked meetings and held meetings as separate numbers, so a busy week never hides a weak fit. Rejected meetings, cancellations and no-shows are reviewed next to the wins. Across our campaigns we have booked 20,000+ appointments and our clients have attributed $25M+ in revenue to them.
 `;
 const coreFaq=[['What is the minimum budget?','Managed campaigns start at $4,000 per month. Higher-volume or more complex programs are quoted after the market, language and delivery scope are agreed.'],['Are meetings or revenue guaranteed?','No. We commit to the activity, process and reporting written into your agreement. Meetings and revenue depend on your market, your offer and your sales follow-up.'],['What does our sales team need to do?','Provide an accurate offer, approve targeting and messaging, attend agreed meetings and give timely feedback. Your team handles detailed discovery, proposals and closing.']];
 function generate(out){

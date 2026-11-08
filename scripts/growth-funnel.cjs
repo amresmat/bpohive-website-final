@@ -89,14 +89,14 @@ function funnel(out){
   }
   if(rel==='about.html')$('h3').filter((i,e)=>$(e).text().trim()==='Amr Abdelrazzak').attr('id','amr-abdelrazzak');
   if(rel==='case-studies.html'){
-   $('meta[name=description],meta[property="og:description"],meta[name="twitter:description"]').attr('content','Explore BPO Hive campaign approaches. Company-reported cumulative results: 21,200+ appointments and $25M+ client revenue. Outcomes vary.');
-   $('div.text-4xl').each((i,e)=>{const t=$(e).text().trim();if(t==='$20.7M+')$(e).text('$25M+');else if(t==='20,000+')$(e).text('21,200+');else $(e).parent().remove();});
+   $('meta[name=description],meta[property="og:description"],meta[name="twitter:description"]').attr('content','Explore BPO Hive campaign approaches. Company-reported cumulative results: 20,000+ appointments and $25M+ client revenue. Outcomes vary.');
+   $('div.text-4xl').each((i,e)=>{const t=$(e).text().trim();if(t==='$20.7M+')$(e).text('$25M+');else if(t==='20,000+')$(e).text('20,000+');else $(e).parent().remove();});
    $('div.text-3xl').parent().remove();$('span.text-lg.font-bold.text-bpo-blue').parent().remove();$('span.uppercase').filter((i,e)=>/months/.test($(e).text())).remove();
    $('p').each((i,e)=>{const t=$(e).text();if(/Estimated 11,760/.test(t))$(e).text('The campaign supported recurring appointment handoffs and weekly performance review.');if(/Sales team averaged approximately/.test(t))$(e).text('The engagement combined sales-team management with clearer reporting and operational coordination.');if(/Average output of 10 shown demos/.test(t))$(e).text('The team tracked held demos and subsequent sales outcomes as separate stages.');});
    $('h2').filter((i,e)=>$(e).text().trim()==='Combined Impact').after('<p class="growth-caption">Company-reported cumulative figures. Individual outcomes vary; these totals are not forecasts.</p>');
   }
   if(rel==='industries.html'){
-   $('p').each((i,e)=>{const t=$(e).text().trim();if(t==='30%')$(e).parent().remove();if(t==='Book 30% more appointments')$(e).text('Build a qualified sales pipeline');if(t==='$25.0M+')$(e).text('$25M+');if(t==='21,200')$(e).text('21,200+');});
+   $('p').each((i,e)=>{const t=$(e).text().trim();if(t==='30%')$(e).parent().remove();if(t==='Book 30% more appointments')$(e).text('Build a qualified sales pipeline');if(t==='$25.0M+')$(e).text('$25M+');if(t==='20,000+')$(e).text('20,000+');});
   }
   if(rel==='index.html')$('.reported-result').remove();
   // Remove obsolete duplicate Organization nodes; one consistent organization identity.
