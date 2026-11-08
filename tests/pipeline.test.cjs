@@ -380,10 +380,10 @@ test('a recorded call with no invitees is matched by time, or by the company in 
   const rec = (id, at, title, inv) => ({ id, title, start: iso(at), scheduled: '', url: 'https://fathom.video/x/' + id, recordedBy: 'Amr', invitees: inv || [], speakers: [], externalSpoke: false, summary: '## Summary\n- Wants 15 meetings a month', actions: ['Send pricing'] });
   const d = { since: '', entries: [], sheets: [], outcomes: {}, skipEvents: null, trails: {}, leadOv: {}, manual: [{ id: 'm', name: 'David', company: 'Leonardo Worldwide', type: 'outbound', at: iso(t0 - 30 * day) }],
     meetings: [mt('T', t0, { name: 'Tariq Damouk', email: 'tariq@italents.com' }), mt('M', t0 + 3 * 3600e3, { name: 'Moiz Baig', email: 'moiz@x.com' })],
-    recordings: [rec('r1', t0 + 4 * 60e3, 'Impromptu Zoom Meeting'), rec('r2', t0 + 9 * 3600e3, 'Impromptu Zoom Meeting'), rec('r3', t0 - 9 * day, 'BPO Hive & David | Leonardo Worldwide', [{ name: 'David Sgroi', email: '', external: true }])] };
+    recordings: [Object.assign(rec('r1', t0 + 4 * 60e3, 'Impromptu Zoom Meeting'), { speakers: ['Amr Abdelrazzak', 'Tariq'] }), Object.assign(rec('r4', t0 + 3 * 3600e3 + 2 * 60e3, 'Impromptu Zoom Meeting'), { speakers: ['Amr Abdelrazzak', 'Abdullah M'] }), rec('r2', t0 + 9 * 3600e3, 'Impromptu Zoom Meeting'), rec('r3', t0 - 9 * day, 'BPO Hive & David | Leonardo Worldwide', [{ name: 'David Sgroi', email: '', external: true }])] };
   const r = pl.build(d), by = Object.fromEntries(r.leads.map(l => [l.name, l.recordings.map(x => x.id)]));
   assert.deepEqual(by['Tariq Damouk'], ['r1'], 'same start time');
-  assert.deepEqual(by['Moiz Baig'], [], 'too far from any meeting');
+  assert.deepEqual(by['Moiz Baig'], [], 'only the team talked while waiting, so it is not his call');
   assert.deepEqual(by['David'], ['r3'], 'company in the title');
   assert.equal(r.leads.find(l => l.name === 'Tariq Damouk').recordings[0].summary.includes('15 meetings'), true);
 });
