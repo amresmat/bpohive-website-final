@@ -260,6 +260,19 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
+  var TEAM_MAILS = ['amr@bpohive.com', 'abdullah@bpohive.com', 'info@bpohive.com', 'success@bpohive.com'];
+  function mailBox(l) {
+    var me = myName(), first = String(l.name || '').trim().split(/\s+/)[0] || 'there';
+    first = first.charAt(0).toUpperCase() + first.slice(1);
+    var mine = TEAM_MAILS.filter(function (e) { return me && e.indexOf(me.toLowerCase().split(/\s+/)[0] + '@') === 0; })[0] || TEAM_MAILS[0];
+    var body = 'Hi ' + first + ',\n\nThanks again for your time. Following up on our conversation.\n\nWould you have 15 minutes this week to go over next steps?\n\nBest,\n' + (me || 'Amr') + '\nBPO Hive';
+    return '<div class="pl-mailbox" id="pl-m-box" hidden><div class="pl-mail-row"><label>To<input type="email" id="pl-m-to" value="' + esc(l.email || '') + '" placeholder="name@company.com"></label><label>Cc <small>(optional)</small><input type="text" id="pl-m-cc" placeholder="abdullah@bpohive.com"></label></div>' +
+      '<div class="pl-mail-row"><label>Your name<input type="text" id="pl-m-from" value="' + esc(me) + '" placeholder="Amr"></label><label>Replies go to<select id="pl-m-reply">' + TEAM_MAILS.map(function (e) { return '<option' + (e === mine ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label></div>' +
+      '<label>Subject<input type="text" id="pl-m-subj" value="' + esc('Following up' + (l.company ? ', ' + l.company : '')) + '"></label>' +
+      '<label>Message<textarea id="pl-m-body" rows="8">' + esc(body) + '</textarea></label>' +
+      '<div class="pl-editbox-act"><button type="button" class="btn pri" id="pl-m-send">Send email</button><button type="button" class="btn" id="pl-m-cancel">Cancel</button><a id="pl-m-app" class="pl-m-app" href="#">Open in my email app instead</a><span class="ins-note" id="pl-m-msg" style="margin:0"></span></div>' +
+      '<p class="ins-note" style="margin:8px 0 0">Sent from success@bpohive.com with your name; their reply comes to the address you pick. A copy goes on the trail.</p></div>';
+  }
   function addLeadDialog(stage) {
     var d = dlg(), st = STAGES.some(function (s) { return s[0] === stage; }) ? stage : 'shown';
     d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>Add a lead</h2><p class="ins-note" style="margin:4px 0 14px">For someone who is not in Calendly or the Lead Entry sheets yet. Pick the stage they are at.</p>' +
@@ -360,7 +373,7 @@
   function recSection(l) {
     var rs = recsOf(l); if (!rs.length) return '';
     return '<div class="pl-recs"><h3 class="pl-h" style="margin-top:0">Booking call' + (rs.length > 1 ? 's' : '') + '</h3>' + rs.map(function (m) {
-      return '<div class="pl-recs-row"><small>' + esc([m.sheet.caller || (m.callers || [])[0], m.created ? 'booked ' + day(m.created) : '', 'for ' + day(m.start)].filter(Boolean).join(', ')) + '</small>' + recPlayer(m.sheet.recording) + '</div>';
+      return '<div class="pl-recs-row"><small>' + esc([m.sheet.caller || (m.callers || [])[0], m.created ? 'booked ' + day(m.created) : '', 'for ' + day(m.start)].filter(Boolean).join(', ')) + '</small> ' + recPlayer(m.sheet.recording) + '</div>';
     }).join('') + '</div>';
   }
   document.addEventListener('click', function (e) {
@@ -523,6 +536,8 @@
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
       else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ', ' + day(x.due + 'T12:00:00') : ''), by: x.by });
+      else if (x.kind === 'email') ev.push({ at: x.at, k: 'note', t: 'Email sent to ' + (x.to || '') + ': ' + (x.subject || ''), body: x.text, by: x.by, c: '#2A6A9E' });
+      else if (x.kind === 'edit') ev.push({ at: x.at, k: 'stage', t: x.text, by: x.by, c: '#8a9aa6' });
       else if (x.kind === 'temp') ev.push({ at: x.at, k: 'stage', t: TEMP[x.temp] ? 'Marked ' + TEMP[x.temp][0] + ' (' + TEMP[x.temp][1].toLowerCase() + ')' : 'Hot, warm or cold cleared', by: x.by, c: x.temp === 'hot' ? '#A3392D' : x.temp === 'warm' ? '#C28A0A' : x.temp === 'cold' ? '#2A6A9E' : '#8a9aa6' });
       else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? 'Marked ' + (HOT[x.hot] || OLD_HOT[x.hot])[0] : 'Tag removed', by: x.by, c: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? (HOT[x.hot] || OLD_HOT[x.hot])[1] : '#8a9aa6' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
@@ -557,7 +572,9 @@
     var moves = closed ? '<button class="btn" type="button" data-deal="' + (l.shownAt ? 'shown' : '') + '">' + (l.shownAt ? 'Bring back to Showed' : 'Bring back') + '</button>'
       : (l.status === 'shown' ? '<button class="btn pl-b-won" type="button" data-deal="won">Won</button>' : '') + '<button class="btn pl-b-dead" type="button" data-deal="dead" data-r="no_reply">Not replying</button><button class="btn pl-b-dead" type="button" data-deal="dead" data-r="unqualified">Unqualified</button>';
     var d = pane || dlg(), q = function (id) { return d.querySelector('#' + id); };
-    d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<h2>' + esc(l.name || l.email) + '</h2><div style="color:#5d7280">' + esc([l.title, l.company].filter(Boolean).join(', ')) + '</div>' +
+    d.innerHTML = '<div class="dl">' + (pane ? '' : '<button class="x" type="button" aria-label="Close">×</button>') + '<div class="pl-dname"><h2>' + esc(l.name || l.email) + '</h2>' + (isAdmin() ? '<span class="pl-dact"><button type="button" class="btn pl-mail-btn" id="pl-m-open">Send email</button><button type="button" class="pl-edit-btn" id="pl-e-open">Edit contact</button></span>' : '') + '</div><div class="pl-dcontact">' + esc([l.title, l.company].filter(Boolean).join(', ')) + (l.phone ? '<span class="pl-dphone"><a href="tel:' + esc(l.phone.replace(/[^\d+]/g, '')) + '">' + esc(l.phone) + '</a></span>' : '') + (l.email ? '<span class="pl-dphone"><a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a></span>' : '') + '</div>' +
+      (isAdmin() ? mailBox(l) : '') +
+      (isAdmin() ? '<div class="pl-editbox" id="pl-e-box" hidden><label>Name<input type="text" id="pl-e-name" value="' + esc(l.name || '') + '"></label><label>Phone<input type="tel" id="pl-e-phone" value="' + esc(l.phone || '') + '"></label><label>Email<input type="email" id="pl-e-email" value="' + esc(l.email || '') + '"></label><label>Company<input type="text" id="pl-e-co" value="' + esc(l.company || '') + '"></label><div class="pl-editbox-act"><button type="button" class="btn pri" id="pl-e-save">Save</button><button type="button" class="btn" id="pl-e-cancel">Cancel</button><span class="ins-note" id="pl-e-msg" style="margin:0"></span></div></div>' : '') +
       '<div class="pl-dtags">' + typeTag(l.type) + leadTag(l) + tempTag(l.temp) + hotTag(l.hot) + (l.nextStep ? '<span class="pl-c-next' + (overdue(l.nextStep) ? ' late' : '') + '" style="margin:0">Next: ' + esc(l.nextStep.text) + (l.nextStep.due ? ', ' + esc(dueTxt(l.nextStep)) : '') + '</span>' : '') + (l.attempts ? '<small class="ins-note" style="margin:0;align-self:center">' + l.attempts + ' update' + (l.attempts === 1 ? '' : 's') + ' since the show</small>' : '') + '</div><div class="pl-dgrid"><div class="pl-dmain">' + summarySection(l) + recSection(l) +
       (isAdmin() ? '<div class="pl-upd"><h3 class="pl-h" style="margin-top:0">Notes</h3><p class="ins-note" style="margin:-4px 0 8px">Each note goes on this lead\'s trail with the date, time and your name.</p><textarea id="pl-u-note" rows="3" placeholder="Type a note… e.g. Called twice, no answer. Sent a WhatsApp."></textarea>' +
         '<div class="pl-upd-row ' + (l.status === 'shown' ? 'pl-upd-5' : 'pl-upd-3') + '">' + (l.status === 'shown' ? '<label>Hot, warm or cold<select id="pl-u-temp">' + Object.keys(TEMP).map(function (k) { return '<option value="' + k + '"' + (l.temp === k ? ' selected' : '') + ' title="' + esc(TEMP[k][1]) + '">' + TEMP[k][0] + '</option>'; }).join('') + (l.temp ? '' : '<option value="" selected>Not set</option>') + '</select></label>' : '') + (l.status === 'shown' ? '<label>Where it stands<select id="pl-u-hot"><option value="">—</option>' + Object.keys(HOT).map(function (k) { return '<option value="' + k + '"' + (l.hot === k ? ' selected' : '') + '>' + esc(HOT[k][0]) + '</option>'; }).join('') + '</select></label>' : '') + '<label>Next follow-up<input type="text" id="pl-u-next" value="' + esc(nx.text || '') + '" placeholder="Call again"></label><label>On<input type="date" id="pl-u-due" value="' + esc(nx.due || '') + '"></label><label>Your name<input type="text" id="pl-u-by" value="' + esc(myName()) + '" placeholder="Amr"></label></div>' +
@@ -583,6 +600,29 @@
     [].forEach.call(d.querySelectorAll('[data-del]'), function (b) {
       b.onclick = function () { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Click again to delete'; return; } b.disabled = true; api('POST', { action: 'note-delete', key: l.key, also: l.aliases || [], id: b.getAttribute('data-del') }).then(reopen).catch(fail); };
     });
+    if (q('pl-m-open')) {
+      q('pl-m-open').onclick = function () { q('pl-m-box').hidden = false; q('pl-m-open').hidden = true; (q('pl-m-to').value ? q('pl-m-body') : q('pl-m-to')).focus(); };
+      q('pl-m-cancel').onclick = function () { q('pl-m-box').hidden = true; q('pl-m-open').hidden = false; };
+      var mailto = function () { q('pl-m-app').href = 'mailto:' + encodeURIComponent(q('pl-m-to').value.trim()) + '?subject=' + encodeURIComponent(q('pl-m-subj').value) + '&body=' + encodeURIComponent(q('pl-m-body').value) + (q('pl-m-cc').value.trim() ? '&cc=' + encodeURIComponent(q('pl-m-cc').value.trim()) : ''); };
+      ['pl-m-to', 'pl-m-subj', 'pl-m-body', 'pl-m-cc'].forEach(function (id) { q(id).oninput = mailto; }); mailto();
+      q('pl-m-send').onclick = function () {
+        var b = this; b.disabled = true; q('pl-m-msg').textContent = 'Sending…';
+        var from = q('pl-m-from').value.trim(); if (from) setMyName(from);
+        api('POST', { action: 'email-send', key: l.key, also: l.aliases || [], to: q('pl-m-to').value.trim(), toName: l.name || '', cc: q('pl-m-cc').value, replyTo: q('pl-m-reply').value, fromName: from, subject: q('pl-m-subj').value, body: q('pl-m-body').value, by: from || 'Admin' })
+          .then(function () { q('pl-m-msg').textContent = 'Sent.'; return reopen(); }).catch(function (e) { q('pl-m-msg').textContent = e.message; b.disabled = false; });
+      };
+    }
+    if (q('pl-e-open')) {
+      q('pl-e-open').onclick = function () { q('pl-e-box').hidden = false; q('pl-e-open').hidden = true; q('pl-e-name').focus(); };
+      q('pl-e-cancel').onclick = function () { q('pl-e-box').hidden = true; q('pl-e-open').hidden = false; };
+      q('pl-e-save').onclick = function () {
+        var b = this, name = q('pl-e-name').value.trim();
+        if (!name) { q('pl-e-msg').textContent = 'Enter a name.'; q('pl-e-name').focus(); return; }
+        b.disabled = true; q('pl-e-msg').textContent = 'Saving…';
+        api('POST', { action: 'update', key: l.key, also: l.aliases || [], by: myName() || 'Admin', contact: (function () { var c = {}, ph = q('pl-e-phone').value.trim(), co = q('pl-e-co').value.trim(), em = q('pl-e-email').value.trim(); if (em !== (l.email || '')) c.email = em; if (name !== (l.name || '')) c.name = name; if (ph !== (l.phone || '')) c.phone = ph; if (co !== (l.company || '')) c.company = co; return c; })() })
+          .then(reopen).catch(function (e) { q('pl-e-msg').textContent = e.message; b.disabled = false; });
+      };
+    }
     if (q('pl-d-save')) q('pl-d-save').onclick = function () {
       var b = this; b.disabled = true; q('pl-d-msg').textContent = 'Saving…';
       api('POST', { action: 'lead', key: l.key, also: l.aliases || [], type: q('pl-d-type').value }).then(reopen).catch(function (e) { q('pl-d-msg').textContent = e.message; b.disabled = false; });
