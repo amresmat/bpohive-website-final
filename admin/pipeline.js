@@ -77,7 +77,8 @@
     var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
     var sub = isAdmin() ? 'Booked, then a show or a no-show. Shows stay in Showed while you follow up, until they are won, not replying or unqualified.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['booked', 'Booked', needs ? needs + ' to mark' : (DATA.meetings.filter(function (m) { return m.outcome === 'upcoming'; }).length || '')], ['shown', 'Showed', cnt('shown') || ''], ['noshow', 'No-shows', cnt('no_show') || ''], ['won', 'Won', cnt('won') || ''], ['noreply', 'Not replying', DATA.leads.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length || ''], ['unqualified', 'Unqualified', DATA.leads.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length || ''], ['leads', 'All leads', DATA.leads.length]];
+    var sc = stageCounts(DATA.leads);
+    var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['booked', 'Booked', sc.booked || ''], ['shown', 'Showed', sc.shown || ''], ['noshow', 'No-shows', sc.no_show || ''], ['noreply', 'Not replying', sc.no_reply || ''], ['unqualified', 'Unqualified', sc.unqualified || ''], ['won', 'Won', sc.won || ''], ['leads', 'All leads', DATA.leads.length]];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
       (isAdmin() ? setup() : '') +
@@ -183,26 +184,31 @@
     return '<div class="card pl-funnel"><h3>Booked, show, closed <small>people booked during this period, counted once each</small></h3><div class="pl-funs">' +
       col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
   }
+  function rangeLabel() {
+    if (F.range === 'custom') return (F.from ? day(F.from + 'T12:00:00') : 'Start') + ' to ' + (F.to ? day(F.to + 'T12:00:00') : 'today');
+    return F.range ? 'Last ' + F.range + ' days' : 'All time';
+  }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
     var sub = function (k, n, label) { return n ? '<a href="#pipeline/view/' + k + '">' + n + ' ' + label + '</a>' : '0 ' + label; };
+    var now = DATA.leads.filter(matchesLead), sc = stageCounts(now);
+    var stageTiles = STAGES.map(function (s) { return [s[1], sc[s[0]], s[0] === 'booked' && needs ? needs + ' date passed, mark them' : s[0] === 'shown' ? now.filter(function (l) { return l.status === 'shown' && l.temp === 'hot'; }).length + ' hot' : '', '#pipeline/' + ({ booked: 'booked', shown: 'shown', no_show: 'noshow', no_reply: 'noreply', unqualified: 'unqualified', won: 'won' })[s[0]], s[2]]; });
     var tiles = [
-      ['Booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ', ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
-      ['Shows', showed, esc('of ' + S.held.length + ' held'), '#pipeline/view/showed'],
-      ['No-shows', noshow, '', '#pipeline/view/noshow'],
-      ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'of marked meetings', '#pipeline/view/rate'],
-      ['Date passed', needs, needs ? 'mark show or no-show' : 'all caught up', '#pipeline/booked'],
-      ['Hot leads', S.hot.length, 'in Showed now', '#pipeline/shown'],
-      ['Not replying', S.noreply.length, 'all time', '#pipeline/noreply'],
-      ['Unqualified', S.unq.length, 'all time', '#pipeline/unqualified'],
-      ['Won', S.won.length, 'all time', '#pipeline/leads']
+      ['Meetings booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ', ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
+      ['Meetings held', S.held.length, 'date passed and marked', '#pipeline/view/showed'],
+      ['Shows', showed, 'meetings that happened', '#pipeline/view/showed'],
+      ['No-shows', noshow, 'meetings missed', '#pipeline/view/noshow'],
+      ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'shows out of held', '#pipeline/view/rate']
     ];
     var upcoming = S.ms.filter(function (m) { return m.outcome === 'upcoming' && t(m.start) < Date.now() + 7 * 864e5; }).sort(function (a, b) { return t(a.start) - t(b.start); });
     var weeks = 12;
     var lc = weekly(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; }, weeks);
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
-      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile' + (x[0] === 'Hot leads' ? ' pl-tile-hot' : '') + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
+      '<h3 class="pl-dh">Where every lead is now <small>each lead counted once, in its stage</small></h3>' +
+      '<div class="ins-tiles pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
+      '<h3 class="pl-dh">' + esc(rangeLabel()) + ' <small>meetings, by their date</small></h3>' +
+      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
       funnel() +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
       bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
@@ -254,17 +260,25 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
-  function addLeadDialog() {
-    var d = dlg();
-    d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>Add a lead</h2><p class="ins-note" style="margin:4px 0 14px">For someone you met outside Calendly and the Lead Entry sheets. They go straight to Showed.</p>' +
+  function addLeadDialog(stage) {
+    var d = dlg(), st = STAGES.some(function (s) { return s[0] === stage; }) ? stage : 'shown';
+    d.innerHTML = '<div class="dl"><button class="x" type="button" aria-label="Close">×</button><h2>Add a lead</h2><p class="ins-note" style="margin:4px 0 14px">For someone who is not in Calendly or the Lead Entry sheets yet. Pick the stage they are at.</p>' +
+      '<div class="pl-a-stages" role="radiogroup" aria-label="Stage">' + STAGES.map(function (s) { return '<label style="--c:' + s[2] + '"><input type="radio" name="pl-a-stage" value="' + s[0] + '"' + (s[0] === st ? ' checked' : '') + '><span>' + s[1] + '</span></label>'; }).join('') + '</div>' +
+      '<div class="pl-a-when" id="pl-a-when"><label>Meeting date<input type="date" id="pl-a-date"></label><label>Time<input type="time" id="pl-a-time" value="10:00"></label></div>' +
       '<div class="pl-upd-row pl-add-f"><label>Name<input type="text" id="pl-a-name"></label><label>Company<input type="text" id="pl-a-co"></label><label>Country<input type="text" id="pl-a-country"></label><label>Phone<input type="text" id="pl-a-phone"></label><label>Email<input type="text" id="pl-a-email"></label><label>Source<select id="pl-a-type"><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></label></div>' +
       '<label class="pl-a-note">What they need / first update<textarea id="pl-a-note" rows="3"></textarea></label>' +
-      '<div class="pl-upd-act"><button class="btn pri" id="pl-a-save" type="button">Add to Showed</button><span id="pl-a-msg" class="ins-note" style="margin:0"></span></div></div>';
+      '<div class="pl-upd-act"><button class="btn pri" id="pl-a-save" type="button"></button><span id="pl-a-msg" class="ins-note" style="margin:0"></span></div></div>';
     d.querySelector('.x').onclick = function () { d.close(); };
     var q = function (id) { return d.querySelector('#' + id); };
+    var cur = function () { var r = d.querySelector('input[name=pl-a-stage]:checked'); return r ? r.value : 'shown'; };
+    var sync = function () { var s = cur(), lab = STAGES.filter(function (x) { return x[0] === s; })[0]; q('pl-a-when').style.display = s === 'booked' || s === 'no_show' ? '' : 'none'; q('pl-a-save').textContent = 'Add to ' + (lab ? lab[1] : 'Showed'); };
+    [].forEach.call(d.querySelectorAll('input[name=pl-a-stage]'), function (r) { r.onchange = sync; });
+    sync();
     q('pl-a-save').onclick = function () {
-      var b = this; b.disabled = true; q('pl-a-msg').textContent = 'Adding…';
-      api('POST', { action: 'lead-add', name: q('pl-a-name').value, company: q('pl-a-co').value, country: q('pl-a-country').value, phone: q('pl-a-phone').value, email: q('pl-a-email').value, type: q('pl-a-type').value, note: q('pl-a-note').value, by: myName() })
+      var b = this, s = cur(), dt = q('pl-a-date').value, tm = q('pl-a-time').value || '10:00';
+      if (s === 'booked' && !dt) { q('pl-a-msg').textContent = 'Pick the meeting date.'; q('pl-a-date').focus(); return; }
+      b.disabled = true; q('pl-a-msg').textContent = 'Adding…';
+      api('POST', { action: 'lead-add', stage: s, meetingAt: dt ? new Date(dt + 'T' + tm).toISOString() : '', name: q('pl-a-name').value, company: q('pl-a-co').value, country: q('pl-a-country').value, phone: q('pl-a-phone').value, email: q('pl-a-email').value, type: q('pl-a-type').value, note: q('pl-a-note').value, by: myName() })
         .then(function (r) { SEL = r.key; d.close(); return load(false); }).then(draw).catch(function (e) { q('pl-a-msg').textContent = e.message; b.disabled = false; });
     };
     if (!d.open) d.showModal();
@@ -284,7 +298,7 @@
       '<div class="pl-hcards">' + (rows.length ? rows.map(function (l) { return hcard(l, 'shown'); }).join('') : '<div class="card empty">' + (all.length ? 'Nobody matches.' : 'No hot leads yet. When a meeting happens, mark it Show under Booked and the lead lands here.') + '</div>') + '</div>';
   }
   function bindShown() {
-    var add = $('pl-add'); if (add) add.onclick = addLeadDialog;
+    var add = $('pl-add'); if (add) add.onclick = function () { addLeadDialog('shown'); };
     [].forEach.call(MAIN.querySelectorAll('[data-hf]'), function (b) { b.onclick = function () { HOTF = b.getAttribute('data-hf'); draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
     bindHcards(MAIN);
@@ -377,11 +391,16 @@
 
   /* ---------- Stages: every lead in one stage, side by side ---------- */
   var STAGES = [
-    ['booked', 'Booked', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or the date passed and needs marking'],
-    ['shown', 'Showed', 'var(--teal)', function (l) { return l.status === 'shown'; }, 'Had the meeting, follow up until won or dead'],
-    ['no_show', 'No-show', 'var(--red)', function (l) { return l.status === 'no_show'; }, 'Missed it, back to Booked when they rebook'],
+    ['booked', 'Booked', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or to mark'],
+    ['shown', 'Showed', 'var(--teal)', function (l) { return l.status === 'shown'; }, 'Had the meeting, following up'],
+    ['no_show', 'No-show', 'var(--red)', function (l) { return l.status === 'no_show'; }, 'Missed the meeting'],
+    ['no_reply', 'Not replying', '#7A6A55', function (l) { return deadBucket(l) === 'no_reply'; }, 'Stopped replying'],
+    ['unqualified', 'Unqualified', '#6B7780', function (l) { return deadBucket(l) === 'unqualified'; }, 'Not a fit'],
     ['won', 'Won', 'var(--green)', function (l) { return l.status === 'won'; }, 'Closed']
   ];
+  // Every lead is in exactly one stage (cancelled bookings and leads with no meeting yet are only under All leads).
+  function stageCounts(leads) { var o = {}; STAGES.forEach(function (s) { o[s[0]] = leads.filter(s[3]).length; }); return o; }
+  function hcardStage(k) { return k === 'no_reply' || k === 'unqualified' ? 'dead' : k; }
   function stageCard(l, st) {
     var line = '', last = lastNote(l), rs = recsOf(l), lm = l.lastMeeting;
     if (st === 'booked') line = l.status === 'to_mark' ? '<span class="pl-c-next late">Date passed, mark show or no-show</span>' : l.next ? '<span class="pl-c-next">Meeting ' + esc(when(l.next)) + '</span>' : '';
@@ -435,20 +454,21 @@
     var q = F.q.trim().toLowerCase();
     var leads = DATA.leads.filter(matchesLead).filter(function (l) { return !q || [l.name, l.company, l.email].join(' ').toLowerCase().indexOf(q) > -1; });
     var dead = leads.filter(function (l) { return l.status === 'dead'; });
-    var order = function (st) { return function (a, b) { return st === 'booked' ? (a.status === 'to_mark' ? 0 : 1) - (b.status === 'to_mark' ? 0 : 1) || t(a.next) - t(b.next) : st === 'shown' ? byTemp(a, b) : st === 'won' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); }; };
+    var order = function (st) { return function (a, b) { return st === 'booked' ? (a.status === 'to_mark' ? 0 : 1) - (b.status === 'to_mark' ? 0 : 1) || t(a.next) - t(b.next) : st === 'shown' ? byTemp(a, b) : st === 'won' || st === 'no_reply' || st === 'unqualified' ? (b.dealAt || 0) - (a.dealAt || 0) : t(b.lastMeeting && b.lastMeeting.start) - t(a.lastMeeting && a.lastMeeting.start); }; };
     if (!STAGES.some(function (s) { return s[0] === STG; })) STG = 'booked';
     var cur = STAGES.filter(function (s) { return s[0] === STG; })[0];
     var rows = leads.filter(cur[3]).sort(order(cur[0]));
-    return filters(false, false) +
+    return filters(false, false).replace(/<\/div>$/, (isAdmin() ? '<button type="button" id="pl-add" class="pl-add">+ Add a lead</button>' : '') + '</div>') +
       '<div class="pl-stagebar">' + STAGES.map(function (s, i) {
         var n = leads.filter(s[3]).length;
-        return '<button type="button" class="pl-stg' + (s[0] === STG ? ' on' : '') + '" data-stg="' + s[0] + '" style="--c:' + s[2] + '"><span class="pl-stg-n">' + n + '</span><span class="pl-stg-t"><b>' + (i + 1) + '. ' + s[1] + '</b><small>' + esc(s[4]) + '</small></span></button>';
+        return '<button type="button" class="pl-stg' + (s[0] === STG ? ' on' : '') + '" data-stg="' + s[0] + '" style="--c:' + s[2] + '"><span class="pl-stg-n">' + n + '</span><span class="pl-stg-t"><b>' + s[1] + '</b><small>' + esc(s[4]) + '</small></span></button>';
       }).join('') + '</div>' +
-      '<div class="pl-hcards" style="--c:' + cur[2] + '">' + (rows.length ? rows.map(function (l) { return hcard(l, cur[0]); }).join('') : '<div class="card empty">Nobody in ' + esc(cur[1]) + ' right now.</div>') + '</div>' +
-      (dead.length ? '<p class="ins-note" style="margin-top:14px">Out of the pipeline: <a href="#pipeline/noreply">' + dead.filter(function (l) { return deadBucket(l) === 'no_reply'; }).length + ' not replying</a>, <a href="#pipeline/unqualified">' + dead.filter(function (l) { return deadBucket(l) === 'unqualified'; }).length + ' unqualified</a>.</p>' : '');
+      '<div class="pl-hcards" style="--c:' + cur[2] + '">' + (rows.length ? rows.map(function (l) { return hcard(l, hcardStage(cur[0])); }).join('') : '<div class="card empty">Nobody in ' + esc(cur[1]) + ' right now.</div>') + '</div>' +
+      '';
   }
   function bindStages() {
     bindHcards(MAIN);
+    var add = $('pl-add'); if (add) add.onclick = function () { addLeadDialog(STG); };
     [].forEach.call(MAIN.querySelectorAll('[data-stg]'), function (b) { b.onclick = function () { STG = b.getAttribute('data-stg'); try { localStorage.setItem('bh_pl_stage', STG); } catch (e) {} draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
   }

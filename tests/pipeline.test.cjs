@@ -276,7 +276,7 @@ test('leads added by hand go to Shown; hot tags and an imported trail keep their
   const l = pl.build(base).leads.find(x => x.key === r0.key);
   assert.equal(l.status, 'shown'); assert.equal(l.hot, 'contract'); assert.equal(l.origin, 'Added by hand'); assert.equal(l.type, 'outbound'); assert.equal(l.country, 'Canada');
   assert.equal(l.trail[0].at, when, 'the imported line keeps its own date and sorts first');
-  assert.deepEqual(l.trail.map(x => x.kind), ['note', 'note', 'hot']);
+  assert.deepEqual(l.trail.map(x => x.kind), ['note', 'stage', 'note', 'hot']);
   await assert.rejects(pl.addManualLead({ name: '' }), /name/);
 });
 
@@ -386,4 +386,30 @@ test('a recorded call with no invitees is matched by time, or by the company in 
   assert.deepEqual(by['Moiz Baig'], [], 'only the team talked while waiting, so it is not his call');
   assert.deepEqual(by['David'], ['r3'], 'company in the title');
   assert.equal(r.leads.find(l => l.name === 'Tariq Damouk').recordings[0].summary.includes('15 meetings'), true);
+});
+
+test('a lead can be added by hand at any stage', async () => {
+  const day = 864e5;
+  const add = (stage, name, extra) => pl.addManualLead(Object.assign({ name, company: 'Co ' + name, stage }, extra || {}), 'Amr');
+  await add('booked', 'Bea Booked', { meetingAt: new Date(Date.now() + 2 * day).toISOString() });
+  await add('no_show', 'Nora Noshow', { meetingAt: new Date(Date.now() - day).toISOString() });
+  await add('no_reply', 'Rex Quiet');
+  await add('unqualified', 'Una Fit');
+  await add('won', 'Will Won');
+  await add('shown', 'Sue Showed');
+  await assert.rejects(add('booked', 'No Date'), /meeting date/);
+  const r = await pl.snapshot({ sync: false });
+  const st = n => { const l = r.leads.find(x => x.name === n); return l.status + (l.deadReason ? ':' + l.deadReason : ''); };
+  assert.equal(st('Bea Booked'), 'booked');
+  assert.equal(st('Nora Noshow'), 'no_show');
+  assert.equal(st('Rex Quiet'), 'dead:no_reply');
+  assert.equal(st('Una Fit'), 'dead:unqualified');
+  assert.equal(st('Will Won'), 'won');
+  assert.equal(st('Sue Showed'), 'shown');
+  // the hand-made meeting can be marked like any other
+  const m = r.meetings.find(x => x.invitee.name === 'Bea Booked');
+  assert.equal(m.kind, 'manual');
+  await pl.setOutcome(m.id, 'showed');
+  const r2 = await pl.snapshot({ sync: false });
+  assert.equal(r2.leads.find(x => x.name === 'Bea Booked').status, 'shown');
 });
