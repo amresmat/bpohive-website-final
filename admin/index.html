@@ -374,6 +374,27 @@ a.pl-stile{text-decoration:none;color:inherit;box-shadow:inset 0 3px 0 var(--c)}
 .pl-a-stages input:focus-visible+span{outline:2px solid var(--c);outline-offset:2px}
 .pl-a-when{display:grid;grid-template-columns:200px 140px;gap:10px;margin:0 0 12px}.pl-a-when label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:#344d5c}.pl-a-when input{height:38px;padding:0 10px;border:1px solid #d3e0e8;border-radius:6px;font:14px Inter,Arial,sans-serif}
 @media(max-width:860px){.pl-a-when{grid-template-columns:1fr 1fr}}
+/* Edit a lead's name, phone, company */
+.pl-dname{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-right:48px}
+.pl-edit-btn{border:0;background:none;padding:0;color:var(--blue);font:600 13px Inter,Arial,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.pl-dphone{margin-left:12px;color:#2f3d45;font-variant-numeric:tabular-nums;white-space:nowrap;display:inline-block}
+.pl-editbox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--soft)}
+.pl-editbox[hidden]{display:none}
+.pl-editbox label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:#344d5c}.pl-editbox input{height:38px;padding:0 10px;border:1px solid #d3e0e8;border-radius:6px;font:14px Inter,Arial,sans-serif;min-width:0}
+.pl-editbox-act{grid-column:1/-1;display:flex;gap:10px;align-items:center}
+@media(max-width:860px){.pl-editbox{grid-template-columns:1fr}}
+/* Send an email from a lead */
+.pl-dact{display:inline-flex;gap:14px;align-items:center;margin-left:auto}
+.btn.pl-mail-btn{height:34px;padding:0 14px;font-size:13.5px}
+.pl-dcontact{color:#5d7280}.pl-dcontact a{color:var(--blue)}
+.pl-mailbox{display:grid;gap:10px;margin:12px 0 4px;padding:14px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:4px;background:#fff}
+.pl-mailbox[hidden]{display:none}
+.pl-mailbox label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:#344d5c}.pl-mailbox label small{font-weight:400;color:var(--muted,#5b6770)}
+.pl-mailbox input,.pl-mailbox select{height:38px;padding:0 10px;border:1px solid #d3e0e8;border-radius:6px;font:14px Inter,Arial,sans-serif;min-width:0;background:#fff}
+.pl-mailbox textarea{padding:10px 12px;border:1px solid #d3e0e8;border-radius:6px;font:14.5px/1.5 Inter,Arial,sans-serif;resize:vertical}
+.pl-mail-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pl-m-app{font-size:13px;color:var(--blue)}
+@media(max-width:860px){.pl-mail-row{grid-template-columns:1fr}.pl-dact{margin-left:0;width:100%}.pl-editbox{grid-template-columns:1fr}}
 </style>
 
 </head>
