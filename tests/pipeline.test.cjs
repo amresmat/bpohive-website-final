@@ -53,6 +53,7 @@ global.fetch = async (url, opt = {}) => {
         calendar_invitees: [{ name: 'Stranger', email: 'x@unknown.com', is_external: true }], transcript: [{ speaker: { display_name: 'Amr' }, text: 'Hello?' }] }
     ] });
   }
+  if (url === 'https://api.brevo.com/v3/smtp/email') return json({ messageId: 'm1' });
   return { ok: false, status: 404, text: async () => '{}' };
 };
 const pl = require('../lib/pipeline.cjs');
@@ -412,4 +413,35 @@ test('a lead can be added by hand at any stage', async () => {
   await pl.setOutcome(m.id, 'showed');
   const r2 = await pl.snapshot({ sync: false });
   assert.equal(r2.leads.find(x => x.name === 'Bea Booked').status, 'shown');
+});
+
+test('the team can fix a lead\'s name, phone and company', async () => {
+  const day = 864e5, t0 = Date.now() - 3 * day;
+  const d = { since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, trails: {}, leadOv: {},
+    meetings: [{ id: 'X', name: 'Discovery Call', start: new Date(t0).toISOString(), end: new Date(t0 + 1800e3).toISOString(), status: 'active', created: new Date(t0 - day).toISOString(), invitees: [{ name: 'raji nwaser', email: 'raji@x.com', phone: '123', qa: [], utm: {} }], override: { outcome: 'showed' } }] };
+  await pl.updateLead('e:raji@x.com', { contact: { name: 'Raji Nwasir', phone: '+1 416 555 0199', company: 'Circle Marketing' } }, 'Amr');
+  d.leadOv = { 'e:raji@x.com': JSON.parse(H.get('pl:leadov').get('e:raji@x.com')) };
+  const l = pl.build(d).leads[0];
+  assert.equal(l.name, 'Raji Nwasir'); assert.equal(l.phone, '+1 416 555 0199'); assert.equal(l.company, 'Circle Marketing'); assert.equal(l.edited, true);
+  const tr = JSON.parse(H.get('pl:trail').get('e:raji@x.com')).filter(x => x.kind === 'edit').map(x => x.text);
+  assert.deepEqual(tr, ['Name changed to Raji Nwasir', 'Phone changed to +1 416 555 0199', 'Company changed to Circle Marketing']);
+  const r = await pl.updateLead('e:raji@x.com', { contact: { name: '' } }, 'Amr');
+  assert.equal(r.changed, 0, 'a name cannot be emptied');
+});
+
+test('a follow-up email can be sent to a lead and goes on the trail', async () => {
+  process.env.BREVO_API_KEY = 'bk';
+  await assert.rejects(pl.sendLeadEmail('e:ann@a.com', { to: '', subject: 'Hi', body: 'x', replyTo: 'amr@bpohive.com' }, 'Amr'), /email address/);
+  await assert.rejects(pl.sendLeadEmail('e:ann@a.com', { to: 'ann@a.com', subject: 'Hi', body: 'x', replyTo: 'me@gmail.com' }, 'Amr'), /replies/);
+  await pl.sendLeadEmail('e:ann@a.com', { to: 'ann@a.com', toName: 'Ann', subject: 'Following up', body: 'Hi Ann,\n\nGood speaking today.', replyTo: 'amr@bpohive.com', fromName: 'Amr' }, 'Amr');
+  const sent = calls.filter(c => c[1] === 'https://api.brevo.com/v3/smtp/email').pop()[2];
+  assert.equal(sent.to[0].email, 'ann@a.com'); assert.equal(sent.replyTo.email, 'amr@bpohive.com'); assert.equal(sent.subject, 'Following up');
+  assert.match(sent.htmlContent, /Good speaking today/);
+  const last = JSON.parse(H.get('pl:trail').get('e:ann@a.com')).pop();
+  assert.equal(last.kind, 'email'); assert.equal(last.subject, 'Following up');
+  // the email address can be edited
+  await pl.updateLead('e:ann@a.com', { contact: { email: 'ann.lee@a.com' } }, 'Amr');
+  assert.equal(JSON.parse(H.get('pl:leadov').get('e:ann@a.com')).email, 'ann.lee@a.com');
+  await assert.rejects(pl.updateLead('e:ann@a.com', { contact: { email: 'not an email' } }, 'Amr'), /email address/);
+  delete process.env.BREVO_API_KEY;
 });
