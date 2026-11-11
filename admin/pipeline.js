@@ -7,8 +7,20 @@
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var DATA = null, MAIN = null, SUB = '', VIEW = '', LOADING = null;
-  var F = { range: 30, from: '', to: '', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
+  var F = { range: 30, from: '', to: '', preset: '30', open: '', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
   function iso10(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  // Date range presets, like the analytics portal: a preset fills the From and To dates, editing a date makes it custom.
+  var PRESETS = [['7', '7 days'], ['30', '30 days'], ['90', '90 days'], ['month', 'This month'], ['lastmonth', 'Last month'], ['all', 'All time']];
+  function applyPreset(p) {
+    var now = new Date(), a = new Date(now), b = new Date(now);
+    F.preset = p;
+    if (p === 'all') { F.range = 0; F.from = ''; F.to = ''; return; }
+    if (p === 'month') a = new Date(now.getFullYear(), now.getMonth(), 1);
+    else if (p === 'lastmonth') { a = new Date(now.getFullYear(), now.getMonth() - 1, 1); b = new Date(now.getFullYear(), now.getMonth(), 0); }
+    else a.setDate(a.getDate() - (+p - 1));
+    F.range = 'custom'; F.from = iso10(a); F.to = iso10(b);
+  }
+  applyPreset('30');
   var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
   var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { contract: ['Waiting on contract', '#7a5af5'] };
@@ -73,16 +85,15 @@
 
   function head() {
     var s = DATA.status, c = s.calendly, sh = s.sheets;
-    var line = (s.since ? 'From ' + day(s.since + 'T12:00:00') + '. ' : '') + (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ', Website forms live' : '');
-    var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
+    var line = (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected');
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
-    var sub = isAdmin() ? 'Booked, then a show or a no-show. Shows stay in Showed while you follow up, until they are won, not replying or unqualified.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var sc = stageCounts(DATA.leads);
-    var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['booked', 'Booked', sc.booked || ''], ['shown', 'Showed', sc.shown || ''], ['noshow', 'No-shows', sc.no_show || ''], ['noreply', 'Not replying', sc.no_reply || ''], ['unqualified', 'Unqualified', sc.unqualified || ''], ['won', 'Won', sc.won || ''], ['leads', 'All leads', DATA.leads.length]];
-    if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
-    return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
+    // Stage pages (Showed, No-shows, Won...) open from the dashboard tiles, so they are not repeated as tabs.
+    var tabs = [['', 'Dashboard', ''], ['booked', 'Meetings', needs ? needs + ' to mark' : ''], ['leads', 'All leads', '']];
+    if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team', '']);
+    var onTab = function (k) { return SUB === k || (!k && ['', 'view', 'stages', 'shown', 'noshow', 'noreply', 'unqualified', 'won'].indexOf(SUB) > -1); };
+    return '<div class="ins-head pl-head"><h1>Pipeline</h1><button class="btn" id="pl-refresh" type="button" title="' + esc(line) + '">Refresh</button></div>' +
       (isAdmin() ? setup() : '') +
-      '<div class="tabs">' + tabs.map(function (x) { return '<a class="tab' + (SUB === x[0] || (SUB === 'view' && !x[0]) ? ' on' : '') + (x[0] === 'shown' ? ' pl-hot' : '') + '" href="#pipeline' + (x[0] ? '/' + x[0] : '') + '">' + x[1] + (x[2] !== '' ? '<b>' + esc(x[2]) + '</b>' : '') + '</a>'; }).join('') + '</div>';
+      '<div class="tabs">' + tabs.map(function (x) { return '<a class="tab' + (onTab(x[0]) ? ' on' : '') + '" href="#pipeline' + (x[0] ? '/' + x[0] : '') + '">' + x[1] + (x[2] !== '' ? '<b>' + esc(x[2]) + '</b>' : '') + '</a>'; }).join('') + '</div>';
   }
   function setup() {
     var s = DATA.status, bits = [];
@@ -98,17 +109,23 @@
   function filters(withRange, withStage) {
     var camps = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.campaigns || []; })));
     var callers = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.callers || []; })));
-    return '<div class="bar">' +
-      (withRange ? '<select id="pl-range">' + [[7, 'Last 7 days'], [30, 'Last 30 days'], [90, 'Last 90 days'], [0, 'All time'], ['custom', 'Custom dates']].map(function (r) { return '<option value="' + r[0] + '"' + (F.range === r[0] ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select>' + (F.range === 'custom' ? '<label class="pl-dates">From <input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label><label class="pl-dates">to <input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label>' : '') : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
+    return (withRange ? dateBar() : '') + '<div class="bar">' +
+      (withRange ? '' : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
       '<select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
       '<select id="pl-campaign">' + opts(camps, F.campaign, 'All campaigns') + '</select>' +
       (isAdmin() ? '<select id="pl-caller">' + opts(callers, F.caller, 'All callers') + '</select>' : '') +
       (withStage ? '<select id="pl-stage">' + '<option value="">Every status</option>' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (F.stage === k ? ' selected' : '') + '>' + STATUS[k][0] + '</option>'; }).join('') + '</select>' : '') +
       '</div>';
   }
+  function dateBar() {
+    return '<div class="pl-datebar" role="group" aria-label="Date range"><div class="pl-presets">' + PRESETS.map(function (p) { return '<button type="button" data-p="' + p[0] + '" aria-pressed="' + (F.preset === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div>' +
+      '<label class="pl-dates"><span>From</span><input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label>' +
+      '<label class="pl-dates"><span>To</span><input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label></div>';
+  }
   function bindFilters() {
-    [['pl-range', 'range', true], ['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = x[2] && el.value !== 'custom' ? +el.value : el.value; if (F.range === 'custom' && !F.from && !F.to) { var d = new Date(); F.to = iso10(d); d.setDate(d.getDate() - 29); F.from = iso10(d); } draw(); }; });
-    ['from', 'to'].forEach(function (k) { var el = $('pl-' + k); if (el) el.onchange = function () { F[k] = el.value; draw(); }; });
+    [].forEach.call(document.querySelectorAll('.pl-presets button'), function (b) { b.onclick = function () { applyPreset(b.getAttribute('data-p')); draw(); }; });
+    [['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = el.value; draw(); }; });
+    ['from', 'to'].forEach(function (k) { var el = $('pl-' + k); if (el) el.onchange = function () { F[k] = el.value; F.range = 'custom'; F.preset = ''; draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; drawLeadsTable(); };
     var rf = $('pl-refresh'); if (rf) rf.onclick = function () { rf.disabled = true; rf.textContent = 'Syncing…'; (isAdmin() ? api('POST', { action: 'sync' }).catch(function () {}) : Promise.resolve()).then(function () { return load(isAdmin() ? false : true); }).then(draw).catch(fail); };
   }
@@ -181,8 +198,25 @@
         return '<div class="pl-fun-step"><div class="pl-fun-top"><span>' + x[0] + '</span><b>' + x[1] + '</b></div><div class="pl-fun-bar"><i style="width:' + (b ? Math.max(x[1] / b * 100, x[1] ? 3 : 0) : 0).toFixed(1) + '%"></i></div><small>' + (x[2] || '&nbsp;') + '</small></div>';
       }).join('') + '<p class="pl-fun-end">' + (b ? pct(cl, b) + '% of bookings closed' : 'Nothing booked yet') + '</p></div>';
     };
-    return '<div class="card pl-funnel"><h3>Booked, show, closed <small>people booked during this period, counted once each</small></h3><div class="pl-funs">' +
+    return '<div class="card pl-funnel"><h3>Booked, show, closed</h3><div class="pl-funs">' +
       col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
+  }
+  // A lead belongs to the chosen dates when it came in, or had a meeting booked or held, inside them.
+  function leadInRange(l) {
+    if (!F.range) return true;
+    if (inRange(l.firstAt)) return true;
+    return (l.meetings || []).some(function (id) { var m = DATA.meetings.find(function (x) { return x.id === id; }); return m && (inRange(m.created) || inRange(m.start)); });
+  }
+  var STAGE_ROUTE = { booked: 'booked', shown: 'shown', no_show: 'noshow', no_reply: 'noreply', unqualified: 'unqualified', won: 'won' };
+  function stagePanel(k, leads) {
+    var st = STAGES.filter(function (s) { return s[0] === k; })[0], rows = leads.filter(st[3]).sort(function (a, b) { return (b.lastActivity || 0) - (a.lastActivity || 0); });
+    return '<div class="card pl-sopen" id="pl-sopen" style="--c:' + st[2] + '"><div class="pl-sopen-h"><h3>' + esc(st[1]) + ' <span>' + rows.length + '</span></h3><a href="#pipeline/' + STAGE_ROUTE[k] + '">Open full view</a><button type="button" class="pl-sclose" aria-label="Close">Close</button></div>' +
+      (rows.length ? '<div class="tablewrap pl-table">' + leadTable(rows.slice(0, 200)) + '</div>' : '<div class="empty">No leads in this stage for these dates.</div>') + '</div>';
+  }
+  function bindStageTiles() {
+    [].forEach.call(MAIN.querySelectorAll('.pl-stile2'), function (b) { b.onclick = function () { var k = b.getAttribute('data-st'); F.open = F.open === k ? '' : k; draw(); var p = $('pl-sopen'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }; });
+    var c = MAIN.querySelector('.pl-sclose'); if (c) c.onclick = function () { F.open = ''; draw(); };
+    var p = $('pl-sopen'); if (p) bindLeadRows(p);
   }
   function rangeLabel() {
     if (F.range === 'custom') return (F.from ? day(F.from + 'T12:00:00') : 'Start') + ' to ' + (F.to ? day(F.to + 'T12:00:00') : 'today');
@@ -191,24 +225,15 @@
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
     var sub = function (k, n, label) { return n ? '<a href="#pipeline/view/' + k + '">' + n + ' ' + label + '</a>' : '0 ' + label; };
-    var now = DATA.leads.filter(matchesLead), sc = stageCounts(now);
-    var stageTiles = STAGES.map(function (s) { return [s[1], sc[s[0]], s[0] === 'booked' && needs ? needs + ' date passed, mark them' : s[0] === 'shown' ? now.filter(function (l) { return l.status === 'shown' && l.temp === 'hot'; }).length + ' hot' : '', '#pipeline/' + ({ booked: 'booked', shown: 'shown', no_show: 'noshow', no_reply: 'noreply', unqualified: 'unqualified', won: 'won' })[s[0]], s[2]]; });
-    var tiles = [
-      ['Meetings booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ', ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
-      ['Meetings held', S.held.length, 'date passed and marked', '#pipeline/view/showed'],
-      ['Shows', showed, 'meetings that happened', '#pipeline/view/showed'],
-      ['No-shows', noshow, 'meetings missed', '#pipeline/view/noshow'],
-      ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'shows out of held', '#pipeline/view/rate']
-    ];
+    var now = DATA.leads.filter(matchesLead).filter(leadInRange), sc = stageCounts(now);
+    if (F.open && !STAGES.some(function (s) { return s[0] === F.open; })) F.open = '';
     var upcoming = S.ms.filter(function (m) { return m.outcome === 'upcoming' && t(m.start) < Date.now() + 7 * 864e5; }).sort(function (a, b) { return t(a.start) - t(b.start); });
     var weeks = 12;
     var lc = weekly(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; }, weeks);
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
-      '<h3 class="pl-dh">Where every lead is now <small>each lead counted once, in its stage</small></h3>' +
-      '<div class="ins-tiles pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
-      '<h3 class="pl-dh">' + esc(rangeLabel()) + ' <small>meetings, by their date</small></h3>' +
-      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
+      '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<button type="button" class="pl-stile2' + (on ? ' on' : '') + '" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen" style="--c:' + s[2] + '"><span>' + esc(s[1]) + '</span><b>' + sc[s[0]] + '</b></button>'; }).join('') + '</div>' +
+      (F.open ? stagePanel(F.open, now) : '') +
       funnel() +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
       bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
@@ -743,6 +768,7 @@
     if (SUB === 'shown') bindShown();
     if (SUB === 'stages') bindStages();
     if ((SUB === 'noshow' || SUB === 'won' || SUB === 'noreply' || SUB === 'unqualified') && $('pl-leads')) { bindHcards($('pl-leads')); var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; var pos = q.selectionStart; draw(); var n = $('pl-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }; }
+    if (!SUB) bindStageTiles();
     if (SUB === 'sources') bindSources();
     if (SUB === 'team') bindTeam(); else LAST_INVITE = null;
     bindMeetings(MAIN);
