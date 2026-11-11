@@ -235,7 +235,7 @@
   }
 
   window.BH_INSIGHT = {
-    nav: function () { return '<a href="#insight">Overview</a><a href="#insight/pages">Pages</a><a href="#insight/sessions">Recordings</a><a href="#insight/forms">Forms</a>'; },
+    nav: function () { return '<h4>Analytics</h4><a href="#insight">Overview</a><a href="#insight/pages">Pages</a><a href="#insight/sessions">Recordings</a><a href="#insight/forms">Forms</a>'; },
     route: function (parts, el) {
       main = el;
       if (player) { try { player.pause(); } catch (e) {} player = null; }
