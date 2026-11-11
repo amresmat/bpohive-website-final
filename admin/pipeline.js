@@ -270,8 +270,10 @@
       '<div class="pl-mail-row"><label>Your name<input type="text" id="pl-m-from" value="' + esc(me) + '" placeholder="Amr"></label><label>Replies go to<select id="pl-m-reply">' + TEAM_MAILS.map(function (e) { return '<option' + (e === mine ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label></div>' +
       '<label>Subject<input type="text" id="pl-m-subj" value="' + esc('Following up' + (l.company ? ', ' + l.company : '')) + '"></label>' +
       '<label>Message<textarea id="pl-m-body" rows="8">' + esc(body) + '</textarea></label>' +
+      '<div class="pl-m-files"><label class="pl-m-attach"><input type="file" id="pl-m-file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.png,.jpg,.jpeg,.gif,.zip,.rtf,.odt,.ods,.odp"><span>Attach files</span></label><ul id="pl-m-list"></ul><small>PDF, Word, Excel, PowerPoint, images or ZIP, up to 3 MB in total</small></div>' +
+      '<label class="pl-m-copy"><input type="checkbox" id="pl-m-copy" checked> Send a copy to my inbox (the address replies go to)</label>' +
       '<div class="pl-editbox-act"><button type="button" class="btn pri" id="pl-m-send">Send email</button><button type="button" class="btn" id="pl-m-cancel">Cancel</button><a id="pl-m-app" class="pl-m-app" href="#">Open in my email app instead</a><span class="ins-note" id="pl-m-msg" style="margin:0"></span></div>' +
-      '<p class="ins-note" style="margin:8px 0 0">Sent from success@bpohive.com with your name; their reply comes to the address you pick. A copy goes on the trail.</p></div>';
+      '<p class="ins-note" style="margin:8px 0 0">Sent from success@bpohive.com with your name. Their reply and your copy go to the address you pick, and it is saved on the trail.</p></div>';
   }
   function addLeadDialog(stage) {
     var d = dlg(), st = STAGES.some(function (s) { return s[0] === stage; }) ? stage : 'shown';
@@ -536,7 +538,7 @@
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
       else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ', ' + day(x.due + 'T12:00:00') : ''), by: x.by });
-      else if (x.kind === 'email') ev.push({ at: x.at, k: 'note', t: 'Email sent to ' + (x.to || '') + ': ' + (x.subject || ''), body: x.text, by: x.by, c: '#2A6A9E' });
+      else if (x.kind === 'email') ev.push({ at: x.at, k: 'note', t: 'Email sent to ' + (x.to || '') + ': ' + (x.subject || ''), body: (x.text || '') + ((x.files || []).length ? '\n\nAttached: ' + x.files.join(', ') : ''), by: x.by, c: '#2A6A9E' });
       else if (x.kind === 'edit') ev.push({ at: x.at, k: 'stage', t: x.text, by: x.by, c: '#8a9aa6' });
       else if (x.kind === 'temp') ev.push({ at: x.at, k: 'stage', t: TEMP[x.temp] ? 'Marked ' + TEMP[x.temp][0] + ' (' + TEMP[x.temp][1].toLowerCase() + ')' : 'Hot, warm or cold cleared', by: x.by, c: x.temp === 'hot' ? '#A3392D' : x.temp === 'warm' ? '#C28A0A' : x.temp === 'cold' ? '#2A6A9E' : '#8a9aa6' });
       else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? 'Marked ' + (HOT[x.hot] || OLD_HOT[x.hot])[0] : 'Tag removed', by: x.by, c: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? (HOT[x.hot] || OLD_HOT[x.hot])[1] : '#8a9aa6' });
@@ -605,11 +607,23 @@
       q('pl-m-cancel').onclick = function () { q('pl-m-box').hidden = true; q('pl-m-open').hidden = false; };
       var mailto = function () { q('pl-m-app').href = 'mailto:' + encodeURIComponent(q('pl-m-to').value.trim()) + '?subject=' + encodeURIComponent(q('pl-m-subj').value) + '&body=' + encodeURIComponent(q('pl-m-body').value) + (q('pl-m-cc').value.trim() ? '&cc=' + encodeURIComponent(q('pl-m-cc').value.trim()) : ''); };
       ['pl-m-to', 'pl-m-subj', 'pl-m-body', 'pl-m-cc'].forEach(function (id) { q(id).oninput = mailto; }); mailto();
+      var files = [];
+      var kb = function (n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+      var drawFiles = function () {
+        var total = files.reduce(function (n, f) { return n + f.size; }, 0);
+        q('pl-m-list').innerHTML = files.map(function (f, i) { return '<li>' + esc(f.name) + ' <small>' + kb(f.size) + '</small> <button type="button" data-rm="' + i + '" aria-label="Remove ' + esc(f.name) + '">Remove</button></li>'; }).join('') + (total > 3 * 1048576 ? '<li class="late">Too big: ' + kb(total) + ' in total, 3 MB at most</li>' : '');
+        [].forEach.call(q('pl-m-list').querySelectorAll('[data-rm]'), function (x) { x.onclick = function () { files.splice(+x.getAttribute('data-rm'), 1); drawFiles(); }; });
+      };
+      q('pl-m-file').onchange = function () { [].forEach.call(this.files, function (f) { if (files.length < 5) files.push(f); }); this.value = ''; drawFiles(); };
+      var read = function (f) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok({ name: f.name, content: String(r.result).replace(/^data:[^,]*,/, '') }); }; r.onerror = function () { no(new Error('Could not read ' + f.name)); }; r.readAsDataURL(f); }); };
       q('pl-m-send').onclick = function () {
-        var b = this; b.disabled = true; q('pl-m-msg').textContent = 'Sending…';
+        var b = this;
+        if (files.reduce(function (n, f) { return n + f.size; }, 0) > 3 * 1048576) { q('pl-m-msg').textContent = 'Attachments are too big (3 MB in total at most).'; return; }
+        b.disabled = true; q('pl-m-msg').textContent = files.length ? 'Uploading and sending…' : 'Sending…';
         var from = q('pl-m-from').value.trim(); if (from) setMyName(from);
-        api('POST', { action: 'email-send', key: l.key, also: l.aliases || [], to: q('pl-m-to').value.trim(), toName: l.name || '', cc: q('pl-m-cc').value, replyTo: q('pl-m-reply').value, fromName: from, subject: q('pl-m-subj').value, body: q('pl-m-body').value, by: from || 'Admin' })
-          .then(function () { q('pl-m-msg').textContent = 'Sent.'; return reopen(); }).catch(function (e) { q('pl-m-msg').textContent = e.message; b.disabled = false; });
+        Promise.all(files.map(read)).then(function (att) {
+          return api('POST', { action: 'email-send', key: l.key, also: l.aliases || [], to: q('pl-m-to').value.trim(), toName: l.name || '', cc: q('pl-m-cc').value, replyTo: q('pl-m-reply').value, copy: q('pl-m-copy').checked, fromName: from, subject: q('pl-m-subj').value, body: q('pl-m-body').value, attachments: att, by: from || 'Admin' });
+        }).then(function () { q('pl-m-msg').textContent = 'Sent.'; return reopen(); }).catch(function (e) { q('pl-m-msg').textContent = e.message; b.disabled = false; });
       };
     }
     if (q('pl-e-open')) {

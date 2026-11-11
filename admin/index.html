@@ -381,7 +381,7 @@ a.pl-stile{text-decoration:none;color:inherit;box-shadow:inset 0 3px 0 var(--c)}
 .pl-editbox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--soft)}
 .pl-editbox[hidden]{display:none}
 .pl-editbox label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:#344d5c}.pl-editbox input{height:38px;padding:0 10px;border:1px solid #d3e0e8;border-radius:6px;font:14px Inter,Arial,sans-serif;min-width:0}
-.pl-editbox-act{grid-column:1/-1;display:flex;gap:10px;align-items:center}
+.pl-editbox-act{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pl-editbox-act .btn{white-space:nowrap}
 @media(max-width:860px){.pl-editbox{grid-template-columns:1fr}}
 /* Send an email from a lead */
 .pl-dact{display:inline-flex;gap:14px;align-items:center;margin-left:auto}
@@ -395,6 +395,15 @@ a.pl-stile{text-decoration:none;color:inherit;box-shadow:inset 0 3px 0 var(--c)}
 .pl-mail-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pl-m-app{font-size:13px;color:var(--blue)}
 @media(max-width:860px){.pl-mail-row{grid-template-columns:1fr}.pl-dact{margin-left:0;width:100%}.pl-editbox{grid-template-columns:1fr}}
+/* Email attachments and copy */
+.pl-m-files{display:grid;gap:6px}.pl-m-files small{color:var(--muted,#5b6770);font-size:12px}
+.pl-m-attach{position:relative;display:inline-flex!important;width:max-content;cursor:pointer}
+.pl-m-attach input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.pl-m-attach span{display:inline-flex;align-items:center;height:34px;padding:0 14px;border:1px dashed #9fb2bf;border-radius:4px;background:var(--soft);font:600 13.5px Inter,Arial,sans-serif;color:var(--teal-d)}
+.pl-m-attach:focus-within span{outline:2px solid var(--teal);outline-offset:2px}
+#pl-m-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}#pl-m-list li{font-size:13.5px;color:#2f3d45}#pl-m-list li small{color:var(--muted,#5b6770)}#pl-m-list li.late{color:var(--red);font-weight:600}
+#pl-m-list button{border:0;background:none;color:var(--muted,#5b6770);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0 0 0 6px}
+.pl-mailbox label.pl-m-copy{display:flex;gap:8px;align-items:center;font-weight:600;font-size:13.5px}.pl-m-copy input{width:16px;height:16px}
 </style>
 
 </head>
