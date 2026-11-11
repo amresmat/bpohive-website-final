@@ -437,7 +437,14 @@ test('a follow-up email can be sent to a lead and goes on the trail', async () =
   const sent = calls.filter(c => c[1] === 'https://api.brevo.com/v3/smtp/email').pop()[2];
   assert.equal(sent.to[0].email, 'ann@a.com'); assert.equal(sent.replyTo.email, 'amr@bpohive.com'); assert.equal(sent.subject, 'Following up');
   assert.match(sent.htmlContent, /Good speaking today/);
-  const last = JSON.parse(H.get('pl:trail').get('e:ann@a.com')).pop();
+  assert.deepEqual(sent.bcc, [{ email: 'amr@bpohive.com' }], 'a copy goes to the sender');
+  await pl.sendLeadEmail('e:ann@a.com', { to: 'ann@a.com', subject: 'Deck', body: 'Attached.', replyTo: 'amr@bpohive.com', attachments: [{ name: 'BPO Hive deck.pdf', content: Buffer.from('%PDF-1.4 test').toString('base64') }] }, 'Amr');
+  const sent2 = calls.filter(c => c[1] === 'https://api.brevo.com/v3/smtp/email').pop()[2];
+  assert.equal(sent2.attachment[0].name, 'BPO Hive deck.pdf');
+  assert.equal(JSON.parse(H.get('pl:trail').get('e:ann@a.com')).pop().files[0], 'BPO Hive deck.pdf');
+  await assert.rejects(pl.sendLeadEmail('e:ann@a.com', { to: 'ann@a.com', subject: 'x', body: 'x', replyTo: 'amr@bpohive.com', attachments: [{ name: 'run.exe', content: 'AAAA' }] }, 'Amr'), /file type/);
+  await assert.rejects(pl.sendLeadEmail('e:ann@a.com', { to: 'ann@a.com', subject: 'x', body: 'x', replyTo: 'amr@bpohive.com', attachments: [{ name: 'big.pdf', content: 'A'.repeat(4.5 * 1024 * 1024) }] }, 'Amr'), /too big/);
+  const last = JSON.parse(H.get('pl:trail').get('e:ann@a.com')).filter(x => x.kind === 'email')[0];
   assert.equal(last.kind, 'email'); assert.equal(last.subject, 'Following up');
   // the email address can be edited
   await pl.updateLead('e:ann@a.com', { contact: { email: 'ann.lee@a.com' } }, 'Amr');
