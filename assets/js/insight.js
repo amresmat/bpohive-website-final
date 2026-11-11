@@ -1,7 +1,8 @@
 // BPO Hive Insight: first-party visitor analytics for the admin "Analytics" section.
 // Records what visitors see and do (page views, scrolling, clicks, the lead pop-up) and sends
-// it to this website's own server. Nothing goes to a third party. Everything a visitor types
-// is masked before it leaves the browser; only "which field was touched" is kept.
+// it to this website's own server. Everything a visitor types is masked before it leaves the
+// browser; only "which field was touched" is kept. Once a day the browser asks ipapi.is which
+// company owns its internet address, so the admin can see which companies visit.
 (function () {
   'use strict';
   if (!window.fetch || !window.localStorage || /^\/admin/.test(location.pathname)) return;
@@ -86,6 +87,21 @@
     w: window.innerWidth, h: window.innerHeight, sw: screen.width, sh: screen.height, dpr: window.devicePixelRatio || 1,
     lang: navigator.language, tz: (Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '', utm: utm(), newSession: isNew, ua: navigator.userAgent.slice(0, 300)
   });
+
+  // --- Which company the visitor's internet address belongs to (cached for 12 hours) ---------
+  (function () {
+    var c = null; try { c = JSON.parse(store('bh_org') || 'null'); } catch (e) { c = null; }
+    function send(o) { if (store('bh_org_sid') === sid) return; store('bh_org_sid', sid); custom('org', { company: String(o.c || '').slice(0, 100), asn: String(o.a || '').slice(0, 120) }); }
+    if (c && Date.now() - (c.t || 0) < 12 * 3600000) return send(c);
+    if (store('bh_org_sid') === sid) return;
+    var ctl = window.AbortController ? new AbortController() : null; if (ctl) setTimeout(function () { ctl.abort(); }, 5000);
+    fetch('https://api.ipapi.is/', { credentials: 'omit', signal: ctl ? ctl.signal : undefined }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      var name = j.company && typeof j.company === 'object' ? j.company.name : j.company, asn = j.asn && typeof j.asn === 'object' ? 'AS' + j.asn.asn + ' ' + (j.asn.org || '') : j.asn;
+      if (!name) return;
+      var o = { t: Date.now(), c: name, a: asn || '' }; store('bh_org', JSON.stringify(o)); send(o);
+    }).catch(function () {});
+  })();
 
   // --- Scroll depth per page (max %) ----------------------------------------------------
   var maxScroll = 0;
