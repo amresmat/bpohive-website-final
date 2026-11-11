@@ -27,6 +27,9 @@
   function table(title, rows, cols) {
     return '<div class="card ins-table"><h3>' + esc(title) + '</h3>' + (rows.length ? '<table><thead><tr>' + cols.map(function (c) { return '<th' + (c.num ? ' class="num"' : '') + '>' + esc(c.h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td' + (c.num ? ' class="num"' : '') + '>' + c.f(r) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '<div class="empty">No data yet.</div>') + '</div>';
   }
+  function coName(s) { return s.company && !s.network ? s.company : ''; }
+  function coLine(s) { return s.company ? (s.network ? '<br><small style="color:#5d7280">via ' + esc(s.company) + '</small>' : '<br><b class="ins-co">' + esc(s.company) + '</b>') : ''; }
+  var PENDING_Q = '';
   function barCell(n, max) { return '<div class="ins-bar"><i style="width:' + pct(n, max) + '%"></i><span>' + n + '</span></div>'; }
 
   /* ---------- Overview ---------- */
@@ -75,6 +78,10 @@
     var maxPage = Math.max.apply(null, [1].concat(pageRows.map(function (p) { return p.n; }))), scroll = {}; o.scroll.forEach(function (s) { scroll[s.path] = s.pct; });
     var sources = count(rows, 'source'), countries = count(rows, 'country'), devices = count(rows, 'device'), browsers = count(rows, 'browser'), refs = count(rows, null, function (r) { return r.ref && !/bpohive\.com$/.test(r.ref) ? r.ref : ''; }), cities = count(rows, null, function (r) { return r.city ? r.city + ', ' + country(r.country) : ''; });
     var aiRows = sources.filter(function (x) { return AI[x.name]; }), aiTotal = aiRows.reduce(function (a, x) { return a + x.n; }, 0);
+    var cos = {}; rows.forEach(function (r) { var n = coName(r); if (!n) return; var c = cos[n] = cos[n] || { name: n, n: 0, pages: 0, last: 0, booked: 0, cities: {} }; c.n++; c.pages += r.pages; c.last = Math.max(c.last, r.start); if (r.booked) c.booked++; if (r.city) c.cities[r.city + ', ' + country(r.country)] = 1; });
+    var coRows = Object.keys(cos).map(function (k) { return cos[k]; }).sort(function (a, b) { return b.last - a.last; });
+    var known = rows.filter(function (r) { return r.company; }).length, nets = rows.filter(function (r) { return r.company && r.network; }).length;
+    body += '<div class="card ins-table ins-cos"><h3>Companies visiting (' + coRows.length + ')</h3>' + (coRows.length ? '<div class="ins-scroll"><table><thead><tr><th>Company</th><th>Where</th><th class="num">Visits</th><th class="num">Pages</th><th>Last visit</th><th></th></tr></thead><tbody>' + coRows.slice(0, 100).map(function (c) { return '<tr data-co="' + esc(c.name) + '"><td><b>' + esc(c.name) + '</b>' + (c.booked ? ' <span class="tag ok">Booked</span>' : '') + '</td><td>' + esc(Object.keys(c.cities).slice(0, 2).join('; ')) + '</td><td class="num">' + c.n + '</td><td class="num">' + c.pages + '</td><td>' + esc(ago(c.last)) + '</td><td><span class="tag play">▶ Watch</span></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="empty">' + (known ? 'No company networks yet. The visitors so far came from home or mobile internet.' : 'Companies appear here as new visitors arrive.') + '</div>') + '<p class="ins-note" style="margin:0;padding:10px 16px 14px">Matched from the visitor\'s internet address, the way ZoomInfo and Apollo do it. It works when someone browses from an office network. ' + (nets ? nets + ' of ' + known + ' looked-up visits came from home, mobile or cloud internet providers, so they are not listed.' : '') + '</p></div>';
     body += '<div class="ins-grid">';
     body += table('Where visitors come from', sources, [{ h: 'Source', f: function (r) { return esc(srcLabel(r.name)) + (AI[r.name] ? ' <span class="tag">AI</span>' : ''); } }, { h: 'Visitors', f: function (r) { return barCell(r.n, sources[0].n); } }, { h: 'Booked', num: true, f: function (r) { return rows.filter(function (x) { return x.source === r.name && x.booked; }).length || ''; } }]);
     body += table('Countries', countries, [{ h: 'Country', f: function (r) { return flag(r.name) + ' ' + esc(country(r.name)); } }, { h: 'Visitors', f: function (r) { return barCell(r.n, countries[0].n); } }, { h: 'Booked', num: true, f: function (r) { return rows.filter(function (x) { return x.country === r.name && x.booked; }).length || ''; } }]);
@@ -86,6 +93,7 @@
     body += '</div>';
     body += '<p class="ins-note">Recordings kept for ' + o.storage.keepDays + ' days. Storage used: ' + mb(o.storage.bytes) + ' of ' + mb(o.storage.budget) + ' (' + o.storage.sessions.toLocaleString() + ' sessions stored). Visitors with ad blockers may not be counted. An AI assistant shows up as the source when the visitor clicked a link inside ChatGPT, Claude, Perplexity, Gemini or Copilot.</p>';
     $('ins-body').innerHTML = body;
+    [].forEach.call(document.querySelectorAll('.ins-cos tr[data-co]'), function (tr) { tr.onclick = function () { PENDING_Q = tr.dataset.co; location.hash = '#insight/sessions'; }; });
   }
   function chart(daily) {
     var W = 900, H = 220, pad = 28, n = daily.length, max = Math.max(1, Math.max.apply(null, daily.map(function (d) { return Math.max(d.s, d.pv); })));
@@ -136,9 +144,10 @@
   /* ---------- Recordings list ---------- */
   function sessions() {
     main.innerHTML = head('Recordings', 'Watch how real visitors moved through the site. Everything typed is masked.', '<button class="btn" id="ins-refresh" type="button">Refresh</button>') + tabs('sessions') +
-      '<div class="bar"><input id="ins-q" type="search" placeholder="Search city, page, browser"><span id="ins-filters"></span><select id="ins-dev"><option value="">All devices</option><option>desktop</option><option>mobile</option><option>tablet</option></select><select id="ins-f"><option value="">All visitors</option><option value="popup">Opened the pop-up</option><option value="submit">Submitted</option><option value="booked">Booked</option><option value="long">Stayed over 1 minute</option></select></div>' +
+      '<div class="bar"><input id="ins-q" type="search" placeholder="Search company, city, page"><span id="ins-filters"></span><select id="ins-dev"><option value="">All devices</option><option>desktop</option><option>mobile</option><option>tablet</option></select><select id="ins-f"><option value="">All visitors</option><option value="popup">Opened the pop-up</option><option value="submit">Submitted</option><option value="booked">Booked</option><option value="long">Stayed over 1 minute</option><option value="company">From a company</option></select></div>' +
       '<div class="card tablewrap"><table><thead><tr><th>When</th><th>Visitor</th><th>Device</th><th>Landed on</th><th class="num">Pages</th><th class="num">Time</th><th>Source</th><th>Pop-up</th><th></th></tr></thead><tbody id="ins-rows"></tbody></table><div class="empty" id="ins-empty" hidden>No recordings yet.</div></div>';
     $('ins-refresh').onclick = function () { SESS.loaded = false; loadSessions(); };
+    if (PENDING_Q) { $('ins-q').value = PENDING_Q; PENDING_Q = ''; }
     $('ins-q').oninput = drawSessions; $('ins-dev').onchange = drawSessions; $('ins-f').onchange = drawSessions;
     loadSessions();
   }
@@ -152,14 +161,14 @@
     var q = ($('ins-q').value || '').toLowerCase(), dev = $('ins-dev').value, f = $('ins-f').value;
     var rows = applyFilter(SESS.rows).filter(function (s) {
       if (dev && s.device !== dev) return false;
-      if (f === 'popup' && !s.popup) return false; if (f === 'submit' && !s.submit) return false; if (f === 'booked' && !s.booked) return false; if (f === 'long' && s.duration < 60) return false;
-      if (q && [s.city, s.country, country(s.country), s.entry, s.source, s.ref, s.browser, s.os].join(' ').toLowerCase().indexOf(q) < 0) return false;
+      if (f === 'popup' && !s.popup) return false; if (f === 'submit' && !s.submit) return false; if (f === 'booked' && !s.booked) return false; if (f === 'long' && s.duration < 60) return false; if (f === 'company' && !coName(s)) return false;
+      if (q && [s.company, s.city, s.country, country(s.country), s.entry, s.source, s.ref, s.browser, s.os].join(' ').toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     $('ins-rows').innerHTML = rows.map(function (s) {
       var loc = [s.city, country(s.country)].filter(Boolean).join(', ') || 'Unknown location';
       var fun = s.booked ? '<span class="tag ok">✓ Booked a call</span>' : s.submit ? '<span class="tag">Submitted</span>' : s.popup ? '<span class="tag off">Opened</span>' : '';
-      return '<tr data-id="' + esc(s.id) + '" class="' + (s.booked ? 'is-booked' : s.submit ? 'is-submit' : '') + '"><td><b>' + esc(ago(s.start)) + '</b><br><small style="color:#5d7280">' + esc(when(s.start)) + '</small></td><td>' + flag(s.country) + ' ' + esc(loc) + '</td><td>' + esc(s.device) + '<br><small style="color:#5d7280">' + esc(s.browser + (s.os ? ' · ' + s.os : '')) + '</small></td><td>' + esc(s.entry) + '</td><td class="num">' + s.pages + '</td><td class="num">' + dur(s.duration) + '</td><td>' + esc(srcLabel(s.source)) + (AI[s.source] ? ' <span class="tag">AI</span>' : '') + '</td><td>' + fun + '</td><td><span class="tag play">▶ Play</span></td></tr>';
+      return '<tr data-id="' + esc(s.id) + '" class="' + (s.booked ? 'is-booked' : s.submit ? 'is-submit' : '') + '"><td><b>' + esc(ago(s.start)) + '</b><br><small style="color:#5d7280">' + esc(when(s.start)) + '</small></td><td>' + flag(s.country) + ' ' + esc(loc) + coLine(s) + '</td><td>' + esc(s.device) + '<br><small style="color:#5d7280">' + esc(s.browser + (s.os ? ' · ' + s.os : '')) + '</small></td><td>' + esc(s.entry) + '</td><td class="num">' + s.pages + '</td><td class="num">' + dur(s.duration) + '</td><td>' + esc(srcLabel(s.source)) + (AI[s.source] ? ' <span class="tag">AI</span>' : '') + '</td><td>' + fun + '</td><td><span class="tag play">▶ Play</span></td></tr>';
     }).join('');
     $('ins-empty').hidden = rows.length > 0; $('ins-empty').textContent = SESS.rows.length ? 'No recordings match these filters.' : 'No recordings yet. They appear here a few minutes after visitors arrive.';
     [].forEach.call($('ins-rows').children, function (tr) { tr.onclick = function () { location.hash = '#insight/s/' + tr.dataset.id; }; });
@@ -182,8 +191,8 @@
     api({ view: 'session', id: id }).then(function (s) {
       meta = s;
       var loc = [s.city, country(s.country)].filter(Boolean).join(', ');
-      $('ins-title').textContent = (flag(s.country) + ' ' + (loc || 'Unknown location')).trim();
-      $('ins-sub').textContent = when(s.start) + ' · ' + dur(s.duration) + ' · ' + s.pages + ' page' + (s.pages === 1 ? '' : 's') + ' · ' + s.device + ', ' + s.browser + (s.os ? ' on ' + s.os : '') + ' · ' + s.w + '×' + s.h + ' · from ' + srcLabel(s.source);
+      $('ins-title').textContent = (coName(s) ? coName(s) + ' · ' : '') + (flag(s.country) + ' ' + (loc || 'Unknown location')).trim();
+      $('ins-sub').textContent = when(s.start) + ' · ' + dur(s.duration) + ' · ' + s.pages + ' page' + (s.pages === 1 ? '' : 's') + ' · ' + s.device + ', ' + s.browser + (s.os ? ' on ' + s.os : '') + ' · ' + s.w + '×' + s.h + ' · from ' + srcLabel(s.source) + (s.company && s.network ? ' · internet: ' + s.company : '');
       return Promise.all([loadAsset('link', '/admin/vendor/rrweb-player.min.css'), loadAsset('script', '/admin/vendor/rrweb-player.min.js'), loadEvents(id, s.chunks)]);
     }).then(function (r) {
       var events = r[2];
