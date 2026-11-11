@@ -127,3 +127,16 @@ test('excluded countries are not stored', async () => {
   const b = res(); await handler(mk('US'), b); assert.equal(b.code, 204); assert.equal(b.headers['X-Insight'], undefined);
   assert.equal((await ins.listSessions()).total, 1);
 });
+
+test('the visitor company is stored, and home or mobile internet providers are marked as networks', async () => {
+  const r = fakeRedis(); ins._setPipe(r.pipe);
+  const t = Date.now(), a = 'b1b2c3d4e5f60718', b = 'c1b2c3d4e5f60718';
+  await ins.ingest({ sid: a, vid, seq: 1, events: [custom('pageview', { path: '/', newSession: true, utm: {} }, t), custom('org', { company: 'Villa Capital LLC', asn: 'AS1 Villa' }, t + 1)] }, req);
+  await ins.ingest({ sid: b, vid, seq: 1, events: [custom('pageview', { path: '/', newSession: true, utm: {} }, t), custom('org', { company: 'TE Data', asn: 'AS8452 TE Data' }, t + 1)] }, req);
+  await ins.ingest({ sid: a, vid, seq: 2, events: [custom('org', { company: 'Other Co' }, t + 5)] }, req);
+  const rows = Object.fromEntries((await ins.listSessions()).rows.map(x => [x.id, x]));
+  assert.equal(rows[a].company, 'Villa Capital LLC'); assert.equal(rows[a].network, false);
+  assert.equal(rows[b].company, 'TE Data'); assert.equal(rows[b].network, true);
+  for (const n of ['Vodafone Egypt', 'Comcast Cable Communications, LLC', 'Google LLC', 'Amazon.com, Inc.', 'Saudi Telecom Company JSC', 'Etisalat']) assert.equal(ins.isNetwork(n), true, n);
+  for (const n of ['Deloitte LLP', 'Morgan Stanley', 'Salesforce.com, Inc.', 'Northwestern University']) assert.equal(ins.isNetwork(n), false, n);
+});
