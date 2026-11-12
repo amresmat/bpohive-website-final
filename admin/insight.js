@@ -144,22 +144,39 @@
   /* ---------- Recordings list ---------- */
   function sessions() {
     main.innerHTML = head('Recordings', 'Watch how real visitors moved through the site. Everything typed is masked.', '<button class="btn" id="ins-refresh" type="button">Refresh</button>') + tabs('sessions') +
-      '<div class="bar"><input id="ins-q" type="search" placeholder="Search company, city, page"><span id="ins-filters"></span><select id="ins-dev"><option value="">All devices</option><option>desktop</option><option>mobile</option><option>tablet</option></select><select id="ins-f"><option value="">All visitors</option><option value="popup">Opened the pop-up</option><option value="submit">Submitted</option><option value="booked">Booked</option><option value="long">Stayed over 1 minute</option><option value="company">From a company</option></select></div>' +
-      '<div class="card tablewrap"><table><thead><tr><th>When</th><th>Visitor</th><th>Device</th><th>Landed on</th><th class="num">Pages</th><th class="num">Time</th><th>Source</th><th>Pop-up</th><th></th></tr></thead><tbody id="ins-rows"></tbody></table><div class="empty" id="ins-empty" hidden>No recordings yet.</div></div>';
+      '<div class="bar"><input id="ins-q" type="search" placeholder="Search company, city, page"><select id="ins-when" aria-label="Date">' + [['', 'Any date'], ['today', 'Today'], ['yesterday', 'Yesterday'], ['week', 'This week'], ['month', 'This month'], ['year', 'This year'], ['custom', 'Custom dates']].map(function (o) { return '<option value="' + o[0] + '"' + (WHEN.k === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><span class="ins-dates" id="ins-dates"' + (WHEN.k === 'custom' ? '' : ' hidden') + '><label>From <input type="date" id="ins-from" value="' + WHEN.from + '"></label><label>To <input type="date" id="ins-to" value="' + WHEN.to + '"></label></span><span id="ins-filters"></span><select id="ins-dev"><option value="">All devices</option><option>desktop</option><option>mobile</option><option>tablet</option></select><select id="ins-f"><option value="">All visitors</option><option value="popup">Opened the pop-up</option><option value="submit">Submitted</option><option value="booked">Booked</option><option value="long">Stayed over 1 minute</option><option value="company">From a company</option></select></div>' +
+      '<p class="ins-note" id="ins-count" style="margin:0 0 10px"></p><div class="card tablewrap"><table><thead><tr><th>When</th><th>Visitor</th><th>Device</th><th>Landed on</th><th class="num">Pages</th><th class="num">Time</th><th>Source</th><th>Pop-up</th><th></th></tr></thead><tbody id="ins-rows"></tbody></table><div class="empty" id="ins-empty" hidden>No recordings yet.</div></div>';
     $('ins-refresh').onclick = function () { SESS.loaded = false; loadSessions(); };
     if (PENDING_Q) { $('ins-q').value = PENDING_Q; PENDING_Q = ''; }
     $('ins-q').oninput = drawSessions; $('ins-dev').onchange = drawSessions; $('ins-f').onchange = drawSessions;
+    $('ins-when').onchange = function () { WHEN.k = this.value; $('ins-dates').hidden = WHEN.k !== 'custom'; if (WHEN.k === 'custom' && !WHEN.from) { var t = iso(new Date()); WHEN.from = WHEN.to = t; $('ins-from').value = $('ins-to').value = t; } drawSessions(); };
+    $('ins-from').onchange = function () { WHEN.from = this.value; drawSessions(); }; $('ins-to').onchange = function () { WHEN.to = this.value; drawSessions(); };
     loadSessions();
   }
   function loadSessions() {
     if (SESS.loaded) { $('ins-filters').innerHTML = filterSel(SESS.rows); wireFilters(drawSessions); return drawSessions(); }
     $('ins-rows').innerHTML = '<tr><td colspan="9" class="empty">Loading…</td></tr>';
-    api({ view: 'sessions', limit: 1000 }).then(function (j) { SESS = { rows: j.rows || [], total: j.total || 0, loaded: true }; $('ins-filters').innerHTML = filterSel(SESS.rows); wireFilters(drawSessions); drawSessions(); }).catch(function (e) { $('ins-rows').innerHTML = ''; $('ins-empty').textContent = e.message; $('ins-empty').hidden = false; });
+    api({ view: 'sessions', limit: 3000 }).then(function (j) { SESS = { rows: j.rows || [], total: j.total || 0, loaded: true }; $('ins-filters').innerHTML = filterSel(SESS.rows); wireFilters(drawSessions); drawSessions(); }).catch(function (e) { $('ins-rows').innerHTML = ''; $('ins-empty').textContent = e.message; $('ins-empty').hidden = false; });
+  }
+  // Date filter for Recordings, in the viewer's local time. A week starts on Monday.
+  var WHEN = { k: '', from: '', to: '' };
+  function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function whenRange() {
+    var n = new Date(), d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()), day = 864e5;
+    if (WHEN.k === 'today') return [d0.getTime(), Infinity];
+    if (WHEN.k === 'yesterday') return [d0.getTime() - day, d0.getTime()];
+    if (WHEN.k === 'week') return [d0.getTime() - ((d0.getDay() + 6) % 7) * day, Infinity];
+    if (WHEN.k === 'month') return [new Date(n.getFullYear(), n.getMonth(), 1).getTime(), Infinity];
+    if (WHEN.k === 'year') return [new Date(n.getFullYear(), 0, 1).getTime(), Infinity];
+    if (WHEN.k === 'custom') { var a = WHEN.from ? new Date(WHEN.from + 'T00:00:00').getTime() : -Infinity, b = WHEN.to ? new Date(WHEN.to + 'T00:00:00').getTime() + day : Infinity; return a <= b ? [a, b] : [b - day, a + day]; }
+    return null;
   }
   function drawSessions() {
     if (!$('ins-rows')) return;
     var q = ($('ins-q').value || '').toLowerCase(), dev = $('ins-dev').value, f = $('ins-f').value;
+    var range = whenRange();
     var rows = applyFilter(SESS.rows).filter(function (s) {
+      if (range && (s.start < range[0] || s.start >= range[1])) return false;
       if (dev && s.device !== dev) return false;
       if (f === 'popup' && !s.popup) return false; if (f === 'submit' && !s.submit) return false; if (f === 'booked' && !s.booked) return false; if (f === 'long' && s.duration < 60) return false; if (f === 'company' && !coName(s)) return false;
       if (q && [s.company, s.city, s.country, country(s.country), s.entry, s.source, s.ref, s.browser, s.os].join(' ').toLowerCase().indexOf(q) < 0) return false;
@@ -170,6 +187,7 @@
       var fun = s.booked ? '<span class="tag ok">✓ Booked a call</span>' : s.submit ? '<span class="tag">Submitted</span>' : s.popup ? '<span class="tag off">Opened</span>' : '';
       return '<tr data-id="' + esc(s.id) + '" class="' + (s.booked ? 'is-booked' : s.submit ? 'is-submit' : '') + '"><td><b>' + esc(ago(s.start)) + '</b><br><small style="color:#5d7280">' + esc(when(s.start)) + '</small></td><td>' + flag(s.country) + ' ' + esc(loc) + coLine(s) + '</td><td>' + esc(s.device) + '<br><small style="color:#5d7280">' + esc(s.browser + (s.os ? ' · ' + s.os : '')) + '</small></td><td>' + esc(s.entry) + '</td><td class="num">' + s.pages + '</td><td class="num">' + dur(s.duration) + '</td><td>' + esc(srcLabel(s.source)) + (AI[s.source] ? ' <span class="tag">AI</span>' : '') + '</td><td>' + fun + '</td><td><span class="tag play">▶ Play</span></td></tr>';
     }).join('');
+    $('ins-count').textContent = SESS.rows.length ? rows.length.toLocaleString() + ' recording' + (rows.length === 1 ? '' : 's') + (rows.length !== SESS.rows.length ? ' of ' + SESS.rows.length.toLocaleString() : '') : '';
     $('ins-empty').hidden = rows.length > 0; $('ins-empty').textContent = SESS.rows.length ? 'No recordings match these filters.' : 'No recordings yet. They appear here a few minutes after visitors arrive.';
     [].forEach.call($('ins-rows').children, function (tr) { tr.onclick = function () { location.hash = '#insight/s/' + tr.dataset.id; }; });
   }

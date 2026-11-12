@@ -3,6 +3,7 @@
 // leads and appointments, read-only, and never the rest of the admin.
 const { signedIn } = require('../../lib/admin-auth.cjs');
 const { configured } = require('../../lib/entries.cjs');
+const intel = require('../../lib/intel.cjs');
 const pl = require('../../lib/pipeline.cjs');
 const team = require('../../lib/team.cjs');
 
@@ -51,6 +52,14 @@ module.exports = async (req, res) => {
       case 'lead-restore': return res.status(200).json(await pl.restoreLead(String(b.key || '')));
       case 'note-delete': return res.status(200).json(await pl.deleteNote(String(b.key || ''), String(b.id || ''), b.also));
       case 'lead': return res.status(200).json(await pl.setLead(String(b.key || ''), { stage: b.stage, type: b.type, note: b.note }, b.also));
+      case 'intel': {
+        // Fills in company profiles and booking-call summaries, a few leads per call (the admin page keeps calling while there is more).
+        const snap = await pl.snapshot({ sync: false });
+        const mById = new Map(snap.meetings.map(m => [m.id, m]));
+        const leads = snap.leads.map(l => Object.assign({}, l, { qa: (l.meetings || []).map(id => mById.get(id)).filter(Boolean).flatMap(m => (m.invitee && m.invitee.qa) || []) }));
+        const r = await intel.runBatch(leads, req, { budgetMs: 40000, keys: Array.isArray(b.keys) ? b.keys.slice(0, 200).map(String) : null, max: 3 });
+        return res.status(200).json(r);
+      }
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
       case 'sources': return res.status(200).json({ sources: await pl.setSources(b.sources) });
       case 'since': return res.status(200).json({ since: await pl.setSince(b.since) });
