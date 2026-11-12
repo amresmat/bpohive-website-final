@@ -105,3 +105,14 @@ test('a redo that cannot find the company keeps the profile found before', async
   assert.equal(out.done[lead.key].company.name, 'Milestone Systems');
   assert.equal(out.done[lead.key].company.revenue, '$150M-$375M (est. from size)');
 });
+
+test('a Salesfinity Meeting Set call is summarized from its transcript', async () => {
+  const sf = require('../lib/salesfinity.cjs');
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe); intel._setFetch(fakeFetch(log));
+  sf._setPipe(async cmds => cmds.map(([c, k, f]) => c === 'HGET' ? JSON.stringify({ id: 'sf1', transcript: 'Hi Tim this is Shayen from BPO Hive, we book meetings for ERP vendors and want to set a demo next week.' }) : null));
+  const l = { key: 'e:tpa@milestone.us', name: 'Tim', email: 'tpa@gmail.com', company: '', sheetRows: [], sfCalls: [{ id: 'sf1', hasText: true }] };
+  const out = await intel.runBatch([l], req, {});
+  const c = out.done[l.key].calls['sf:sf1'];
+  assert.match(c.summary, /ERP/); assert.equal(c.source, 'salesfinity');
+  assert.equal(log.filter(x => /transcription-model/.test(x.url)).length, 0, 'no transcription needed');
+});
