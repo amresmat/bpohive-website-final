@@ -83,3 +83,15 @@ test('an empty AI summary is not kept, and is redone on the next run', async () 
   const again = await intel.runBatch([lead], req, {});
   assert.match(again.done[lead.key].calls['https://voca.ro/17s3tEEeziBK'].summary, /ERP/);
 });
+
+test('revenue is always shown: estimated from headcount when nothing is published, and old profiles are redone', async () => {
+  assert.equal(intel.revenueFromSize('51-200'), '$13M-$31M (est. from size)');
+  assert.equal(intel.revenueFromSize(''), '');
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe);
+  const base = fakeFetch(log);
+  intel._setFetch(async (u, o) => { if (/chat\/completions/.test(u) && JSON.parse(o.body).model === 'perplexity/sonar') return { ok: true, status: 200, text: async () => JSON.stringify({ choices: [{ message: { content: '{"found":true,"name":"Mueen","employees":"201-500","revenue":""}' } }] }) }; return base(u, o); });
+  r.H.set('pl:intel', new Map([[lead.key, JSON.stringify({ company: { found: true, name: 'Old', revenue: '', at: 1 }, calls: { 'https://voca.ro/17s3tEEeziBK': { summary: '- long old summary', at: 1 } } })]]));
+  const out = await intel.runBatch([lead], req, {});
+  assert.equal(out.done[lead.key].company.revenue, '$35M-$88M (est. from size)');
+  assert.equal(out.done[lead.key].calls['https://voca.ro/17s3tEEeziBK'].v, 2, 'old long summaries are redone in the short style');
+});
