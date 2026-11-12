@@ -376,7 +376,7 @@
   function coOf(l) { var c = l.intel && l.intel.company; return c && c.found && !c.error ? c : null; }
   function callSumOf(l, u) { var c = l.intel && l.intel.calls && l.intel.calls[u]; return c && c.summary ? c : null; }
   function latestCallSum(l) { var rs = recsOf(l); for (var i = rs.length - 1; i >= 0; i--) { var c = callSumOf(l, rs[i].sheet.recording); if (c) return c; } return null; }
-  function facts(c) { return [c.industry, c.revenue ? 'Revenue ' + c.revenue : '', c.employees ? c.employees + ' employees' : '', c.hq].filter(Boolean); }
+  function facts(c) { return [c.revenue ? 'Revenue ' + c.revenue : '', c.employees ? String(c.employees).replace(/\s*\(.*\)$/, '') + ' employees' : '', c.industry, c.hq].filter(Boolean); }
   function bulletGist(t) { var g = String(t || '').split('\n').map(function (x) { return x.replace(/^\s*[-*•]\s*/, '').trim(); }).filter(Boolean).slice(0, 2).join('; '); return g.length > 230 ? g.slice(0, 227).replace(/\s+\S*$/, '') + '…' : g; }
   function coSection(l) {
     var c = coOf(l), it = l.intel && l.intel.company;
