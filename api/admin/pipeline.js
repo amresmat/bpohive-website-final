@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
         const snap = await pl.snapshot({ sync: false });
         const mById = new Map(snap.meetings.map(m => [m.id, m]));
         const leads = snap.leads.map(l => Object.assign({}, l, { qa: (l.meetings || []).map(id => mById.get(id)).filter(Boolean).flatMap(m => (m.invitee && m.invitee.qa) || []) }));
-        const r = await intel.runBatch(leads, req, { budgetMs: 40000, keys: Array.isArray(b.keys) ? b.keys.slice(0, 200).map(String) : null, max: 3 });
+        const r = await intel.runBatch(leads, req, { budgetMs: 40000, keys: Array.isArray(b.keys) ? b.keys.slice(0, 200).map(String) : null, max: 3, force: Boolean(b.force) });
         return res.status(200).json(r);
       }
       case 'sync': { const [calendly, fathom] = await Promise.all([pl.syncCalendly({ force: true, budgetMs: 8000 }), pl.syncFathom({ force: true, budgetMs: 8000 })]); return res.status(200).json({ calendly, fathom }); }
