@@ -95,3 +95,13 @@ test('revenue is always shown: estimated from headcount when nothing is publishe
   assert.equal(out.done[lead.key].company.revenue, '$35M-$88M (est. from size)');
   assert.equal(out.done[lead.key].calls['https://voca.ro/17s3tEEeziBK'].v, 2, 'old long summaries are redone in the short style');
 });
+
+test('a redo that cannot find the company keeps the profile found before', async () => {
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe);
+  const base = fakeFetch(log);
+  intel._setFetch(async (u, o) => { if (/chat\/completions/.test(u) && JSON.parse(o.body).model === 'perplexity/sonar') return { ok: true, status: 200, text: async () => JSON.stringify({ choices: [{ message: { content: '{"found":false}' } }] }) }; return base(u, o); });
+  r.H.set('pl:intel', new Map([[lead.key, JSON.stringify({ company: { found: true, name: 'Milestone Systems', employees: '1,500+', revenue: '', at: 1 }, calls: {} })]]));
+  const out = await intel.runBatch([lead], req, {});
+  assert.equal(out.done[lead.key].company.name, 'Milestone Systems');
+  assert.equal(out.done[lead.key].company.revenue, '$150M-$375M (est. from size)');
+});
