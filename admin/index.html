@@ -83,6 +83,8 @@ dialog::backdrop{background:rgba(8,21,33,.5)}
 .dl dl{display:grid;grid-template-columns:170px 1fr;gap:8px 16px;margin:18px 0 0}.dl dt{color:var(--muted);font-size:13px;font-weight:600}.dl dd{margin:0;word-break:break-word}
 .dl .x{float:right;width:34px;height:34px;border:0;border-radius:50%;background:#f1f5f8;cursor:pointer;font-size:18px}
 .bar #ins-filters{display:contents}
+.ins-dates{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.ins-dates[hidden]{display:none}.ins-dates label{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}.ins-dates input{flex:none;min-width:0;width:150px}
+@media(max-width:860px){.ins-dates{display:grid;grid-template-columns:1fr 1fr;width:100%}.ins-dates[hidden]{display:none}.ins-dates label{display:grid;gap:4px}.ins-dates input{width:100%}}
 .ins-head{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
 .ins-head .sub{margin-bottom:12px}
 .ins-back{display:inline-block;margin-bottom:6px;font-weight:600;text-decoration:none}
