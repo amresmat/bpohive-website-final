@@ -375,7 +375,10 @@
   /* ---------- Company profile and booking-call summaries (made by the server, lib/intel.cjs) ---------- */
   function coOf(l) { var c = l.intel && l.intel.company; return c && c.found && !c.error ? c : null; }
   function callSumOf(l, u) { var c = l.intel && l.intel.calls && l.intel.calls[u]; return c && c.summary ? c : null; }
-  function latestCallSum(l) { var rs = recsOf(l); for (var i = rs.length - 1; i >= 0; i--) { var c = callSumOf(l, rs[i].sheet.recording); if (c) return c; } return null; }
+  function latestCallSum(l) { var rs = recsOf(l); for (var i = rs.length - 1; i >= 0; i--) { var c = callSumOf(l, rs[i].sheet.recording); if (c) return c; } var sf = (l.sfCalls || []).map(function (x) { return callSumOf(l, 'sf:' + x.id); }).filter(Boolean)[0]; return sf || null; }
+  function sfPlayer(c, compact) {
+    if (compact) return (c.recording ? '<button type="button" class="pl-play pl-play-sf" data-sfrec="' + esc(c.recording) + '" data-sflink="' + esc(c.link || '') + '"><i aria-hidden="true"></i>Play call</button>' : '') + (c.link && !c.recording ? '<a class="pl-rec" href="' + esc(c.link) + '" target="_blank" rel="noopener">Open in Salesfinity</a>' : '');
+    return (c.recording ? '<span class="pl-player"><audio controls preload="none" src="' + esc(c.recording) + '"></audio></span>' : '') + (c.link ? ' <a class="pl-rec" href="' + esc(c.link) + '" target="_blank" rel="noopener">Open in Salesfinity</a>' : ''); }
   function facts(c) { return [c.revenue ? 'Revenue ' + c.revenue : '', c.employees ? String(c.employees).replace(/\s*\(.*\)$/, '') + ' employees' : '', c.industry, c.hq].filter(Boolean); }
   function bulletGist(t) { var g = String(t || '').split('\n').map(function (x) { return x.replace(/^\s*[-*•]\s*/, '').trim(); }).filter(Boolean).slice(0, 2).join('; '); return g.length > 230 ? g.slice(0, 227).replace(/\s+\S*$/, '') + '…' : g; }
   function coSection(l) {
@@ -395,11 +398,21 @@
     return '';
   }
   function recSection(l) {
-    var rs = recsOf(l); if (!rs.length) return '';
+    var rs = recsOf(l);
+    if (!rs.length && (l.sfCalls || []).length) return '<div class="pl-recs"><h3 class="pl-h" style="margin-top:0">Booking call <small class="ins-note" style="font-weight:400">from Salesfinity (Meeting Set)</small></h3>' + l.sfCalls.map(function (c) {
+      return '<div class="pl-recs-row"><small>' + esc([c.rep, c.at ? day(c.at) : '', c.duration ? Math.round(c.duration / 60) + ' min' : ''].filter(Boolean).join(', ')) + '</small> ' + sfPlayer(c) + callSumHtml(l, 'sf:' + c.id) + '</div>';
+    }).join('') + '</div>';
+    if (!rs.length) return '';
     return '<div class="pl-recs"><h3 class="pl-h" style="margin-top:0">Booking call' + (rs.length > 1 ? 's' : '') + '</h3>' + rs.map(function (m) {
       return '<div class="pl-recs-row"><small>' + esc([m.sheet.caller || (m.callers || [])[0], m.created ? 'booked ' + day(m.created) : '', 'for ' + day(m.start)].filter(Boolean).join(', ')) + '</small> ' + recPlayer(m.sheet.recording) + callSumHtml(l, m.sheet.recording) + '</div>';
     }).join('') + '</div>';
   }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.pl-play-sf'); if (!b) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    [].forEach.call(document.querySelectorAll('.pl-player audio'), function (a) { a.pause(); });
+    var w = document.createElement('span'); w.innerHTML = '<span class="pl-player"><audio controls autoplay src="' + esc(b.getAttribute('data-sfrec')) + '"></audio>' + (b.getAttribute('data-sflink') ? '<a href="' + esc(b.getAttribute('data-sflink')) + '" target="_blank" rel="noopener">Open in Salesfinity</a>' : '') + '</span>'; b.replaceWith(w.firstChild);
+  }, true);
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.pl-play'); if (!b) return;
     e.preventDefault(); e.stopPropagation();
@@ -468,7 +481,7 @@
         (last ? '<p class="pl-h-note">' + esc(last.text.slice(0, 260)) + (last.text.length > 260 ? '…' : '') + '<small>' + esc([last.by, ago(last.at)].filter(Boolean).join(', ')) + '</small></p>' : '<p class="pl-h-note pl-h-empty">No update yet</p>') +
         (sm ? '<p class="pl-h-sum"><b>Call summary, ' + esc(day(sm.start)) + '</b>' + esc(summaryGist(sm)) + '</p>' : cs ? '<p class="pl-h-sum"><b>Booking call summary</b>' + esc(bulletGist(cs.summary)) + '</p>' : '') + '</div>' +
       '<div class="pl-h-side">' + (st === 'shown' && isAdmin() ? tempSet(l) : '') + '<span class="pl-h-count">' + count + '</span>' + (l.lastActivity ? '<small' + (Date.now() - l.lastActivity > 14 * 864e5 ? ' class="late"' : '') + '>Last activity ' + esc(ago(l.lastActivity)) + '</small>' : '') +
-        '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : '') + delBtn(l) + '</span></div></article>';
+        '<span class="pl-h-act">' + (rs.length ? playBtn(rs[rs.length - 1].sheet.recording, 'Play call', true) : (l.sfCalls || []).length ? sfPlayer(l.sfCalls[0], true) : '') + delBtn(l) + '</span></div></article>';
   }
   function tempSet(l) {
     return '<span class="pl-tset" role="group" aria-label="Hot, warm or cold">' + Object.keys(TEMP).map(function (k) { return '<button type="button" class="pl-tset-' + k + (l.temp === k ? ' on' : '') + '" data-temp-set="' + k + '" data-k="' + esc(l.key) + '" title="' + esc(TEMP[k][1]) + '" aria-pressed="' + (l.temp === k) + '">' + TEMP[k][0] + '</button>'; }).join('') + '</span>';

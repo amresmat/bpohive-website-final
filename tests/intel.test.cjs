@@ -95,3 +95,24 @@ test('revenue is always shown: estimated from headcount when nothing is publishe
   assert.equal(out.done[lead.key].company.revenue, '$35M-$88M (est. from size)');
   assert.equal(out.done[lead.key].calls['https://voca.ro/17s3tEEeziBK'].v, 2, 'old long summaries are redone in the short style');
 });
+
+test('a redo that cannot find the company keeps the profile found before', async () => {
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe);
+  const base = fakeFetch(log);
+  intel._setFetch(async (u, o) => { if (/chat\/completions/.test(u) && JSON.parse(o.body).model === 'perplexity/sonar') return { ok: true, status: 200, text: async () => JSON.stringify({ choices: [{ message: { content: '{"found":false}' } }] }) }; return base(u, o); });
+  r.H.set('pl:intel', new Map([[lead.key, JSON.stringify({ company: { found: true, name: 'Milestone Systems', employees: '1,500+', revenue: '', at: 1 }, calls: {} })]]));
+  const out = await intel.runBatch([lead], req, {});
+  assert.equal(out.done[lead.key].company.name, 'Milestone Systems');
+  assert.equal(out.done[lead.key].company.revenue, '$150M-$375M (est. from size)');
+});
+
+test('a Salesfinity Meeting Set call is summarized from its transcript', async () => {
+  const sf = require('../lib/salesfinity.cjs');
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe); intel._setFetch(fakeFetch(log));
+  sf._setPipe(async cmds => cmds.map(([c, k, f]) => c === 'HGET' ? JSON.stringify({ id: 'sf1', transcript: 'Hi Tim this is Shayen from BPO Hive, we book meetings for ERP vendors and want to set a demo next week.' }) : null));
+  const l = { key: 'e:tpa@milestone.us', name: 'Tim', email: 'tpa@gmail.com', company: '', sheetRows: [], sfCalls: [{ id: 'sf1', hasText: true }] };
+  const out = await intel.runBatch([l], req, {});
+  const c = out.done[l.key].calls['sf:sf1'];
+  assert.match(c.summary, /ERP/); assert.equal(c.source, 'salesfinity');
+  assert.equal(log.filter(x => /transcription-model/.test(x.url)).length, 0, 'no transcription needed');
+});
