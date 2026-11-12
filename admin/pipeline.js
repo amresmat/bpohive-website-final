@@ -81,7 +81,7 @@
     var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['booked', 'Booked', sc.booked || ''], ['shown', 'Showed', sc.shown || ''], ['noshow', 'No-shows', sc.no_show || ''], ['noreply', 'Not replying', sc.no_reply || ''], ['unqualified', 'Unqualified', sc.unqualified || ''], ['won', 'Won', sc.won || ''], ['leads', 'All leads', DATA.leads.length]];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
     return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
-      (isAdmin() ? setup() : '') +
+      (isAdmin() ? setup() + intelNote() : '') +
       '<div class="tabs">' + tabs.map(function (x) { return '<a class="tab' + (SUB === x[0] || (SUB === 'view' && !x[0]) ? ' on' : '') + (x[0] === 'shown' ? ' pl-hot' : '') + '" href="#pipeline' + (x[0] ? '/' + x[0] : '') + '">' + x[1] + (x[2] !== '' ? '<b>' + esc(x[2]) + '</b>' : '') + '</a>'; }).join('') + '</div>';
   }
   function setup() {
@@ -775,19 +775,29 @@
   }
   // Company profiles and call summaries are made in the background while the admin is open, a few leads at a time.
   var INTEL = { running: false, calls: 0 };
-  function runIntel() {
+  function intelNote() {
+    var st = DATA.status && DATA.status.intel; if (!st || !st.pausedUntil || st.pausedUntil < Date.now()) return '';
+    return '<div class="pl-intel-note" role="status">Company info and call summaries are paused: ' + esc(st.error || 'the AI service refused') + ' <button type="button" class="btn" id="pl-intel-retry">Retry now</button></div>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#pl-intel-retry'); if (!b) return;
+    b.disabled = true; b.textContent = 'Working…'; DATA.status.intel = {}; INTEL.calls = 0; runIntel(true);
+  });
+  function runIntel(force) {
     if (INTEL.running || !isAdmin() || !DATA || INTEL.calls >= 40) return;
-    var st = DATA.status && DATA.status.intel; if (st && st.pausedUntil && st.pausedUntil > Date.now()) return;
+    var st = DATA.status && DATA.status.intel; if (!force && st && st.pausedUntil && st.pausedUntil > Date.now()) return;
     INTEL.running = true; INTEL.calls++;
     var keys = DATA.leads.filter(function (l) { return ['booked', 'to_mark', 'shown', 'no_show'].indexOf(l.status) > -1; }).map(function (l) { return l.key; });
-    api('POST', { action: 'intel', keys: keys }).then(function (r) {
+    api('POST', { action: 'intel', keys: keys, force: Boolean(force) }).then(function (r) {
       INTEL.running = false;
       Object.keys((r && r.done) || {}).forEach(function (k) {
         var l = leadByKey(k); if (!l) return; l.intel = r.done[k];
         var card = MAIN && MAIN.querySelector('.pl-hcard[data-k="' + k.replace(/["\\]/g, '\\$&') + '"]');
         if (card) { var m = /pl-hc-(\w+)/.exec(card.className), w = document.createElement('div'); w.innerHTML = hcard(l, m ? m[1] : 'booked'); card.replaceWith(w.firstChild); bindHcards(MAIN); }
       });
-      if (r && r.paused) { DATA.status.intel = { error: r.error || '', pausedUntil: Date.now() + 3600e3 }; return; }
+      var note = document.querySelector('.pl-intel-note');
+      if (r && r.paused) { DATA.status.intel = { error: r.error || '', pausedUntil: Date.now() + 3600e3 }; if (note) note.outerHTML = intelNote(); return; }
+      if (note) note.remove();
       if (r && r.remaining > 0) setTimeout(runIntel, 1500);
     }, function () { INTEL.running = false; });
   }
