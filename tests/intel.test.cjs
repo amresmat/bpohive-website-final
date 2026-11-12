@@ -60,3 +60,13 @@ test('without a token nothing runs; leads with a free email and no company are s
   assert.equal(intel.audioOf('https://voca.ro/18OeTudAGd5P'), 'https://media.vocaroo.com/mp3/18OeTudAGd5P');
   assert.equal(intel.canSummarize('https://web.salesfinity.co/call-detail/x'), false);
 });
+
+test('Retry now (force) runs even while paused', async () => {
+  const r = fakeRedis(), log = []; intel._setPipe(r.pipe);
+  intel._setFetch(fakeFetch(log, { fail: true })); await intel.runBatch([lead], req, {});
+  intel._setFetch(fakeFetch(log));
+  assert.equal((await intel.runBatch([lead], req, {})).paused, true);
+  const out = await intel.runBatch([lead], req, { force: true });
+  assert.equal(out.paused, undefined); assert.equal(out.done[lead.key].company.found, true);
+  assert.equal((await intel.runBatch([lead], req, {})).paused, undefined, 'the pause is cleared after a good run');
+});
