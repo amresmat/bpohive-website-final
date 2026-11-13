@@ -273,11 +273,11 @@
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
       '<h3 class="pl-sech">Where these leads are now <small>everyone who came in or had a meeting in these dates</small></h3>' +
-      '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<div class="kpi-tile' + (on ? ' on' : '') + '" style="--c:' + s[2] + '"><div class="kpi-label"><i></i>' + esc(s[1]) + '</div><button type="button" class="kpi-value" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen">' + sc[s[0]] + '</button><p class="kpi-action">' + (on ? 'Hide leads' : 'View leads') + ' <span class="kpi-arrow">&rarr;</span></p></div>'; }).join('') + '</div>' +
+      '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<div class="kpi-tile' + (on ? ' on' : '') + '" style="--c:' + s[2] + '"><div class="kpi-label">' + esc(s[1]) + '</div><button type="button" class="kpi-value" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen">' + sc[s[0]] + '</button><p class="kpi-action">' + (on ? 'Hide leads' : 'View leads') + ' <span class="kpi-arrow">&rarr;</span></p></div>'; }).join('') + '</div>' +
       (F.open ? stagePanel(F.open, now) : '') +
       funnel() +
-      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week, last 12 weeks') +
-      bars(mc, [['showed', 'Showed up', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meeting outcomes per week, last 12 weeks') + '</div>' +
+      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#4EA6F8'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week, last 12 weeks') +
+      bars(mc, [['showed', 'Showed up', '#1B7381'], ['no_show', 'No-show', '#20292F'], ['needs', 'Not marked yet', '#78BBFA'], ['rescheduled', 'Rescheduled', '#5B6670'], ['cancelled', 'Cancelled', '#E6F1F3']], 'Meeting outcomes per week, last 12 weeks') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       breakdown('Results by campaign, in these dates', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       '<div style="height:14px"></div>' + breakdown('Results by caller, in these dates', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
