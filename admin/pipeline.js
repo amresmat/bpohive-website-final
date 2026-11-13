@@ -10,12 +10,16 @@
   var F = { range: 30, from: '', to: '', preset: '30', open: '', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
   function iso10(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   // Date range presets, like the analytics portal: a preset fills the From and To dates, editing a date makes it custom.
-  var PRESETS = [['7', '7 days'], ['30', '30 days'], ['90', '90 days'], ['month', 'This month'], ['lastmonth', 'Last month'], ['all', 'All time']];
+  var PRESETS = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This month'], ['lastmonth', 'Last month'], ['lastquarter', 'Last quarter'], ['all', 'All time']];
+  var CUSTOM_OPEN = false;
   function applyPreset(p) {
     var now = new Date(), a = new Date(now), b = new Date(now);
     F.preset = p;
     if (p === 'all') { F.range = 0; F.from = ''; F.to = ''; return; }
-    if (p === 'month') a = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (p === 'today') {}
+    else if (p === 'yesterday') { a.setDate(a.getDate() - 1); b = new Date(a); }
+    else if (p === 'lastquarter') { var q = Math.floor(now.getMonth() / 3) * 3; a = new Date(now.getFullYear(), q - 3, 1); b = new Date(now.getFullYear(), q, 0); }
+    else if (p === 'month') a = new Date(now.getFullYear(), now.getMonth(), 1);
     else if (p === 'lastmonth') { a = new Date(now.getFullYear(), now.getMonth() - 1, 1); b = new Date(now.getFullYear(), now.getMonth(), 0); }
     else a.setDate(a.getDate() - (+p - 1));
     F.range = 'custom'; F.from = iso10(a); F.to = iso10(b);
@@ -117,15 +121,21 @@
       (withStage ? '<select id="pl-stage">' + '<option value="">Every status</option>' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (F.stage === k ? ' selected' : '') + '>' + STATUS[k][0] + '</option>'; }).join('') + '</select>' : '') +
       '</div>';
   }
+  function shortDay(v) { var p = String(v).split('-').map(Number); return p[0] ? new Date(Date.UTC(p[0], p[1] - 1, p[2])).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : v; }
   function dateBar() {
-    return '<div class="pl-datebar" role="group" aria-label="Date range"><div class="pl-presets">' + PRESETS.map(function (p) { return '<button type="button" data-p="' + p[0] + '" aria-pressed="' + (F.preset === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div>' +
-      '<label class="pl-dates"><span>From</span><input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label>' +
-      '<label class="pl-dates"><span>To</span><input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label></div>';
+    var showInputs = CUSTOM_OPEN || !F.preset;
+    var summary = F.preset === 'all' || !F.range ? 'All time' : F.from === F.to ? shortDay(F.from) : shortDay(F.from) + ' to ' + shortDay(F.to);
+    return '<div class="pl-datebar" role="group" aria-label="Date range"><div class="pl-presets">' + PRESETS.map(function (p) { var on = !CUSTOM_OPEN && F.preset === p[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-p="' + p[0] + '" aria-pressed="' + on + '">' + p[1] + '</button>'; }).join('') +
+      '<button type="button" class="pl-pill' + (showInputs ? ' on' : '') + '" id="pl-custom" aria-pressed="' + showInputs + '" aria-expanded="' + showInputs + '">Custom dates</button></div>' +
+      '<p class="pl-showing">Showing ' + esc(summary) + '</p>' +
+      (showInputs ? '<form class="pl-custom" id="pl-custom-form" novalidate><label for="pl-from">From<input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label><label for="pl-to">To<input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label><button type="submit" class="btn pri">Apply</button></form>' : '') +
+      '</div>';
   }
   function bindFilters() {
-    [].forEach.call(document.querySelectorAll('.pl-presets button'), function (b) { b.onclick = function () { applyPreset(b.getAttribute('data-p')); draw(); }; });
+    [].forEach.call(document.querySelectorAll('.pl-presets button[data-p]'), function (b) { b.onclick = function () { CUSTOM_OPEN = false; applyPreset(b.getAttribute('data-p')); draw(); }; });
+    var cb = $('pl-custom'); if (cb) cb.onclick = function () { CUSTOM_OPEN = !CUSTOM_OPEN; draw(); };
+    var cf = $('pl-custom-form'); if (cf) cf.onsubmit = function (e) { e.preventDefault(); var a = $('pl-from').value, b = $('pl-to').value; if (!a || !b) return; if (a > b) { var t0 = a; a = b; b = t0; } F.from = a; F.to = b; F.range = 'custom'; F.preset = ''; CUSTOM_OPEN = false; draw(); };
     [['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = el.value; draw(); }; });
-    ['from', 'to'].forEach(function (k) { var el = $('pl-' + k); if (el) el.onchange = function () { F[k] = el.value; F.range = 'custom'; F.preset = ''; draw(); }; });
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; drawLeadsTable(); };
     var rf = $('pl-refresh'); if (rf) rf.onclick = function () { rf.disabled = true; rf.textContent = 'Syncing…'; (isAdmin() ? api('POST', { action: 'sync' }).catch(function () {}) : Promise.resolve()).then(function () { return load(isAdmin() ? false : true); }).then(draw).catch(fail); };
   }
@@ -214,7 +224,12 @@
       (rows.length ? '<div class="tablewrap pl-table">' + leadTable(rows.slice(0, 200)) + '</div>' : '<div class="empty">No leads in this stage for these dates.</div>') + '</div>';
   }
   function bindStageTiles() {
-    [].forEach.call(MAIN.querySelectorAll('.pl-stile2'), function (b) { b.onclick = function () { var k = b.getAttribute('data-st'); F.open = F.open === k ? '' : k; draw(); var p = $('pl-sopen'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }; });
+    // Same tile motion as the analytics portal: a spotlight and edge light follow the pointer, and the tile tilts toward it.
+    [].forEach.call(MAIN.querySelectorAll('.kpi-tile'), function (el) {
+      el.onpointermove = function (e) { if (e.pointerType === 'touch') return; var r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; el.style.setProperty('--spot-x', x + 'px'); el.style.setProperty('--spot-y', y + 'px'); el.style.setProperty('--tilt-x', ((0.5 - y / r.height) * 5).toFixed(2) + 'deg'); el.style.setProperty('--tilt-y', ((x / r.width - 0.5) * 5).toFixed(2) + 'deg'); };
+      el.onpointerleave = function () { el.style.setProperty('--tilt-x', '0deg'); el.style.setProperty('--tilt-y', '0deg'); };
+    });
+    [].forEach.call(MAIN.querySelectorAll('.kpi-value[data-st]'), function (b) { b.onclick = function () { var k = b.getAttribute('data-st'); F.open = F.open === k ? '' : k; draw(); var p = $('pl-sopen'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }; });
     var c = MAIN.querySelector('.pl-sclose'); if (c) c.onclick = function () { F.open = ''; draw(); };
     var p = $('pl-sopen'); if (p) bindLeadRows(p);
   }
@@ -232,7 +247,7 @@
     var lc = weekly(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; }, weeks);
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
-      '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<button type="button" class="pl-stile2' + (on ? ' on' : '') + '" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen" style="--c:' + s[2] + '"><span>' + esc(s[1]) + '</span><b>' + sc[s[0]] + '</b></button>'; }).join('') + '</div>' +
+      '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<div class="kpi-tile' + (on ? ' on' : '') + '" style="--c:' + s[2] + '"><div class="kpi-label"><i></i>' + esc(s[1]) + '</div><button type="button" class="kpi-value" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen">' + sc[s[0]] + '</button><p class="kpi-action">' + (on ? 'Hide leads' : 'View leads') + ' <span class="kpi-arrow">&rarr;</span></p></div>'; }).join('') + '</div>' +
       (F.open ? stagePanel(F.open, now) : '') +
       funnel() +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
