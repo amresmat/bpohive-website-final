@@ -526,6 +526,24 @@ a.pl-stile{text-decoration:none;color:inherit;box-shadow:inset 0 3px 0 var(--c)}
 .pl-datebar+.bar:has(> .pl-fwrap[hidden]:only-child){display:none}
 .pl-sech{margin:6px 0 10px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--s500)}
 .pl-sech small{margin-left:8px;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--s400)}
+/* ---- BPO Hive palette only (charcoal 20292F, teal 1B7381, blue 4EA6F8, sky 78BBFA, white, tints EAF4FE / E6F1F3, muted 5B6670). No dots before text. ---- */
+:root{--navy:#20292F;--ink:#20292F;--muted:#5B6670;--blue:#1B7381;--teal:#1B7381;--teal-d:#155C67;--green:#1B7381;--red:#20292F;--amber:#20292F;
+--s50:#F7F9FA;--s100:#EEF2F4;--s200:#E3E8EB;--s300:#D3D9DD;--s400:#8A949B;--s500:#5B6670;--s600:#5B6670;--s700:#20292F;--s900:#20292F}
+.st:before,.pl-chips .pl-chip-hot:before,.pl-chips .pl-chip-warm:before,.pl-chips .pl-chip-cold:before,.kpi-label i{display:none}
+.st{font-weight:600}.st-booked,.st-showed,.st-won{color:#1B7381}.st-needs,.st-noshow{color:#20292F}.st-new,.st-work,.st-off{color:#5B6670}
+.ty-in{color:#1B7381}.ty-out{color:#20292F}
+/* Show / No-show / Rescheduled / Cancelled: one segmented look, the chosen one filled in teal */
+.pl-outs .mini,.pl-outs .mini.big,.pl-outs .mini.pl-o-showed.big,.pl-outs .mini.pl-o-no_show.big{height:30px;padding:0 12px;border:1px solid #D3D9DD;border-radius:6px;background:#fff;color:#20292F;font-weight:600}
+.pl-outs .mini:hover{background:#E6F1F3;border-color:#D3D9DD}
+.pl-outs .mini.on,.pl-outs .mini.big.on,.pl-outs .mini.pl-o-showed.big.on,.pl-outs .mini.pl-o-no_show.big.on,.pl-o-showed.on,.pl-o-no_show.on,.pl-o-rescheduled.on,.pl-o-cancelled.on{background:#1B7381;border-color:#1B7381;color:#fff}
+.pl-outs .pl-undo{border-color:transparent;background:none;color:#5B6670;font-weight:500;text-decoration:underline;text-underline-offset:3px}
+/* Hot / warm / cold */
+.pl-temp-hot{color:#fff;background:#1B7381}.pl-temp-warm{color:#20292F;background:#78BBFA}.pl-temp-cold{color:#20292F;background:#EAF4FE}
+.pl-tset .pl-tset-hot.on{background:#1B7381;color:#fff}.pl-tset .pl-tset-warm.on{background:#78BBFA;color:#20292F}.pl-tset .pl-tset-cold.on{background:#EAF4FE;color:#20292F}
+.pl-ht-hot{--hc:#1B7381}.pl-ht-warm{--hc:#78BBFA}.pl-ht-cold{--hc:#4EA6F8}
+.pl-hcard{border-left-width:1px}.pl-recs,.pl-sums,.pl-mailbox{border-left-width:1px}
+.pl-h-sum{border-left:0;background:#EAF4FE}
+.pl-deal{border-color:#1B7381;color:#1B7381}
 </style>
 
 </head>
