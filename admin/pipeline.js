@@ -224,6 +224,24 @@
     return '<div class="card pl-sopen" id="pl-sopen" style="--c:' + st[2] + '"><div class="pl-sopen-h"><h3>' + esc(st[1]) + ' <span>' + rows.length + '</span></h3><a href="#pipeline/' + STAGE_ROUTE[k] + '">Open full view</a><button type="button" class="pl-sclose" aria-label="Close">Close</button></div>' +
       (rows.length ? '<div class="tablewrap pl-table">' + leadTable(rows.slice(0, 200)) + '</div>' : '<div class="empty">No leads in this stage for these dates.</div>') + '</div>';
   }
+  // The lead list under the stage tiles slides open and closed instead of jumping.
+  var ANIM = false;
+  function calm() { return !Element.prototype.animate || matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  function openPanel() {
+    var p = $('pl-sopen'); if (!p || calm()) return;
+    var h = p.offsetHeight; p.style.overflow = 'hidden';
+    var a = p.animate([{ height: '0px', opacity: 0, transform: 'translateY(-10px)' }, { height: h + 'px', opacity: 1, transform: 'none' }], { duration: 650, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+    a.onfinish = a.oncancel = function () { p.style.overflow = ''; };
+    setTimeout(function () { if (p.isConnected && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 250);
+  }
+  function closePanel(then) {
+    var p = $('pl-sopen'); if (!p || calm()) return then();
+    if (ANIM) return; ANIM = true;
+    var h = p.offsetHeight; p.style.overflow = 'hidden';
+    var a = p.animate([{ height: h + 'px', opacity: 1, transform: 'none' }, { height: '0px', opacity: 0, transform: 'translateY(-10px)' }], { duration: 500, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' });
+    a.onfinish = function () { ANIM = false; then(); };
+    a.oncancel = function () { ANIM = false; };
+  }
   function bindStageTiles() {
     [].forEach.call(MAIN.querySelectorAll('[data-fun]'), function (b) { b.onclick = function () { F.fun = b.getAttribute('data-fun'); draw(); }; });
     // Same tile motion as the analytics portal: a spotlight and edge light follow the pointer, and the tile tilts toward it.
@@ -231,8 +249,13 @@
       el.onpointermove = function (e) { if (e.pointerType === 'touch') return; var r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; el.style.setProperty('--spot-x', x + 'px'); el.style.setProperty('--spot-y', y + 'px'); el.style.setProperty('--tilt-x', ((0.5 - y / r.height) * 5).toFixed(2) + 'deg'); el.style.setProperty('--tilt-y', ((x / r.width - 0.5) * 5).toFixed(2) + 'deg'); };
       el.onpointerleave = function () { el.style.setProperty('--tilt-x', '0deg'); el.style.setProperty('--tilt-y', '0deg'); };
     });
-    [].forEach.call(MAIN.querySelectorAll('.kpi-value[data-st]'), function (b) { b.onclick = function () { var k = b.getAttribute('data-st'); F.open = F.open === k ? '' : k; draw(); var p = $('pl-sopen'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }; });
-    var c = MAIN.querySelector('.pl-sclose'); if (c) c.onclick = function () { F.open = ''; draw(); };
+    [].forEach.call(MAIN.querySelectorAll('.kpi-value[data-st]'), function (b) { b.onclick = function () {
+      var k = b.getAttribute('data-st');
+      if (F.open === k) closePanel(function () { F.open = ''; draw(); });
+      else if (F.open) closePanel(function () { F.open = k; draw(); openPanel(); });
+      else { F.open = k; draw(); openPanel(); }
+    }; });
+    var c = MAIN.querySelector('.pl-sclose'); if (c) c.onclick = function () { closePanel(function () { F.open = ''; draw(); }); };
     var p = $('pl-sopen'); if (p) bindLeadRows(p);
   }
   function rangeLabel() {
