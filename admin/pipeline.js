@@ -113,26 +113,31 @@
   function filters(withRange, withStage) {
     var camps = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.campaigns || []; })));
     var callers = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.callers || []; })));
-    return (withRange ? dateBar() : '') + '<div class="bar">' +
-      (withRange ? '' : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
-      '<select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
+    // Filters sit behind a small icon; the badge counts the ones in use.
+    var n = [F.type, F.campaign, isAdmin() ? F.caller : '', withStage ? F.stage : ''].filter(Boolean).length;
+    var btn = '<button type="button" class="pl-ficon' + (n ? ' on' : '') + '" id="pl-ftoggle" aria-expanded="' + FILTERS_OPEN + '" aria-controls="pl-fwrap" aria-label="Filters' + (n ? ', ' + n + ' in use' : '') + '" title="Filters"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>' + (n ? '<b>' + n + '</b>' : '') + '</button>';
+    return (withRange ? dateBar(btn) : '') + '<div class="bar">' +
+      (withRange ? '' : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">' + btn) +
+      '<span class="pl-fwrap" id="pl-fwrap"' + (FILTERS_OPEN ? '' : ' hidden') + '><select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
       '<select id="pl-campaign">' + opts(camps, F.campaign, 'All campaigns') + '</select>' +
       (isAdmin() ? '<select id="pl-caller">' + opts(callers, F.caller, 'All callers') + '</select>' : '') +
       (withStage ? '<select id="pl-stage">' + '<option value="">Every status</option>' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (F.stage === k ? ' selected' : '') + '>' + STATUS[k][0] + '</option>'; }).join('') + '</select>' : '') +
-      '</div>';
+      '</span></div>';
   }
   function shortDay(v) { var p = String(v).split('-').map(Number); return p[0] ? new Date(Date.UTC(p[0], p[1] - 1, p[2])).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : v; }
-  function dateBar() {
+  var FILTERS_OPEN = false;
+  function dateBar(extra) {
     var showInputs = CUSTOM_OPEN || !F.preset;
     var summary = F.preset === 'all' || !F.range ? 'All time' : F.from === F.to ? shortDay(F.from) : shortDay(F.from) + ' to ' + shortDay(F.to);
     return '<div class="pl-datebar" role="group" aria-label="Date range"><div class="pl-presets">' + PRESETS.map(function (p) { var on = !CUSTOM_OPEN && F.preset === p[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-p="' + p[0] + '" aria-pressed="' + on + '">' + p[1] + '</button>'; }).join('') +
-      '<button type="button" class="pl-pill' + (showInputs ? ' on' : '') + '" id="pl-custom" aria-pressed="' + showInputs + '" aria-expanded="' + showInputs + '">Custom dates</button></div>' +
+      '<button type="button" class="pl-pill' + (showInputs ? ' on' : '') + '" id="pl-custom" aria-pressed="' + showInputs + '" aria-expanded="' + showInputs + '">Custom dates</button>' + (extra || '') + '</div>' +
       '<p class="pl-showing">Showing ' + esc(summary) + '</p>' +
       (showInputs ? '<form class="pl-custom" id="pl-custom-form" novalidate><label for="pl-from">From<input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label><label for="pl-to">To<input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label><button type="submit" class="btn pri">Apply</button></form>' : '') +
       '</div>';
   }
   function bindFilters() {
     [].forEach.call(document.querySelectorAll('.pl-presets button[data-p]'), function (b) { b.onclick = function () { CUSTOM_OPEN = false; applyPreset(b.getAttribute('data-p')); draw(); }; });
+    var ft = $('pl-ftoggle'); if (ft) ft.onclick = function () { FILTERS_OPEN = !FILTERS_OPEN; ft.setAttribute('aria-expanded', FILTERS_OPEN); var w = $('pl-fwrap'); if (w) w.hidden = !FILTERS_OPEN; };
     var cb = $('pl-custom'); if (cb) cb.onclick = function () { CUSTOM_OPEN = !CUSTOM_OPEN; draw(); };
     var cf = $('pl-custom-form'); if (cf) cf.onsubmit = function (e) { e.preventDefault(); var a = $('pl-from').value, b = $('pl-to').value; if (!a || !b) return; if (a > b) { var t0 = a; a = b; b = t0; } F.from = a; F.to = b; F.range = 'custom'; F.preset = ''; CUSTOM_OPEN = false; draw(); };
     [['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = el.value; draw(); }; });
@@ -201,15 +206,11 @@
     var ms = DATA.meetings.filter(function (m) { return (!F.campaign || (m.campaigns || []).indexOf(F.campaign) > -1) && (!F.caller || (m.callers || []).indexOf(F.caller) > -1) && inRange(m.created); });
     var keys = {}; ms.forEach(function (m) { if (m.leadKey) keys[m.leadKey] = 1; });
     var cohort = DATA.leads.filter(function (l) { return keys[l.key]; });
-    var col = function (title, list, tone) {
-      var b = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
-      var steps = [['Booked', b, ''], ['Show', sh, b ? pct(sh, b) + '% of booked' : ''], ['Closed', cl, sh ? pct(cl, sh) + '% of shows' : '']];
-      return '<div class="pl-fun pl-fun-' + tone + '"><h4>' + esc(title) + '</h4>' + steps.map(function (x, i) {
-        return '<div class="pl-fun-step"><div class="pl-fun-top"><span>' + x[0] + '</span><b>' + x[1] + '</b></div><div class="pl-fun-bar"><i style="width:' + (b ? Math.max(x[1] / b * 100, x[1] ? 3 : 0) : 0).toFixed(1) + '%"></i></div><small>' + (x[2] || '&nbsp;') + '</small></div>';
-      }).join('') + '<p class="pl-fun-end">' + (b ? pct(cl, b) + '% of bookings closed' : 'Nothing booked yet') + '</p></div>';
-    };
-    return '<div class="card pl-funnel"><h3>Booked, show, closed</h3><div class="pl-funs">' +
-      col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
+    var list = F.fun === 'inbound' ? cohort.filter(function (l) { return l.type === 'inbound'; }) : F.fun === 'outbound' ? cohort.filter(function (l) { return l.type !== 'inbound'; }) : cohort;
+    var bk = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
+    var tile = function (label, n, note) { return '<div class="kpi-tile pl-ftile"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + n + '</div><p class="kpi-action">' + (note || '&nbsp;') + '</p></div>'; };
+    return '<div class="card pl-funnel2"><div class="pl-f2-head"><h3>Booked, show, closed</h3><div class="pl-seg" role="group" aria-label="Lead source">' + [['', 'All'], ['inbound', 'Inbound'], ['outbound', 'Outbound']].map(function (x) { var on = (F.fun || '') === x[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-fun="' + x[0] + '" aria-pressed="' + on + '">' + x[1] + '</button>'; }).join('') + '</div></div>' +
+      '<div class="pl-f2-row">' + tile('Booked', bk, '') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Showed', sh, bk ? pct(sh, bk) + '% of booked' : '') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Closed', cl, sh ? pct(cl, sh) + '% of shows' : '') + '</div></div>';
   }
   // A lead belongs to the chosen dates when it came in, or had a meeting booked or held, inside them.
   function leadInRange(l) {
@@ -224,6 +225,7 @@
       (rows.length ? '<div class="tablewrap pl-table">' + leadTable(rows.slice(0, 200)) + '</div>' : '<div class="empty">No leads in this stage for these dates.</div>') + '</div>';
   }
   function bindStageTiles() {
+    [].forEach.call(MAIN.querySelectorAll('[data-fun]'), function (b) { b.onclick = function () { F.fun = b.getAttribute('data-fun'); draw(); }; });
     // Same tile motion as the analytics portal: a spotlight and edge light follow the pointer, and the tile tilts toward it.
     [].forEach.call(MAIN.querySelectorAll('.kpi-tile'), function (el) {
       el.onpointermove = function (e) { if (e.pointerType === 'touch') return; var r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; el.style.setProperty('--spot-x', x + 'px'); el.style.setProperty('--spot-y', y + 'px'); el.style.setProperty('--tilt-x', ((0.5 - y / r.height) * 5).toFixed(2) + 'deg'); el.style.setProperty('--tilt-y', ((x / r.width - 0.5) * 5).toFixed(2) + 'deg'); };
@@ -724,38 +726,43 @@
   /* ---------- Sources (admin) ---------- */
   var SRC_EDIT = null;
   function sheetUrl(id) { return 'https://docs.google.com/spreadsheets/d/' + id + '/edit'; }
+  var SRC_OPEN = {};
+  function srcSection(k, title, summary, body) {
+    return '<details class="pl-sec" data-sec="' + k + '"' + (SRC_OPEN[k] ? ' open' : '') + '><summary><b>' + esc(title) + '</b><span>' + summary + '</span></summary><div class="pl-sec-body">' + body + '</div></details>';
+  }
   function sourcesView() {
     if (!SRC_EDIT) SRC_EDIT = (DATA.sources || []).map(function (x) { return { name: x.name, url: sheetUrl(x.id), tz: x.tz, id: x.id }; });
     var files = {}; (DATA.status.sheets.files || []).forEach(function (f) { files[f.id || ''] = f; });
     var tzOpts = function (cur) { return (DATA.timezones || []).map(function (z) { return '<option value="' + z + '"' + (z === cur ? ' selected' : '') + '>' + z.replace('_', ' ') + '</option>'; }).join(''); };
-    return '<p class="sub" style="margin-top:-6px">The Lead Entry sheets the Pipeline reads. Paste a new link here if a sheet changes. The sheet must be one amr@bpohive.com can open. Changes are picked up on the next sync (every 15 minutes).</p>' +
-      '<div class="card pl-src">' + SRC_EDIT.map(function (x, i) {
+    var probs = SRC_EDIT.filter(function (x) { var f = x.id ? files[x.id] : null; return f && f.error; }).length;
+    var last = Math.max.apply(null, [0].concat((DATA.status.sheets.files || []).map(function (f) { return f.syncedAt || 0; })));
+    var sheetSum = SRC_EDIT.length + ' sheet' + (SRC_EDIT.length === 1 ? '' : 's') + (probs ? ', <em>' + probs + ' with a problem</em>' : last ? ', synced ' + esc(ago(last)) : '');
+    return srcSection('sheets', 'Lead Entry sheets', sheetSum, '<p class="pl-sec-hint">Sheets amr@bpohive.com can open. Changes apply on the next sync (every 15 min). Columns are found by name, so they can move.</p><div class="pl-src">' + SRC_EDIT.map(function (x, i) {
         var f = x.id ? files[x.id] : null;
         return '<div class="pl-src-row" data-i="' + i + '"><label>Name<input type="text" data-f="name" value="' + esc(x.name) + '" placeholder="BPO Hive USA"></label><label class="pl-src-url">Google Sheet link<input type="text" data-f="url" value="' + esc(x.url) + '" placeholder="https://docs.google.com/spreadsheets/d/…"></label><label>Time zone for appointment times<select data-f="tz">' + tzOpts(x.tz) + '</select></label><div class="pl-src-act">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open ↗</a>' : '') + '<button type="button" class="mini" data-del="' + i + '">Remove</button></div>' +
           '<small class="pl-src-st">' + (f ? (f.error ? 'Problem: ' + esc(f.error) : f.rows + ' rows, synced ' + ago(f.syncedAt)) : 'Not synced yet') + '</small></div>';
-      }).join('') + '<div class="pl-src-foot"><button type="button" class="btn" id="pl-src-add">+ Add a sheet</button><button type="button" class="btn pri" id="pl-src-save">Save sources</button><span id="pl-src-msg" class="ins-note" style="margin:0"></span></div></div>' +
-      sinceCard() + deletedCard() + eventTypesCard() +
-      '<p class="ins-note">Columns are found by their names (Prospect Name, Business Name, Agent Name, Appointment Date, Appointment Time, Timezone, Prospect Email, Call Recording Link, Confirmation Status, Show Status…), so you can add or move columns. If a row has its own Timezone (EST, GST…), that wins over the time zone above.</p>';
+      }).join('') + '<div class="pl-src-foot"><button type="button" class="btn" id="pl-src-add">+ Add a sheet</button><button type="button" class="btn pri" id="pl-src-save">Save sources</button><span id="pl-src-msg" class="ins-note" style="margin:0"></span></div></div>') +
+      sinceCard() + eventTypesCard() + deletedCard();
   }
   function sinceCard() {
     var v = DATA.status.since || '';
-    return '<h3 class="pl-h" style="margin-top:22px">Start date</h3><p class="sub" style="margin-top:-4px">Meetings and leads before this date are left out of the Pipeline. Leave it empty to show everything.</p>' +
-      '<div class="card pl-ev" style="padding:14px 16px"><div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid #CBD4D9;border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div></div>';
+    return srcSection('since', 'Start date', v ? 'From ' + esc(day(v + 'T12:00:00')) : 'Everything', '<p class="pl-sec-hint">Leads and meetings before this date are left out. Empty shows everything.</p>' +
+      '<div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid #CBD4D9;border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div>');
   }
   function deletedCard() {
     var list = DATA.status.deleted || [];
     if (!list.length) return '';
-    return '<h3 class="pl-h" style="margin-top:22px">Deleted leads</h3><p class="sub" style="margin-top:-4px">Left out of the Pipeline. Their notes are kept, so you can bring any of them back. If one books again, they come back by themselves.</p>' +
-      '<div class="card pl-ev">' + list.map(function (d) { return '<div class="pl-ev-row" style="cursor:default"><span><b>' + esc(d.name || '(no name)') + '</b>' + (d.company ? ', ' + esc(d.company) : '') + '</span><small>Deleted ' + esc(day(d.at)) + (d.by ? ' by ' + esc(d.by) : '') + '</small><button type="button" class="btn" data-restore="' + esc(d.key) + '">Bring back</button></div>'; }).join('') + '</div>';
+    return srcSection('deleted', 'Deleted leads', list.length + ' lead' + (list.length === 1 ? '' : 's'), '<p class="pl-sec-hint">Notes are kept. A lead who books again comes back by itself.</p><div class="pl-ev">' + list.map(function (d) { return '<div class="pl-ev-row" style="cursor:default"><span><b>' + esc(d.name || '(no name)') + '</b>' + (d.company ? ', ' + esc(d.company) : '') + '</span><small>Deleted ' + esc(day(d.at)) + (d.by ? ' by ' + esc(d.by) : '') + '</small><button type="button" class="btn" data-restore="' + esc(d.key) + '">Bring back</button></div>'; }).join('') + '</div>');
   }
   function eventTypesCard() {
     var list = (DATA.status.calendly && DATA.status.calendly.eventTypes) || [];
     if (!list.length) return '';
-    return '<h3 class="pl-h" style="margin-top:22px">Calendly event types</h3><p class="sub" style="margin-top:-4px">Untick the ones that are not sales calls (job interviews, vendor calls…). They are left out of leads, meetings and the show rate.</p>' +
-      '<div class="card pl-ev">' + list.map(function (e) { return '<label class="pl-ev-row"><input type="checkbox" data-ev="' + esc(e.name) + '"' + (e.skipped ? '' : ' checked') + '> <span>' + esc(e.name || '(no name)') + '</span><small>' + e.meetings + ' meeting' + (e.meetings === 1 ? '' : 's') + '</small></label>'; }).join('') +
-      '<div class="pl-src-foot"><button type="button" class="btn pri" id="pl-ev-save">Save event types</button><span id="pl-ev-msg" class="ins-note" style="margin:0"></span></div></div>';
+    var on = list.filter(function (e) { return !e.skipped; }).length;
+    return srcSection('events', 'Calendly event types', on + ' of ' + list.length + ' counted', '<p class="pl-sec-hint">Untick what is not a sales call (interviews, vendor calls).</p><div class="pl-ev">' + list.map(function (e) { return '<label class="pl-ev-row"><input type="checkbox" data-ev="' + esc(e.name) + '"' + (e.skipped ? '' : ' checked') + '> <span>' + esc(e.name || '(no name)') + '</span><small>' + e.meetings + ' meeting' + (e.meetings === 1 ? '' : 's') + '</small></label>'; }).join('') +
+      '<div class="pl-src-foot"><button type="button" class="btn pri" id="pl-ev-save">Save event types</button><span id="pl-ev-msg" class="ins-note" style="margin:0"></span></div></div>');
   }
   function bindSources() {
+    [].forEach.call(MAIN.querySelectorAll('details.pl-sec'), function (d) { d.ontoggle = function () { SRC_OPEN[d.getAttribute('data-sec')] = d.open; }; });
     if ($('pl-since-save')) $('pl-since-save').onclick = function () {
       var b = this; b.disabled = true; $('pl-since-msg').textContent = 'Saving…';
       api('POST', { action: 'since', since: $('pl-since').value }).then(function () { return load(false); }).then(function () { draw(); $('pl-since-msg').textContent = 'Saved.'; }).catch(function (e) { $('pl-since-msg').textContent = e.message; b.disabled = false; });
