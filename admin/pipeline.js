@@ -25,8 +25,8 @@
     F.range = 'custom'; F.from = iso10(a); F.to = iso10(b);
   }
   applyPreset('30');
-  var STATUS = { booked: ['Meeting pending', 'st-booked'], to_mark: ['Meeting to mark', 'st-needs'], shown: ['In follow-up', 'st-showed'], no_show: ['Missed meeting', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
-  var OUT = { upcoming: ['Upcoming', 'st-booked'], needs: ['To mark', 'st-needs'], showed: ['Showed up', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  var STATUS = { past: ['Met before tracking', 'st-off'], booked: ['Meeting pending', 'st-booked'], to_mark: ['Meeting to mark', 'st-needs'], shown: ['In follow-up', 'st-showed'], no_show: ['Missed meeting', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
+  var OUT = { untracked: ['Not tracked', 'st-off'], upcoming: ['Upcoming', 'st-booked'], needs: ['To mark', 'st-needs'], showed: ['Showed up', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { contract: ['Waiting on contract', '#7a5af5'] };
   var OLD_HOT = { must_close: ['Must close', '#c0392b'], nurture: ['Nurture', '#1B7381'] }; // only for older trail entries
   var HOT_RANK = { contract: 0 };
@@ -277,7 +277,7 @@
       (F.open ? stagePanel(F.open, now) : '') +
       funnel() +
       '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#4EA6F8'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week, last 12 weeks') +
-      bars(mc, [['showed', 'Showed up', '#1B7381'], ['no_show', 'No-show', '#20292F'], ['needs', 'Not marked yet', '#78BBFA'], ['rescheduled', 'Rescheduled', '#5B6670'], ['cancelled', 'Cancelled', '#E6F1F3']], 'Meeting outcomes per week, last 12 weeks') + '</div>' +
+      bars(mc, [['showed', 'Showed up', '#1B7381'], ['no_show', 'No-show', '#20292F'], ['needs', 'Not marked yet', '#78BBFA'], ['rescheduled', 'Rescheduled', '#5B6670'], ['cancelled', 'Cancelled', '#E6F1F3'], ['untracked', 'Not tracked', '#EAF4FE']], 'Meeting outcomes per week, last 12 weeks') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       breakdown('Results by campaign, in these dates', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       '<div style="height:14px"></div>' + breakdown('Results by caller, in these dates', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
