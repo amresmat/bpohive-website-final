@@ -25,8 +25,8 @@
     F.range = 'custom'; F.from = iso10(a); F.to = iso10(b);
   }
   applyPreset('30');
-  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
-  var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  var STATUS = { booked: ['Meeting pending', 'st-booked'], to_mark: ['Meeting to mark', 'st-needs'], shown: ['In follow-up', 'st-showed'], no_show: ['Missed meeting', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
+  var OUT = { upcoming: ['Upcoming', 'st-booked'], needs: ['To mark', 'st-needs'], showed: ['Showed up', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { contract: ['Waiting on contract', '#7a5af5'] };
   var OLD_HOT = { must_close: ['Must close', '#c0392b'], nurture: ['Nurture', '#1B7381'] }; // only for older trail entries
   var HOT_RANK = { contract: 0 };
@@ -173,7 +173,7 @@
       keys.forEach(function (k) { var r = map[k] || (map[k] = { k: k, leads: 0, booked: 0, showed: 0, noshow: 0 }); r.booked++; if (m.outcome === 'showed') r.showed++; if (m.outcome === 'no_show') r.noshow++; });
     });
     var rows = Object.keys(map).map(function (k) { return map[k]; }).filter(function (r) { return r.leads || r.booked; }).sort(function (a, b) { return b.booked - a.booked || b.leads - a.leads; });
-    return '<div class="card ins-table tablewrap"><h3>' + esc(title) + '</h3>' + (rows.length ? '<table><thead><tr><th>' + esc(keyName) + '</th><th class="num">New leads</th><th class="num">Booked</th><th class="num">Shows</th><th class="num">No-show</th><th class="num">Show rate</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r.k) + '</td><td class="num">' + r.leads + '</td><td class="num">' + r.booked + '</td><td class="num">' + r.showed + '</td><td class="num">' + r.noshow + '</td><td class="num">' + (r.showed + r.noshow ? pct(r.showed, r.showed + r.noshow) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty">Nothing in this period yet.</div>') + '</div>';
+    return '<div class="card ins-table tablewrap"><h3>' + esc(title) + '</h3>' + (rows.length ? '<table><thead><tr><th>' + esc(keyName) + '</th><th class="num">New leads</th><th class="num">Meetings booked</th><th class="num">Showed up</th><th class="num">No-show</th><th class="num">Show rate</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r.k) + '</td><td class="num">' + r.leads + '</td><td class="num">' + r.booked + '</td><td class="num">' + r.showed + '</td><td class="num">' + r.noshow + '</td><td class="num">' + (r.showed + r.noshow ? pct(r.showed, r.showed + r.noshow) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty">Nothing in this period yet.</div>') + '</div>';
   }
   // What each dashboard box counts. The "View" pages list exactly these, with the same filters.
   function sets() {
@@ -209,8 +209,8 @@
     var list = F.fun === 'inbound' ? cohort.filter(function (l) { return l.type === 'inbound'; }) : F.fun === 'outbound' ? cohort.filter(function (l) { return l.type !== 'inbound'; }) : cohort;
     var bk = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
     var tile = function (label, n, note) { return '<div class="kpi-tile pl-ftile"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + n + '</div><p class="kpi-action">' + (note || '&nbsp;') + '</p></div>'; };
-    return '<div class="card pl-funnel2"><div class="pl-f2-head"><h3>Booked, show, closed</h3><div class="pl-seg" role="group" aria-label="Lead source">' + [['', 'All'], ['inbound', 'Inbound'], ['outbound', 'Outbound']].map(function (x) { var on = (F.fun || '') === x[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-fun="' + x[0] + '" aria-pressed="' + on + '">' + x[1] + '</button>'; }).join('') + '</div></div>' +
-      '<div class="pl-f2-row">' + tile('Booked', bk, '') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Showed', sh, bk ? pct(sh, bk) + '% of booked' : '') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Closed', cl, sh ? pct(cl, sh) + '% of shows' : '') + '</div></div>';
+    return '<div class="card pl-funnel2"><div class="pl-f2-head"><h3>Meetings booked in these dates</h3><div class="pl-seg" role="group" aria-label="Lead source">' + [['', 'All'], ['inbound', 'Inbound'], ['outbound', 'Outbound']].map(function (x) { var on = (F.fun || '') === x[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-fun="' + x[0] + '" aria-pressed="' + on + '">' + x[1] + '</button>'; }).join('') + '</div></div>' +
+      '<div class="pl-f2-row">' + tile('Booked', bk, 'people who booked') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Showed up', sh, bk ? pct(sh, bk) + '% of booked' : '') + '<span class="pl-f2-arrow" aria-hidden="true">&rarr;</span>' + tile('Won', cl, sh ? pct(cl, sh) + '% of shows' : '') + '</div></div>';
   }
   // A lead belongs to the chosen dates when it came in, or had a meeting booked or held, inside them.
   function leadInRange(l) {
@@ -272,14 +272,15 @@
     var lc = weekly(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; }, weeks);
     var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
     return filters(true, false) +
+      '<h3 class="pl-sech">Where these leads are now <small>everyone who came in or had a meeting in these dates</small></h3>' +
       '<div class="pl-stiles">' + STAGES.map(function (s) { var on = F.open === s[0]; return '<div class="kpi-tile' + (on ? ' on' : '') + '" style="--c:' + s[2] + '"><div class="kpi-label"><i></i>' + esc(s[1]) + '</div><button type="button" class="kpi-value" data-st="' + s[0] + '" aria-expanded="' + on + '" aria-controls="pl-sopen">' + sc[s[0]] + '</button><p class="kpi-action">' + (on ? 'Hide leads' : 'View leads') + ' <span class="kpi-arrow">&rarr;</span></p></div>'; }).join('') + '</div>' +
       (F.open ? stagePanel(F.open, now) : '') +
       funnel() +
-      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
-      bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
+      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week, last 12 weeks') +
+      bars(mc, [['showed', 'Showed up', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meeting outcomes per week, last 12 weeks') + '</div>' +
       '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
-      breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
-      '<div style="height:14px"></div>' + breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
+      breakdown('Results by campaign, in these dates', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
+      '<div style="height:14px"></div>' + breakdown('Results by caller, in these dates', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
   }
   function viewPage() {
     var v = VIEWS[VIEW] || VIEWS.booked, rows = sets()[v[1]] || [];
@@ -506,9 +507,9 @@
 
   /* ---------- Stages: every lead in one stage, side by side ---------- */
   var STAGES = [
-    ['booked', 'Booked', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or to mark'],
-    ['shown', 'Showed', 'var(--teal)', function (l) { return l.status === 'shown'; }, 'Had the meeting, following up'],
-    ['no_show', 'No-show', 'var(--red)', function (l) { return l.status === 'no_show'; }, 'Missed the meeting'],
+    ['booked', 'Meeting pending', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or to mark'],
+    ['shown', 'In follow-up', 'var(--teal)', function (l) { return l.status === 'shown'; }, 'Had the meeting, following up'],
+    ['no_show', 'Missed meeting', 'var(--red)', function (l) { return l.status === 'no_show'; }, 'Missed the meeting'],
     ['no_reply', 'Not replying', '#7A6A55', function (l) { return deadBucket(l) === 'no_reply'; }, 'Stopped replying'],
     ['unqualified', 'Unqualified', '#6B7780', function (l) { return deadBucket(l) === 'unqualified'; }, 'Not a fit'],
     ['won', 'Won', 'var(--green)', function (l) { return l.status === 'won'; }, 'Closed']
