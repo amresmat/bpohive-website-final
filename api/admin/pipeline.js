@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
     if (!admin) return res.status(403).json({ error: 'Only the main admin can change this.' });
     const b = await body(req);
-    const link = t => 'https://www.bpohive.com/admin/?invite=' + encodeURIComponent(t);
+    const link = t => (process.env.ADMIN_ORIGIN || 'https://www.bpohive.com') + '/admin/?invite=' + encodeURIComponent(t);
     switch (b.action) {
       case 'outcome': return res.status(200).json(await pl.setOutcome(String(b.id || ''), String(b.outcome || '')));
       case 'update': return res.status(200).json(await pl.updateLead(String(b.key || ''), { note: b.note, deal: b.deal, from: b.from, reason: b.reason, hot: b.hot, temp: b.temp, value: b.value, next: b.next, contact: b.contact }, b.by, b.also));
