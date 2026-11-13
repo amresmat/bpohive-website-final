@@ -452,3 +452,14 @@ test('a follow-up email can be sent to a lead and goes on the trail', async () =
   await assert.rejects(pl.updateLead('e:ann@a.com', { contact: { email: 'not an email' } }, 'Amr'), /email address/);
   delete process.env.BREVO_API_KEY;
 });
+
+test('meetings before tracking started count as not tracked unless something marked them', () => {
+  const { effectiveOutcome } = require('../lib/pipeline.cjs');
+  const now = Date.parse('2026-11-13T00:00:00Z');
+  const old = { end: '2025-03-01T10:00:00Z', invitees: [{}] };
+  assert.equal(effectiveOutcome(old, now), 'untracked');
+  assert.equal(effectiveOutcome({ ...old, invitees: [{ noShow: 'x' }] }, now), 'no_show');
+  assert.equal(effectiveOutcome({ ...old, fathomSpoke: true }, now), 'showed');
+  assert.equal(effectiveOutcome({ ...old, override: { outcome: 'showed' } }, now), 'showed');
+  assert.equal(effectiveOutcome({ end: '2026-10-01T10:00:00Z', invitees: [{}] }, now), 'needs');
+});
