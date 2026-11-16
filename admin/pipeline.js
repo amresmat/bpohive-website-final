@@ -263,20 +263,21 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
+  var ALWAYS_CC = 'amr.elmeligy@bpohive.com'; // also copied on the server (PIPELINE_ALWAYS_CC)
   var TEAM_MAILS = ['amr@bpohive.com', 'abdullah@bpohive.com', 'info@bpohive.com', 'success@bpohive.com'];
   function mailBox(l) {
     var me = myName(), first = String(l.name || '').trim().split(/\s+/)[0] || 'there';
     first = first.charAt(0).toUpperCase() + first.slice(1);
     var mine = TEAM_MAILS.filter(function (e) { return me && e.indexOf(me.toLowerCase().split(/\s+/)[0] + '@') === 0; })[0] || TEAM_MAILS[0];
     var body = 'Hi ' + first + ',\n\nThanks again for your time. Following up on our conversation.\n\nWould you have 15 minutes this week to go over next steps?\n\nBest,\n' + (me || 'Amr') + '\nBPO Hive';
-    return '<div class="pl-mailbox" id="pl-m-box" hidden><div class="pl-mail-row"><label>To<input type="email" id="pl-m-to" value="' + esc(l.email || '') + '" placeholder="name@company.com"></label><label>Cc <small>(optional)</small><input type="text" id="pl-m-cc" placeholder="abdullah@bpohive.com"></label></div>' +
+    return '<div class="pl-mailbox" id="pl-m-box" hidden><div class="pl-mail-row"><label>To<input type="email" id="pl-m-to" value="' + esc(l.email || '') + '" placeholder="name@company.com"></label><label>Cc <small>(optional)</small><input type="text" id="pl-m-cc" placeholder="abdullah@bpohive.com"><small class="pl-m-always">' + ALWAYS_CC + ' is always copied</small></label></div>' +
       '<div class="pl-mail-row"><label>Your name<input type="text" id="pl-m-from" value="' + esc(me) + '" placeholder="Amr"></label><label>Replies go to<select id="pl-m-reply">' + TEAM_MAILS.map(function (e) { return '<option' + (e === mine ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label></div>' +
       '<label>Subject<input type="text" id="pl-m-subj" value="' + esc('Following up' + (l.company ? ', ' + l.company : '')) + '"></label>' +
       '<label>Message<textarea id="pl-m-body" rows="8">' + esc(body) + '</textarea></label>' +
       '<div class="pl-m-files"><label class="pl-m-attach"><input type="file" id="pl-m-file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.png,.jpg,.jpeg,.gif,.zip,.rtf,.odt,.ods,.odp"><span>Attach files</span></label><ul id="pl-m-list"></ul><small>PDF, Word, Excel, PowerPoint, images or ZIP, up to 3 MB in total</small></div>' +
       '<label class="pl-m-copy"><input type="checkbox" id="pl-m-copy" checked> Send a copy to my inbox (the address replies go to)</label>' +
       '<div class="pl-editbox-act"><button type="button" class="btn pri" id="pl-m-send">Send email</button><button type="button" class="btn" id="pl-m-cancel">Cancel</button><a id="pl-m-app" class="pl-m-app" href="#">Open in my email app instead</a><span class="ins-note" id="pl-m-msg" style="margin:0"></span></div>' +
-      '<p class="ins-note" style="margin:8px 0 0">Sent from success@bpohive.com with your name. Their reply and your copy go to the address you pick, and it is saved on the trail.</p></div>';
+      '<p class="ins-note" style="margin:8px 0 0">Sent from success@bpohive.com with your name, with ' + ALWAYS_CC + ' in Cc. Their reply and your copy go to the address you pick, and it is saved on the trail.</p></div>';
   }
   function addLeadDialog(stage) {
     var d = dlg(), st = STAGES.some(function (s) { return s[0] === stage; }) ? stage : 'shown';
@@ -645,7 +646,7 @@
     if (q('pl-m-open')) {
       q('pl-m-open').onclick = function () { q('pl-m-box').hidden = false; q('pl-m-open').hidden = true; (q('pl-m-to').value ? q('pl-m-body') : q('pl-m-to')).focus(); };
       q('pl-m-cancel').onclick = function () { q('pl-m-box').hidden = true; q('pl-m-open').hidden = false; };
-      var mailto = function () { q('pl-m-app').href = 'mailto:' + encodeURIComponent(q('pl-m-to').value.trim()) + '?subject=' + encodeURIComponent(q('pl-m-subj').value) + '&body=' + encodeURIComponent(q('pl-m-body').value) + (q('pl-m-cc').value.trim() ? '&cc=' + encodeURIComponent(q('pl-m-cc').value.trim()) : ''); };
+      var mailto = function () { q('pl-m-app').href = 'mailto:' + encodeURIComponent(q('pl-m-to').value.trim()) + '?subject=' + encodeURIComponent(q('pl-m-subj').value) + '&body=' + encodeURIComponent(q('pl-m-body').value) + '&cc=' + encodeURIComponent([q('pl-m-cc').value.trim(), ALWAYS_CC].filter(Boolean).join(',')); };
       ['pl-m-to', 'pl-m-subj', 'pl-m-body', 'pl-m-cc'].forEach(function (id) { q(id).oninput = mailto; }); mailto();
       var files = [];
       var kb = function (n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
