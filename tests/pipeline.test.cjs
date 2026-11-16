@@ -452,3 +452,38 @@ test('a follow-up email can be sent to a lead and goes on the trail', async () =
   await assert.rejects(pl.updateLead('e:ann@a.com', { contact: { email: 'not an email' } }, 'Amr'), /email address/);
   delete process.env.BREVO_API_KEY;
 });
+
+test('a form entry with the wrong time zone joins the Calendly booking instead of showing twice', () => {
+  // Sunil booked 8pm India (14:30 UTC) on Calendly; the caller typed 4:00 PM (Egypt) into the New York sheet.
+  const cal = Date.UTC(2026, 10, 17, 14, 30);
+  const data = {
+    entries: [],
+    sheets: [{ id: 'S1', name: 'BPO Hive USA', tz: 'America/New_York', rows: [
+      { at: '11/16/2026 17:19:40', name: 'Sunil Fonseca', company: 'SecurePalm', email: 'sunil@securepalm.com', caller: 'Shayen', apptDate: '11/17/2026', apptTime: '4:00 PM' },
+      { at: '11/16/2026 17:30:00', name: 'Other Day', email: 'other@x.com', caller: 'Shayen', apptDate: '11/20/2026', apptTime: '4:00 PM' }] }],
+    meetings: [
+      { id: 'SU1', name: 'BPO Hive Discovery Call', start: new Date(cal).toISOString(), end: new Date(cal + 1800e3).toISOString(), status: 'active', created: '2026-11-16T15:12:58Z', invitees: [{ name: 'Sunil Fonseca', email: 'sunil@securepalm.com', qa: [], utm: {}, created: '2026-11-16T15:12:58Z' }] },
+      { id: 'OT1', name: 'BPO Hive Discovery Call', start: '2026-11-18T15:00:00Z', end: '2026-11-18T15:30:00Z', status: 'active', created: '2026-11-16T15:00:00Z', invitees: [{ name: 'Other Day', email: 'other@x.com', qa: [], utm: {} }] }
+    ],
+    leadOv: {}, recordings: [], outcomes: {}, skipEvents: null
+  };
+  const r = pl.build(data, Date.UTC(2026, 10, 16, 18));
+  const sunil = r.leads.find(l => l.email === 'sunil@securepalm.com');
+  assert.deepEqual(sunil.meetings, ['SU1'], 'one meeting, not two');
+  const m = r.meetings.find(x => x.id === 'SU1');
+  assert.equal(m.start, new Date(cal).toISOString(), 'the Calendly time is kept'); assert.equal(m.sheet.caller, 'Shayen');
+  assert.equal(r.leads.find(l => l.email === 'other@x.com').meetings.length, 2, 'a form date two days away is still its own meeting');
+});
+
+test('Amr El Meligy is copied (Cc) on every Pipeline email', async () => {
+  process.env.BREVO_API_KEY = process.env.BREVO_API_KEY || 'test';
+  const sent = []; const realFetch = global.fetch;
+  global.fetch = async (u, o) => { if (String(u).includes('api.brevo.com')) { sent.push(JSON.parse(o.body)); return new Response('{}', { status: 201 }); } return realFetch(u, o); };
+  try {
+    await pl.sendLeadEmail('e:lead@acme.com', { to: 'lead@acme.com', subject: 'Hi', body: 'Hello', replyTo: 'amr@bpohive.com', cc: 'abdullah@bpohive.com' }, 'Amr');
+    await pl.sendLeadEmail('e:lead@acme.com', { to: 'lead@acme.com', subject: 'Hi', body: 'Hello', replyTo: 'amr@bpohive.com', cc: 'Amr.Elmeligy@bpohive.com' }, 'Amr');
+  } finally { global.fetch = realFetch; }
+  assert.deepEqual(sent[0].cc.map(x => x.email), ['abdullah@bpohive.com', 'amr.elmeligy@bpohive.com']);
+  assert.deepEqual(sent[0].bcc.map(x => x.email), ['amr@bpohive.com'], 'the sender still gets a hidden copy');
+  assert.deepEqual(sent[1].cc.map(x => x.email), ['amr.elmeligy@bpohive.com'], 'not added twice');
+});
