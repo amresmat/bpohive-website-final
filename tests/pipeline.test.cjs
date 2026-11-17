@@ -282,15 +282,16 @@ test('leads added by hand go to Shown; hot tags and an imported trail keep their
 });
 
 test('a start date leaves out older meetings and leads', async () => {
+  // (each person has their own company domain: people from one company are grouped once they have met us)
   const day = 864e5, start = Date.parse('2026-09-01T00:00:00Z');
   const mt = (id, at, inv) => ({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - day), invitees: [Object.assign({ qa: [], utm: {}, created: iso(at - day) }, inv)], override: { outcome: 'showed' } });
   const data = () => ({ since: '2026-09-01', entries: [{ id: 'w', form: 'Contact', at: iso(start - 5 * day), fields: { name: 'Old Web', email: 'old@web.com' } }], sheets: [], recordings: [], outcomes: {}, skipEvents: null, leadOv: {}, trails: {},
-    meetings: [mt('O1', start - 20 * day, { name: 'Old Lead', email: 'old@x.com' }), mt('N1', start + 3 * day, { name: 'New Lead', email: 'new@x.com' }), mt('B1', start - 30 * day, { name: 'Both', email: 'both@x.com' }), mt('B2', start + 10 * day, { name: 'Both', email: 'both@x.com' })] });
+    meetings: [mt('O1', start - 20 * day, { name: 'Old Lead', email: 'old@aco.com' }), mt('N1', start + 3 * day, { name: 'New Lead', email: 'new@bco.com' }), mt('B1', start - 30 * day, { name: 'Both', email: 'both@cco.com' }), mt('B2', start + 10 * day, { name: 'Both', email: 'both@cco.com' })] });
   const d0 = data();
-  d0.meetings.push(Object.assign(mt('T1', start - 40 * day, { name: 'Noted Lead', email: 'noted@x.com' }), { override: null }), Object.assign(mt('B0', start - 50 * day, { name: 'Both', email: 'both@x.com' }), { override: null }));
-  d0.trails = { 'e:noted@x.com': [{ id: 'n', at: start + 5 * day, kind: 'note', text: 'Still talking', by: 'Amr' }] };
+  d0.meetings.push(Object.assign(mt('T1', start - 40 * day, { name: 'Noted Lead', email: 'noted@dco.com' }), { override: null }), Object.assign(mt('B0', start - 50 * day, { name: 'Both', email: 'both@cco.com' }), { override: null }));
+  d0.trails = { 'e:noted@dco.com': [{ id: 'n', at: start + 5 * day, kind: 'note', text: 'Still talking', by: 'Amr' }] };
   const r = pl.build(d0);
-  assert.deepEqual(r.leads.map(l => l.email).sort(), ['both@x.com', 'new@x.com', 'noted@x.com'], 'old leads go, unless something happened after the start date');
+  assert.deepEqual(r.leads.map(l => l.email).sort(), ['both@cco.com', 'new@bco.com', 'noted@dco.com'], 'old leads go, unless something happened after the start date');
   assert.deepEqual(r.meetings.map(m => m.id).sort(), ['B1', 'B2', 'N1'], 'a kept lead keeps its older marked meetings; old unmarked ones are dropped');
   assert.equal(pl.build(Object.assign(data(), { since: '' })).meetings.length, 4);
   assert.equal(await pl.setSince('2026-09-01'), '2026-09-01');
@@ -497,4 +498,29 @@ test('links in a Pipeline email are clickable (no-show rebooking link)', async (
   } finally { global.fetch = realFetch; }
   assert.match(sent[0].htmlContent, /<a href="https:\/\/calendly\.com\/d\/cxkp-cvw-qyg\?name=Sam%20Lee&amp;email=lead%40acme\.com&amp;utm_source=pipeline"[^>]*>calendly\.com\/d\/cxkp-cvw-qyg<\/a>/);
   assert.match(sent[0].textContent, /https:\/\/calendly\.com\/d\/cxkp-cvw-qyg\?name=Sam%20Lee/);
+});
+
+test('a colleague from a company already in the Pipeline joins that company lead', () => {
+  const mt = (id, start, created, inv) => ({ id, name: 'BPO Hive Discovery Call', start, end: start, status: 'active', created, invitees: [Object.assign({ qa: [], utm: {}, created }, inv)] });
+  const data = {
+    entries: [], sheets: [],
+    meetings: [
+      // listed newest first on purpose: the older booking must still win
+      mt('H1', '2026-11-18T11:00:00Z', '2026-11-17T11:57:00Z', { name: 'Hudan', email: 'h.yusaf@mueen.com.sa', phone: '+966557754708', qa: [{ q: 'Company name', a: 'mueen hr' }] }),
+      mt('O1', '2026-11-11T09:00:00Z', '2026-11-05T10:00:00Z', { name: 'Omar Al Juraifani', email: 'o.aljuraifani@mueen.com.sa' }),
+      mt('G1', '2026-11-12T09:00:00Z', '2026-11-06T10:00:00Z', { name: 'Ali One', email: 'ali.one@gmail.com' }),
+      mt('G2', '2026-11-13T09:00:00Z', '2026-11-07T10:00:00Z', { name: 'Sara Two', email: 'sara.two@gmail.com' }),
+      mt('F1', '2026-11-20T09:00:00Z', '2026-11-16T10:00:00Z', { name: 'Lina First', email: 'lina@falcon.com' }),
+      mt('F2', '2026-11-21T09:00:00Z', '2026-11-16T12:00:00Z', { name: 'Sam Second', email: 'sam@falcon.com' })
+    ],
+    leadOv: {}, recordings: [], outcomes: {}, skipEvents: null
+  };
+  const r = pl.build(data, Date.parse('2026-11-17T18:00:00Z'));
+  const mueen = r.leads.filter(l => /mueen/.test(l.email));
+  assert.equal(mueen.length, 1, 'one Mueen lead');
+  assert.equal(mueen[0].email, 'o.aljuraifani@mueen.com.sa');
+  assert.ok(mueen[0].aliases.includes('e:h.yusaf@mueen.com.sa'));
+  assert.deepEqual(mueen[0].meetings.slice().sort(), ['H1', 'O1']);
+  assert.equal(r.leads.filter(l => /gmail/.test(l.email)).length, 2, 'free mail is never grouped');
+  assert.equal(r.leads.filter(l => /falcon/.test(l.email)).length, 2, 'two people from one company booking before either meeting has happened stay apart');
 });
