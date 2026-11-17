@@ -263,6 +263,7 @@
 
   /* ---------- Shown: the hot leads, in one place, updated through the trail ---------- */
   var SEL = '', HOTF = '';
+  var REBOOK_URL = 'https://calendly.com/d/cxkp-cvw-qyg'; // the website's booking link, used in the no-show email
   var ALWAYS_CC = 'amr.elmeligy@bpohive.com'; // also copied on the server (PIPELINE_ALWAYS_CC)
   var TEAM_MAILS = ['amr@bpohive.com', 'abdullah@bpohive.com', 'info@bpohive.com', 'success@bpohive.com'];
   function mailBox(l) {
@@ -270,9 +271,16 @@
     first = first.charAt(0).toUpperCase() + first.slice(1);
     var mine = TEAM_MAILS.filter(function (e) { return me && e.indexOf(me.toLowerCase().split(/\s+/)[0] + '@') === 0; })[0] || TEAM_MAILS[0];
     var body = 'Hi ' + first + ',\n\nThanks again for your time. Following up on our conversation.\n\nWould you have 15 minutes this week to go over next steps?\n\nBest,\n' + (me || 'Amr') + '\nBPO Hive';
+    var subj = 'Following up' + (l.company ? ', ' + l.company : '');
+    // No-shows get a short note that brings them back to book a new time on Calendly.
+    if (l.status === 'no_show') {
+      var link = REBOOK_URL;
+      subj = 'Sorry we missed you, ' + first;
+      body = 'Hi ' + first + ',\n\nSorry we missed each other. Want to grab a new time that suits you?\n' + link + '\n\nBest,\n' + (me || 'Amr') + '\nBPO Hive';
+    }
     return '<div class="pl-mailbox" id="pl-m-box" hidden><div class="pl-mail-row"><label>To<input type="email" id="pl-m-to" value="' + esc(l.email || '') + '" placeholder="name@company.com"></label><label>Cc <small>(optional)</small><input type="text" id="pl-m-cc" placeholder="abdullah@bpohive.com"><small class="pl-m-always">' + ALWAYS_CC + ' is always copied</small></label></div>' +
       '<div class="pl-mail-row"><label>Your name<input type="text" id="pl-m-from" value="' + esc(me) + '" placeholder="Amr"></label><label>Replies go to<select id="pl-m-reply">' + TEAM_MAILS.map(function (e) { return '<option' + (e === mine ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label></div>' +
-      '<label>Subject<input type="text" id="pl-m-subj" value="' + esc('Following up' + (l.company ? ', ' + l.company : '')) + '"></label>' +
+      '<label>Subject<input type="text" id="pl-m-subj" value="' + esc(subj) + '"></label>' +
       '<label>Message<textarea id="pl-m-body" rows="8">' + esc(body) + '</textarea></label>' +
       '<div class="pl-m-files"><label class="pl-m-attach"><input type="file" id="pl-m-file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.png,.jpg,.jpeg,.gif,.zip,.rtf,.odt,.ods,.odp"><span>Attach files</span></label><ul id="pl-m-list"></ul><small>PDF, Word, Excel, PowerPoint, images or ZIP, up to 3 MB in total</small></div>' +
       '<label class="pl-m-copy"><input type="checkbox" id="pl-m-copy" checked> Send a copy to my inbox (the address replies go to)</label>' +

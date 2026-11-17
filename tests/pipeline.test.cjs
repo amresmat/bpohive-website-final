@@ -487,3 +487,14 @@ test('Amr El Meligy is copied (Cc) on every Pipeline email', async () => {
   assert.deepEqual(sent[0].bcc.map(x => x.email), ['amr@bpohive.com'], 'the sender still gets a hidden copy');
   assert.deepEqual(sent[1].cc.map(x => x.email), ['amr.elmeligy@bpohive.com'], 'not added twice');
 });
+
+test('links in a Pipeline email are clickable (no-show rebooking link)', async () => {
+  process.env.BREVO_API_KEY = process.env.BREVO_API_KEY || 'test';
+  const sent = []; const realFetch = global.fetch;
+  global.fetch = async (u, o) => { if (String(u).includes('api.brevo.com')) { sent.push(JSON.parse(o.body)); return new Response('{}', { status: 201 }); } return realFetch(u, o); };
+  try {
+    await pl.sendLeadEmail('e:lead@acme.com', { to: 'lead@acme.com', subject: 'Sorry we missed you', body: 'Hi Sam,\n\nPick a time here:\nhttps://calendly.com/d/cxkp-cvw-qyg?name=Sam%20Lee&email=lead%40acme.com&utm_source=pipeline\n\nBest', replyTo: 'amr@bpohive.com' }, 'Amr');
+  } finally { global.fetch = realFetch; }
+  assert.match(sent[0].htmlContent, /<a href="https:\/\/calendly\.com\/d\/cxkp-cvw-qyg\?name=Sam%20Lee&amp;email=lead%40acme\.com&amp;utm_source=pipeline"[^>]*>calendly\.com\/d\/cxkp-cvw-qyg<\/a>/);
+  assert.match(sent[0].textContent, /https:\/\/calendly\.com\/d\/cxkp-cvw-qyg\?name=Sam%20Lee/);
+});
