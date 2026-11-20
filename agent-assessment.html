@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales Agent Assessment | BPO Hive</title>
+<meta name="description" content="A 5-minute voice assessment for outbound sales agents at BPO Hive.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logo/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#20292F;--teal:#1B7381;--blue:#4EA6F8;--light:#78BBFA;--ink:#20292F;--muted:#5B6670;--line:#DDE3E7;--bg:#F4F6F8;--red:#B5523F;--green:#2B6E4C}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:12px}
+.top img{height:30px;width:auto;filter:brightness(0) invert(1)}
+.top span{color:#C9D3DA;font-size:13px;font-weight:500;margin-left:auto}
+.wrap{max-width:640px;margin:0 auto;padding:28px 16px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:0 1px 2px rgba(32,41,47,.04)}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:20px;margin:0 0 6px}
+p{line-height:1.6;margin:0 0 12px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 22px}
+.steps div{background:var(--bg);border-radius:10px;padding:12px;font-size:13px;color:var(--muted);line-height:1.45}
+.steps b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
+label{display:block;font-weight:600;font-size:14px;margin:0 0 14px}
+label small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],select{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid #C9D2D8;border-radius:9px;font:inherit;font-size:16px;font-weight:400;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px;color:var(--muted);line-height:1.5}
+.check input{width:18px;height:18px;margin-top:2px;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:14px 22px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;background:var(--teal);color:#fff;min-height:50px}
+.btn:hover{background:#155f6b}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid #C9D2D8}
+.btn.rec{background:var(--red)}
+.btn.wide{width:100%}
+.err{color:var(--red);font-size:14px;margin:10px 0 0;min-height:1em}
+.brief{border-left:4px solid var(--teal);background:#F2F8F9;border-radius:0 10px 10px 0;padding:14px 16px;margin:0 0 12px}
+.brief b{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
+.brief div{color:var(--ink);line-height:1.55;font-size:15px}
+.progress{display:flex;gap:6px;margin:0 0 16px}
+.progress i{flex:1;height:6px;border-radius:3px;background:#DDE3E7}
+.progress i.on{background:var(--teal)}
+.prospect{display:flex;gap:12px;align-items:flex-start;margin:6px 0 18px}
+.avatar{flex:none;width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.bubble{background:var(--bg);border-radius:4px 14px 14px 14px;padding:13px 15px;font-size:17px;line-height:1.5;color:var(--ink)}
+.bubble small{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.replay{background:none;border:0;color:var(--teal);font:inherit;font-weight:600;font-size:14px;cursor:pointer;padding:6px 0;margin-top:4px}
+.task{font-size:14px;color:var(--muted);margin:0 0 16px}
+.task b{color:var(--ink)}
+.recbox{border:1px dashed #C9D2D8;border-radius:12px;padding:18px;text-align:center}
+.timer{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0 2px}
+.timer.live{color:var(--red)}
+.hint{font-size:13px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block;animation:p 1s infinite}
+@keyframes p{50%{opacity:.25}}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+audio{width:100%;margin-top:12px}
+.done{text-align:center}
+.done .tick{width:64px;height:64px;border-radius:50%;background:#E6F3EC;color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:18px}
+.foot a{color:var(--muted)}
+[hidden]{display:none!important}
+@media (max-width:560px){.steps{grid-template-columns:1fr}.row{grid-template-columns:1fr}h1{font-size:24px}.card{padding:20px 16px}.wrap{padding:18px 12px 48px}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+</style>
+</head>
+<body>
+<header class="top"><img src="assets/logo/bpohivelogo.png" alt="BPO Hive"><span>Sales Agent Assessment</span></header>
+<main class="wrap">
+
+<!-- 1. About you -->
+<section class="card" id="s-intro">
+  <h1>Show us how you sound on a sales call</h1>
+  <p>This takes about 5 minutes. You'll make a short practice cold call: a business owner answers, and you reply out loud four times. We listen to how clear you are, your English, and how you handle the call.</p>
+  <div class="steps">
+    <div><b>1. Read the brief</b>A simple product and one goal: book a meeting.</div>
+    <div><b>2. Answer 4 times</b>The prospect speaks, you record a reply (up to 45 seconds).</div>
+    <div><b>3. Done</b>Our team reviews it and contacts you.</div>
+  </div>
+  <p style="font-size:14px">Use a quiet room and allow the microphone when asked. Headphones help.</p>
+  <form id="f-intro" novalidate>
+    <label>Full name<input type="text" name="name" autocomplete="name" required></label>
+    <div class="row">
+      <label>Email<input type="email" name="email" autocomplete="email" required></label>
+      <label>WhatsApp number <small>(optional)</small><input type="tel" name="phone" autocomplete="tel"></label>
+    </div>
+    <div class="row">
+      <label>Country<input type="text" name="country" autocomplete="country-name"></label>
+      <label>Cold calling experience
+        <select name="experience"><option value="">Choose one</option><option>None yet</option><option>Less than 1 year</option><option>1 to 2 years</option><option>3 to 5 years</option><option>More than 5 years</option></select>
+      </label>
+    </div>
+    <label class="check"><input type="checkbox" name="consent"> I agree that my answers are recorded, scored with the help of AI, and reviewed by the BPO Hive team for this job application. Recordings are deleted after 120 days.</label>
+    <button class="btn wide" type="submit" id="b-start">Continue</button>
+    <p class="err" id="e-intro" role="alert"></p>
+  </form>
+</section>
+
+<!-- 2. The brief -->
+<section class="card" id="s-brief" hidden>
+  <h2>Your call brief</h2>
+  <p>Read this, then start the call. You won't see it again during the call, so take a moment.</p>
+  <div class="brief"><b>You are selling</b><div id="b-what"></div></div>
+  <div class="brief"><b>You are calling</b><div id="b-who"></div></div>
+  <div class="brief"><b>Your goal</b><div id="b-goal"></div></div>
+  <p style="font-size:14px">Speak naturally, like a real call. You can't pause once you start recording, but you can listen back and record again before sending.</p>
+  <button class="btn wide" type="button" id="b-call">Start the call</button>
+  <p class="err" id="e-brief" role="alert"></p>
+</section>
+
+<!-- 3. The call -->
+<section class="card" id="s-call" hidden>
+  <div class="progress" id="prog"></div>
+  <p class="hint" id="t-step" style="margin-bottom:6px"></p>
+  <div class="prospect">
+    <div class="avatar" aria-hidden="true">MC</div>
+    <div>
+      <div class="bubble"><small>Mike Carter, Carter Plumbing</small><span id="t-say"></span></div>
+      <button class="replay" type="button" id="b-replay">&#9654; Hear Mike again</button>
+    </div>
+  </div>
+  <p class="task">Your turn: <b id="t-task"></b></p>
+  <div class="recbox">
+    <div id="r-idle">
+      <button class="btn rec" type="button" id="b-rec">&#9679; Start recording</button>
+      <p class="hint" style="margin-top:10px">Up to 45 seconds. It stops by itself.</p>
+    </div>
+    <div id="r-live" hidden>
+      <p class="hint"><span class="dot"></span> Recording</p>
+      <div class="timer live" id="r-time">0:00</div>
+      <p class="hint">of 0:45</p>
+      <div class="actions"><button class="btn" type="button" id="b-stop">Stop</button></div>
+    </div>
+    <div id="r-review" hidden>
+      <p class="hint">Listen back if you like, then send.</p>
+      <audio id="r-audio" controls></audio>
+      <div class="actions"><button class="btn ghost" type="button" id="b-again">Record again</button><button class="btn" type="button" id="b-send">Send answer</button></div>
+    </div>
+    <div id="r-sending" hidden><p class="hint" style="margin:8px 0">Sending your answer&hellip;</p></div>
+  </div>
+  <p class="err" id="e-call" role="alert"></p>
+</section>
+
+<!-- 4. Done -->
+<section class="card done" id="s-done" hidden>
+  <div class="tick" aria-hidden="true">&#10003;</div>
+  <h2 id="d-title">Thank you!</h2>
+  <p>Your assessment is complete. Our team will review it and contact you by email or WhatsApp.</p>
+</section>
+
+<p class="foot">BPO Hive &middot; <a href="privacy-policy">Privacy policy</a></p>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { id: '', scenario: null, turn: 0, stream: null, rec: null, chunks: [], blob: null, mime: '', secs: 0, timer: null, t0: 0, name: '' };
+  var MAX = 45;
+  var params = new URLSearchParams(location.search);
+  function show(id) { ['s-intro', 's-brief', 's-call', 's-done'].forEach(function (s) { $(s).hidden = s !== id; }); window.scrollTo(0, 0); }
+  function api(body) {
+    return fetch('/api/agent-assessment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong. Please try again.'); return j; }); });
+  }
+
+  // 1. About you, then ask for the microphone
+  $('f-intro').onsubmit = function (e) {
+    e.preventDefault();
+    var f = e.target, b = $('b-start'), err = $('e-intro');
+    err.textContent = '';
+    if (!f.name.value.trim()) return (err.textContent = 'Please type your full name.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.value.trim())) return (err.textContent = 'Please type a valid email address.');
+    if (!f.consent.checked) return (err.textContent = 'Please tick the box to agree to the recording.');
+    if (!navigator.mediaDevices || !window.MediaRecorder) return (err.textContent = 'This browser cannot record audio. Please open this page in Chrome, Safari or Edge.');
+    b.disabled = true; b.textContent = 'Allow the microphone…';
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (stream) {
+      S.stream = stream; b.textContent = 'Starting…';
+      var src = [params.get('utm_source'), params.get('utm_campaign')].filter(Boolean).join(' / ');
+      return api({ action: 'start', name: f.name.value, email: f.email.value, phone: f.phone.value, country: f.country.value, experience: f.experience.value, consent: true, team: params.get('team') === '1', source: src });
+    }).then(function (j) {
+      S.id = j.id; S.scenario = j.scenario; S.name = f.name.value.trim().split(/\s+/)[0];
+      $('b-what').textContent = S.scenario.what; $('b-who').textContent = S.scenario.prospect; $('b-goal').textContent = S.scenario.goal;
+      show('s-brief');
+    }).catch(function (e2) {
+      b.disabled = false; b.textContent = 'Continue';
+      err.textContent = /Permission|NotAllowed|denied/i.test(String(e2 && (e2.name || e2.message))) ? 'We need your microphone for the call. Please allow it in your browser and try again.' : e2.message;
+    });
+  };
+
+  // 2. Brief, then the call
+  $('b-call').onclick = function () { S.turn = 0; turn(); };
+
+  var voice = null;
+  function pickVoice() {
+    var v = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+    voice = v.find(function (x) { return /en-US/i.test(x.lang) && /male|david|alex|daniel|guy|mark|aaron|fred/i.test(x.name) && !/female/i.test(x.name); }) || v.find(function (x) { return /en-US/i.test(x.lang); }) || v.find(function (x) { return /^en/i.test(x.lang); }) || null;
+  }
+  if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text); if (voice) u.voice = voice; u.lang = 'en-US'; u.rate = 0.98;
+    speechSynthesis.speak(u);
+  }
+
+  function turn() {
+    var t = S.scenario.turns[S.turn], n = S.scenario.turns.length;
+    $('prog').innerHTML = S.scenario.turns.map(function (_, i) { return '<i class="' + (i <= S.turn ? 'on' : '') + '"></i>'; }).join('');
+    $('t-step').textContent = 'Answer ' + (S.turn + 1) + ' of ' + n;
+    $('t-say').textContent = t.say; $('t-task').textContent = t.task;
+    $('e-call').textContent = '';
+    state('idle'); show('s-call');
+    setTimeout(function () { speak(t.say); }, 300);
+  }
+  $('b-replay').onclick = function () { speak(S.scenario.turns[S.turn].say); };
+
+  function state(s) { ['idle', 'live', 'review', 'sending'].forEach(function (k) { $('r-' + k).hidden = k !== s; }); }
+  function pickMime() {
+    var opts = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'];
+    for (var i = 0; i < opts.length; i++) if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(opts[i])) return opts[i];
+    return '';
+  }
+  $('b-rec').onclick = function () {
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    var mime = pickMime(), rec;
+    try { rec = new MediaRecorder(S.stream, mime ? { mimeType: mime, audioBitsPerSecond: 24000 } : { audioBitsPerSecond: 24000 }); }
+    catch (e) { rec = new MediaRecorder(S.stream); }
+    S.rec = rec; S.chunks = []; S.mime = rec.mimeType || mime || 'audio/webm';
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) S.chunks.push(e.data); };
+    rec.onstop = function () {
+      clearInterval(S.timer);
+      S.secs = Math.round((Date.now() - S.t0) / 1000);
+      S.blob = new Blob(S.chunks, { type: S.mime });
+      $('r-audio').src = URL.createObjectURL(S.blob);
+      state('review');
+    };
+    rec.start(1000); S.t0 = Date.now(); $('r-time').textContent = '0:00'; state('live');
+    S.timer = setInterval(function () {
+      var s = Math.floor((Date.now() - S.t0) / 1000);
+      $('r-time').textContent = '0:' + String(Math.min(s, MAX)).padStart(2, '0');
+      if (s >= MAX && rec.state === 'recording') rec.stop();
+    }, 250);
+  };
+  $('b-stop').onclick = function () { if (S.rec && S.rec.state === 'recording') S.rec.stop(); };
+  $('b-again').onclick = function () { state('idle'); };
+
+  // A 16 kHz mono WAV copy goes to the scoring; the small recording is kept for the team to listen to.
+  function toWav(blob) {
+    return blob.arrayBuffer().then(function (buf) {
+      var Ctx = window.AudioContext || window.webkitAudioContext, ctx = new Ctx();
+      return new Promise(function (ok, bad) { ctx.decodeAudioData(buf, ok, bad); }).then(function (audio) {
+        try { ctx.close(); } catch (e) {}
+        var rate = 16000, len = Math.max(1, Math.ceil(Math.min(audio.duration, MAX + 1) * rate));
+        var Off = window.OfflineAudioContext || window.webkitOfflineAudioContext, off = new Off(1, len, rate);
+        var s = off.createBufferSource(); s.buffer = audio; s.connect(off.destination); s.start(0);
+        return off.startRendering();
+      }).then(function (out) {
+        var d = out.getChannelData(0), n = d.length, ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab), p = 0;
+        function str(x) { for (var i = 0; i < x.length; i++) v.setUint8(p++, x.charCodeAt(i)); }
+        function u32(x) { v.setUint32(p, x, true); p += 4; } function u16(x) { v.setUint16(p, x, true); p += 2; }
+        str('RIFF'); u32(36 + n * 2); str('WAVE'); str('fmt '); u32(16); u16(1); u16(1); u32(16000); u32(32000); u16(2); u16(16); str('data'); u32(n * 2);
+        for (var i = 0; i < n; i++) { var x = Math.max(-1, Math.min(1, d[i])); v.setInt16(p, x < 0 ? x * 0x8000 : x * 0x7FFF, true); p += 2; }
+        return new Blob([ab], { type: 'audio/wav' });
+      });
+    });
+  }
+  function b64(blob) { return new Promise(function (ok, bad) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1] || ''); }; r.onerror = bad; r.readAsDataURL(blob); }); }
+
+  $('b-send').onclick = function () {
+    state('sending'); $('e-call').textContent = '';
+    Promise.all([b64(S.blob), toWav(S.blob).then(b64)]).then(function (x) {
+      return api({ action: 'answer', id: S.id, turn: S.turn, audio: x[0], wav: x[1], mime: S.mime, secs: S.secs });
+    }).then(function () {
+      S.turn++;
+      if (S.turn < S.scenario.turns.length) return turn();
+      return api({ action: 'finish', id: S.id }).then(function () {
+        try { S.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+        $('d-title').textContent = 'Thank you, ' + S.name + '!';
+        show('s-done');
+      });
+    }).catch(function (e) { state('review'); $('e-call').textContent = (e && e.message) || 'Could not send. Please try again.'; });
+  };
+})();
+</script>
+</body>
+</html>
