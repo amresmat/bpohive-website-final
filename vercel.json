@@ -3,6 +3,28 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.bpohive.com"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/:path((?!admin|api|assets|_vercel).+)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.bpohive.com"
+        }
+      ],
+      "destination": "https://www.bpohive.com/:path",
+      "permanent": false
+    },
+    {
       "source": "/work-with-us",
       "destination": "/careers",
       "statusCode": 301
@@ -73,6 +95,25 @@
   "headers": [
     {
       "source": "/admin/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.bpohive.com"
+        }
+      ],
       "headers": [
         {
           "key": "X-Robots-Tag",
