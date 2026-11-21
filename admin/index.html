@@ -522,7 +522,7 @@ dialog[open],dialog[open]::backdrop{animation:none}}
   <header class="top">
     <button class="btn menu" id="menu" type="button">Menu</button>
     <a class="brand" href="#pipeline"><span class="brand-tile"><img src="/assets/logo/bpohive-icon.png" alt=""></span>BPO Hive</a>
-    <a class="site" href="/" target="_blank" rel="noopener">View live site</a>
+    <a class="site" href="https://www.bpohive.com/" target="_blank" rel="noopener">View live site</a>
     <span class="who" id="who" hidden></span>
     <button class="out" id="logout" type="button">Sign out</button>
   </header>
@@ -815,7 +815,7 @@ function showInvite(){
 }
 $('invite-form').onsubmit=function(e){e.preventDefault();var f=this;$('invite-err').textContent='';
   if(f.password.value!==f.password2.value){$('invite-err').textContent='The two passwords are not the same.';return}
-  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({invite:INVITE,password:f.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Could not save the password')})}).then(function(){INVITE=null;history.replaceState(null,'','/admin/#pipeline');f.reset();$('invite-form').hidden=true;$('login-form').hidden=false;start()}).catch(function(e){$('invite-err').textContent=e.message})};
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({invite:INVITE,password:f.password.value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Could not save the password')})}).then(function(){INVITE=null;history.replaceState(null,'',location.pathname+'#pipeline');f.reset();$('invite-form').hidden=true;$('login-form').hidden=false;start()}).catch(function(e){$('invite-err').textContent=e.message})};
 function start(){
   if(INVITE)return showInvite();
   fetch('/api/admin/session',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(s){
