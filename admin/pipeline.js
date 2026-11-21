@@ -642,7 +642,7 @@
     ms.forEach(function (m) {
       if (m.created && m.kind !== 'sheet') ev.push({ at: t(m.created), k: 'book', t: 'Booked ' + m.name + ' for ' + when(m.start), by: m.host ? 'with ' + m.host : '' });
       if (t(m.start) <= Date.now() || m.outcome === 'cancelled' || m.outcome === 'rescheduled') {
-        var o = (OUT[m.outcome] || [m.outcome])[0];
+        var o = m.assumed ? 'Show (assumed)' : (OUT[m.outcome] || [m.outcome])[0];
         ev.push({ at: t(m.start), k: 'meet-' + m.outcome, t: (m.seq > 1 ? 'Follow-up meeting ' + m.seq : m.seq === 1 ? 'First meeting' : 'Meeting') + ': ' + o, body: m.name + (m.sheet && m.sheet.notes ? '\n' + m.sheet.notes : ''), link: m.fathom && m.fathom.url ? [m.fathom.url, 'Fathom recording'] : m.sheet && m.sheet.recording ? [m.sheet.recording, 'Booking call'] : null });
       }
     });
