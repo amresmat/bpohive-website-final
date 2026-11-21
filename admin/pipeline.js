@@ -118,7 +118,7 @@
     return '<div class="pl-datebar"><div class="pl-presets" role="group" aria-label="Date range">' + PRESETS.map(function (p) { var on = !CUSTOM_OPEN && F.preset === p[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-p="' + p[0] + '" aria-pressed="' + on + '">' + p[1] + '</button>'; }).join('') +
       '<button type="button" class="pl-pill' + (showInputs ? ' on' : '') + '" id="pl-custom" aria-expanded="' + showInputs + '">Custom dates</button>' + btn + '</div>' +
       (showInputs ? '<form class="pl-custom" id="pl-custom-form" novalidate><label for="pl-from">From<input id="pl-from" type="date" value="' + esc(F.from) + '"></label><label for="pl-to">To<input id="pl-to" type="date" value="' + esc(F.to) + '"></label><button type="submit" class="btn pri">Apply</button></form>' : '') +
-      '<p class="pl-showing">Showing ' + esc(summary) + '</p></div>';
+      '</div>';
   }
   function filters(withRange, withStage) {
     var camps = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.campaigns || []; })));
@@ -149,19 +149,25 @@
     items.forEach(function (x) { var ts = getTs(x); cols.forEach(function (c) { if (ts >= c.from && ts < c.to) { var g = groups(x); c.n[g] = (c.n[g] || 0) + 1; } }); });
     return cols;
   }
-  function bars(cols, series, title) {
-    var W = 720, H = 200, pad = 28, bw = (W - pad * 2) / cols.length;
-    var max = Math.max(1, Math.max.apply(null, cols.map(function (c) { return series.reduce(function (s, x) { return s + (c.n[x[0]] || 0); }, 0); })));
-    var svg = '<svg class="ins-svg" viewBox="0 0 ' + W + ' ' + (H + 26) + '" role="img" aria-label="' + esc(title) + '">';
-    [0, .5, 1].forEach(function (g) { var y = H - g * (H - 10); svg += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y + '" y2="' + y + '" stroke="#EAF4FE"/><text x="' + (pad - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#5B6670">' + Math.round(max * g) + '</text>'; });
-    cols.forEach(function (c, i) {
-      var x = pad + i * bw + bw * .18, w = bw * .64, y = H;
-      series.forEach(function (s) { var v = c.n[s[0]] || 0; if (!v) return; var h = v / max * (H - 10); y -= h; svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + s[2] + '"><title>' + esc(s[1]) + ': ' + v + '</title></rect>'; });
-      var every = Math.max(1, Math.ceil(cols.length / 10));
-      if (i % every === 0) svg += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="#5B6670">' + (c.label || new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</text>';
+  // A simple line chart: one line per series, a dot per period, the total for each series in the legend.
+  function lineChart(cols, series, title, note) {
+    var W = 720, H = 210, L = 34, R = 16, T = 14, B = 30, n = cols.length;
+    var max = Math.max(1, Math.max.apply(null, cols.map(function (c) { return Math.max.apply(null, series.map(function (x) { return c.n[x[0]] || 0; })); })));
+    // Round the top up so the middle gridline is a whole number.
+    if (max <= 4) max = 4; else if (max <= 10) max += max % 2; else { var p10 = Math.pow(10, Math.floor(Math.log10(max))); max = [2, 4, 6, 8, 10].map(function (f) { return f * p10; }).filter(function (v) { return v >= max; })[0]; }
+    var x = function (i) { return n < 2 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1); }, y = function (v) { return T + (H - T - B) * (1 - v / max); };
+    var svg = '<svg class="ins-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(title) + '">';
+    [0, .5, 1].forEach(function (g) { var v = Math.round(max * g); svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#EAF4FE"/><text x="' + (L - 8) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#5B6670">' + v + '</text>'; });
+    var every = Math.max(1, Math.ceil(n / 8));
+    cols.forEach(function (c, i) { if (i % every === 0 || i === n - 1) svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (i === n - 1 && n > 1 ? 'end' : i === 0 && n > 1 ? 'start' : 'middle') + '" font-size="11" fill="#5B6670">' + (c.label || new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</text>'; });
+    series.forEach(function (sr) {
+      var pts = cols.map(function (c, i) { return [x(i), y(c.n[sr[0]] || 0), c.n[sr[0]] || 0, c]; });
+      svg += '<path d="' + pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ') + '" fill="none" stroke="' + sr[2] + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"' + (sr[3] ? ' stroke-dasharray="6 5"' : '') + '/>';
+      pts.forEach(function (p) { svg += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.5" fill="#FFFFFF" stroke="' + sr[2] + '" stroke-width="2"><title>' + esc(sr[1]) + ', ' + (p[3].label || new Date(p[3].from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + ': ' + p[2] + '</title></circle>'; });
     });
     svg += '</svg>';
-    return '<div class="card ins-chart"><h3>' + esc(title) + '</h3><div class="ins-scroll">' + svg + '</div><div class="ins-legend">' + series.map(function (s) { return '<span><i style="background:' + s[2] + '"></i>' + esc(s[1]) + '</span>'; }).join('') + '</div></div>';
+    var total = function (k) { return cols.reduce(function (a, c) { return a + (c.n[k] || 0); }, 0); };
+    return '<div class="card ins-chart pl-line"><div class="pl-line-h"><h3>' + esc(title) + '</h3>' + (note ? '<span>' + note + '</span>' : '') + '</div><div class="ins-scroll">' + svg + '</div><div class="ins-legend">' + series.map(function (sr) { return '<span><i class="pl-key' + (sr[3] ? ' dash' : '') + '" style="--k:' + sr[2] + '"></i>' + esc(sr[1]) + ' <b>' + total(sr[0]) + '</b></span>'; }).join('') + '</div></div>';
   }
   function breakdown(title, keyName, rowsOf) {
     var map = {};
@@ -204,15 +210,12 @@
     var ms = DATA.meetings.filter(function (m) { return (!F.campaign || (m.campaigns || []).indexOf(F.campaign) > -1) && (!F.caller || (m.callers || []).indexOf(F.caller) > -1) && inRange(m.created); });
     var keys = {}; ms.forEach(function (m) { if (m.leadKey) keys[m.leadKey] = 1; });
     var cohort = DATA.leads.filter(function (l) { return keys[l.key]; });
-    var col = function (title, list, tone) {
-      var b = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
-      var steps = [['Booked', b, ''], ['Show', sh, b ? pct(sh, b) + '% of booked' : ''], ['Closed', cl, sh ? pct(cl, sh) + '% of shows' : '']];
-      return '<div class="pl-fun pl-fun-' + tone + '"><h4>' + esc(title) + '</h4>' + steps.map(function (x, i) {
-        return '<div class="pl-fun-step"><div class="pl-fun-top"><span>' + x[0] + '</span><b>' + x[1] + '</b></div><div class="pl-fun-bar"><i style="width:' + (b ? Math.max(x[1] / b * 100, x[1] ? 3 : 0) : 0).toFixed(1) + '%"></i></div><small>' + (x[2] || '&nbsp;') + '</small></div>';
-      }).join('') + '<p class="pl-fun-end">' + (b ? pct(cl, b) + '% of bookings closed' : 'Nothing booked yet') + '</p></div>';
+    var row = function (title, list) {
+      var bk = list.length, sh = list.filter(function (l) { return l.shownAt || l.status === 'won'; }).length, cl = list.filter(function (l) { return l.status === 'won'; }).length;
+      return '<tr><th scope="row">' + title + '</th><td class="num">' + bk + '</td><td class="num">' + sh + '</td><td class="num">' + (bk ? pct(sh, bk) + '%' : '—') + '</td><td class="num">' + cl + '</td><td class="num">' + (sh ? pct(cl, sh) + '%' : '—') + '</td></tr>';
     };
-    return '<div class="card pl-funnel"><h3>Booked, show, closed</h3><div class="pl-funs">' +
-      col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
+    return '<div class="card ins-table pl-funtable"><h3>Booked, showed up, won</h3><table><thead><tr><th></th><th class="num">Booked</th><th class="num">Showed up</th><th class="num">Showed up of booked</th><th class="num">Won</th><th class="num">Won of showed up</th></tr></thead><tbody>' +
+      row('All', cohort) + row('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; })) + row('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; })) + '</tbody></table></div>';
   }
   function rangeLabel() {
     if (F.range === 'custom') return (F.from ? day(F.from + 'T12:00:00') : 'Start') + ' to ' + (F.to ? day(F.to + 'T12:00:00') : 'today');
@@ -255,8 +258,8 @@
       '<div class="ins-tiles pl-six pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
       '<div class="ins-tiles pl-six">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
       funnel() +
-      '<div class="pl-two">' + bars(lc, [['inbound', 'Inbound', '#78BBFA'], ['outbound', 'Outbound', '#4EA6F8']], 'Meetings booked per ' + lc.unit) +
-      bars(mc, [['showed', 'Show', '#4EA6F8'], ['no_show', 'No-show', '#20292F'], ['needs', 'Not marked yet', '#78BBFA'], ['rescheduled', 'Rescheduled', '#5B6670'], ['cancelled', 'Cancelled', 'rgba(32,41,47,.14)'], ['untracked', 'Not tracked', '#EAF4FE']], 'Meetings per ' + mc.unit) + '</div>' +
+      '<div class="pl-two">' + lineChart(lc, [['outbound', 'Outbound', '#20292F'], ['inbound', 'Inbound', '#4EA6F8']], 'Meetings booked per ' + lc.unit) +
+      lineChart(mc, [['showed', 'Showed up', '#4EA6F8'], ['no_show', 'No-show', '#20292F', true]], 'Show-ups and no-shows per ' + mc.unit, showed + noshow ? 'Show rate ' + pct(showed, showed + noshow) + '%' : '') + '</div>' +
       '<div class="card ins-table pl-next"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       '<div class="pl-two">' + breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; }) + '</div>';
