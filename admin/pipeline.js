@@ -26,8 +26,8 @@
   applyPreset('30');
   var STATUS = { past: ['Met before tracking', 'st-off'], booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
   var OUT = { untracked: ['Not tracked', 'st-off'], upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
-  var HOT = { contract: ['Waiting on contract', '#7a5af5'] };
-  var OLD_HOT = { must_close: ['Must close', '#c0392b'], nurture: ['Nurture', '#1B7381'] }; // only for older trail entries
+  var HOT = { contract: ['Waiting on contract', '#4EA6F8'] };
+  var OLD_HOT = { must_close: ['Must close', '#4EA6F8'], nurture: ['Nurture', '#20292F'] }; // only for older trail entries
   var HOT_RANK = { contract: 0 };
   // Hot = actively engaging, warm = replying but not deciding now, cold = replying, longer timeframe.
   var TEMP = { hot: ['Hot', 'Actively engaging'], warm: ['Warm', 'Replying, not deciding now'], cold: ['Cold', 'Replying, longer timeframe'] };
@@ -153,12 +153,12 @@
     var W = 720, H = 200, pad = 28, bw = (W - pad * 2) / cols.length;
     var max = Math.max(1, Math.max.apply(null, cols.map(function (c) { return series.reduce(function (s, x) { return s + (c.n[x[0]] || 0); }, 0); })));
     var svg = '<svg class="ins-svg" viewBox="0 0 ' + W + ' ' + (H + 26) + '" role="img" aria-label="' + esc(title) + '">';
-    [0, .5, 1].forEach(function (g) { var y = H - g * (H - 10); svg += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y + '" y2="' + y + '" stroke="#edf3f7"/><text x="' + (pad - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#8a9aa6">' + Math.round(max * g) + '</text>'; });
+    [0, .5, 1].forEach(function (g) { var y = H - g * (H - 10); svg += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y + '" y2="' + y + '" stroke="#EAF4FE"/><text x="' + (pad - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#5B6670">' + Math.round(max * g) + '</text>'; });
     cols.forEach(function (c, i) {
       var x = pad + i * bw + bw * .18, w = bw * .64, y = H;
       series.forEach(function (s) { var v = c.n[s[0]] || 0; if (!v) return; var h = v / max * (H - 10); y -= h; svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + s[2] + '"><title>' + esc(s[1]) + ': ' + v + '</title></rect>'; });
       var every = Math.max(1, Math.ceil(cols.length / 10));
-      if (i % every === 0) svg += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="#8a9aa6">' + (c.label || new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</text>';
+      if (i % every === 0) svg += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="#5B6670">' + (c.label || new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</text>';
     });
     svg += '</svg>';
     return '<div class="card ins-chart"><h3>' + esc(title) + '</h3><div class="ins-scroll">' + svg + '</div><div class="ins-legend">' + series.map(function (s) { return '<span><i style="background:' + s[2] + '"></i>' + esc(s[1]) + '</span>'; }).join('') + '</div></div>';
@@ -255,8 +255,8 @@
       '<div class="ins-tiles pl-six pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
       '<div class="ins-tiles pl-six">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
       funnel() +
-      '<div class="pl-two">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per ' + lc.unit) +
-      bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE'], ['untracked', 'Not tracked', '#E6EBEE']], 'Meetings per ' + mc.unit) + '</div>' +
+      '<div class="pl-two">' + bars(lc, [['inbound', 'Inbound', '#78BBFA'], ['outbound', 'Outbound', '#4EA6F8']], 'Meetings booked per ' + lc.unit) +
+      bars(mc, [['showed', 'Show', '#4EA6F8'], ['no_show', 'No-show', '#20292F'], ['needs', 'Not marked yet', '#78BBFA'], ['rescheduled', 'Rescheduled', '#5B6670'], ['cancelled', 'Cancelled', 'rgba(32,41,47,.14)'], ['untracked', 'Not tracked', '#EAF4FE']], 'Meetings per ' + mc.unit) + '</div>' +
       '<div class="card ins-table pl-next"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
       '<div class="pl-two">' + breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
       breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; }) + '</div>';
@@ -289,7 +289,7 @@
     var rows = (groups[F.mtab] || []).slice().sort(function (a, b) { return mRank(a) - mRank(b); });
     return filters(false, false).replace('<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">', '') +
       '<div class="tabs pl-mtabs">' + [['needs', 'Date passed'], ['upcoming', 'Upcoming'], ['past', 'Already marked']].map(function (x) { return '<button type="button" class="tab' + (F.mtab === x[0] ? ' on' : '') + '" data-t="' + x[0] + '">' + x[1] + '<b>' + groups[x[0]].length + '</b></button>'; }).join('') + '</div>' +
-      (F.mtab === 'needs' && rows.length && isAdmin() ? '<p class="ins-note" style="margin:-4px 0 10px">The date came. Click <b>Show</b> or <b>No-show</b>. A show goes straight to the <a href="#pipeline/shown">Showed</a> tab.</p>' : '') +
+      (F.mtab === 'needs' && rows.length && isAdmin() ? '<p class="ins-note" style="margin:-4px 0 10px">The date came. Click <b>Show</b> or <b>No-show</b>. A show moves the lead to Showed.</p>' : '') +
       '<div class="card tablewrap pl-table" id="pl-meetings">' + (rows.length ? meetingTable(rows.slice(0, 500), false) : '<div class="empty">' + (F.mtab === 'needs' ? 'All caught up. Every past meeting is marked.' : 'No meetings here.') + '</div>') + '</div>';
   }
   function bindMeetings(root) {
@@ -496,12 +496,12 @@
 
   /* ---------- Stages: every lead in one stage, side by side ---------- */
   var STAGES = [
-    ['booked', 'Booked', 'var(--blue)', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or to mark'],
-    ['shown', 'Showed', 'var(--teal)', function (l) { return l.status === 'shown'; }, 'Had the meeting, following up'],
-    ['no_show', 'No-show', 'var(--red)', function (l) { return l.status === 'no_show'; }, 'Missed the meeting'],
-    ['no_reply', 'Not replying', '#7A6A55', function (l) { return deadBucket(l) === 'no_reply'; }, 'Stopped replying'],
-    ['unqualified', 'Unqualified', '#6B7780', function (l) { return deadBucket(l) === 'unqualified'; }, 'Not a fit'],
-    ['won', 'Won', 'var(--green)', function (l) { return l.status === 'won'; }, 'Closed']
+    ['booked', 'Booked', '#78BBFA', function (l) { return l.status === 'booked' || l.status === 'to_mark'; }, 'Meeting coming up, or to mark'],
+    ['shown', 'Showed', '#4EA6F8', function (l) { return l.status === 'shown'; }, 'Had the meeting, following up'],
+    ['no_show', 'No-show', '#20292F', function (l) { return l.status === 'no_show'; }, 'Missed the meeting'],
+    ['no_reply', 'Not replying', '#5B6670', function (l) { return deadBucket(l) === 'no_reply'; }, 'Stopped replying'],
+    ['unqualified', 'Unqualified', '#5B6670', function (l) { return deadBucket(l) === 'unqualified'; }, 'Not a fit'],
+    ['won', 'Won', '#4EA6F8', function (l) { return l.status === 'won'; }, 'Closed']
   ];
   // Every lead is in exactly one stage (cancelled bookings and leads with no meeting yet are only under All leads).
   function stageCounts(leads) { var o = {}; STAGES.forEach(function (s) { o[s[0]] = leads.filter(s[3]).length; }); return o; }
@@ -628,12 +628,12 @@
     var OLD = { met: 'Showed', followup: 'Showed', proposal: 'Showed', negotiation: 'Showed', hold: 'Showed', lost: 'Dead', shown: 'Showed', won: 'Won', dead: 'Dead' };
     (l.trail || []).forEach(function (x) {
       if (x.kind === 'note') ev.push({ at: x.at, k: 'note', t: 'Note', body: x.text, by: x.by, id: x.id });
-      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#c0392b' : x.to === 'won' ? '#1e7a43' : '#0f7ac4' });
+      else if (x.kind === 'stage') ev.push({ at: x.at, k: 'stage', t: x.to === 'auto' ? 'Brought back' : (x.to === 'dead' || x.to === 'lost') ? 'Moved to ' + (x.reason === 'unqualified' ? 'Unqualified' : 'Not replying') : 'Marked ' + (OLD[x.to] || x.to), by: x.by, c: x.to === 'dead' || x.to === 'lost' ? '#4EA6F8' : x.to === 'won' ? '#20292F' : '#20292F' });
       else if (x.kind === 'next') ev.push({ at: x.at, k: 'next', t: 'Next follow-up: ' + x.text + (x.due ? ', ' + day(x.due + 'T12:00:00') : ''), by: x.by });
-      else if (x.kind === 'email') ev.push({ at: x.at, k: 'note', t: 'Email sent to ' + (x.to || '') + ': ' + (x.subject || ''), body: (x.text || '') + ((x.files || []).length ? '\n\nAttached: ' + x.files.join(', ') : ''), by: x.by, c: '#2A6A9E' });
-      else if (x.kind === 'edit') ev.push({ at: x.at, k: 'stage', t: x.text, by: x.by, c: '#8a9aa6' });
-      else if (x.kind === 'temp') ev.push({ at: x.at, k: 'stage', t: TEMP[x.temp] ? 'Marked ' + TEMP[x.temp][0] + ' (' + TEMP[x.temp][1].toLowerCase() + ')' : 'Hot, warm or cold cleared', by: x.by, c: x.temp === 'hot' ? '#A3392D' : x.temp === 'warm' ? '#C28A0A' : x.temp === 'cold' ? '#2A6A9E' : '#8a9aa6' });
-      else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? 'Marked ' + (HOT[x.hot] || OLD_HOT[x.hot])[0] : 'Tag removed', by: x.by, c: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? (HOT[x.hot] || OLD_HOT[x.hot])[1] : '#8a9aa6' });
+      else if (x.kind === 'email') ev.push({ at: x.at, k: 'note', t: 'Email sent to ' + (x.to || '') + ': ' + (x.subject || ''), body: (x.text || '') + ((x.files || []).length ? '\n\nAttached: ' + x.files.join(', ') : ''), by: x.by, c: '#20292F' });
+      else if (x.kind === 'edit') ev.push({ at: x.at, k: 'stage', t: x.text, by: x.by, c: '#5B6670' });
+      else if (x.kind === 'temp') ev.push({ at: x.at, k: 'stage', t: TEMP[x.temp] ? 'Marked ' + TEMP[x.temp][0] + ' (' + TEMP[x.temp][1].toLowerCase() + ')' : 'Hot, warm or cold cleared', by: x.by, c: x.temp === 'hot' ? '#20292F' : x.temp === 'warm' ? '#20292F' : x.temp === 'cold' ? '#20292F' : '#5B6670' });
+      else if (x.kind === 'hot') ev.push({ at: x.at, k: 'stage', t: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? 'Marked ' + (HOT[x.hot] || OLD_HOT[x.hot])[0] : 'Tag removed', by: x.by, c: x.hot && (HOT[x.hot] || OLD_HOT[x.hot]) ? (HOT[x.hot] || OLD_HOT[x.hot])[1] : '#5B6670' });
       else if (x.kind === 'next-done') ev.push({ at: x.at, k: 'next', t: 'Follow-up done' + (x.text ? ': ' + x.text : ''), by: x.by });
     });
     ms.forEach(function (m) {
@@ -755,7 +755,7 @@
   function sinceCard() {
     var v = DATA.status.since || '';
     return '<h3 class="pl-h" style="margin-top:22px">Start date</h3><p class="sub" style="margin-top:-4px">Meetings and leads before this date are left out of the Pipeline. Leave it empty to show everything.</p>' +
-      '<div class="card pl-ev" style="padding:14px 16px"><div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid #CBD4D9;border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div></div>';
+      '<div class="card pl-ev" style="padding:14px 16px"><div class="pl-upd-act" style="margin:0"><label style="display:flex;gap:10px;align-items:center;font-weight:600">Count from <input type="date" id="pl-since" value="' + esc(v) + '" style="height:38px;padding:0 10px;border:1px solid rgba(32,41,47,.14);border-radius:4px"></label><button type="button" class="btn pri" id="pl-since-save">Save start date</button><span id="pl-since-msg" class="ins-note" style="margin:0"></span></div></div>';
   }
   function deletedCard() {
     var list = DATA.status.deleted || [];

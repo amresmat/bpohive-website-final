@@ -28,7 +28,7 @@
     return '<div class="card ins-table"><h3>' + esc(title) + '</h3>' + (rows.length ? '<table><thead><tr>' + cols.map(function (c) { return '<th' + (c.num ? ' class="num"' : '') + '>' + esc(c.h) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td' + (c.num ? ' class="num"' : '') + '>' + c.f(r) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '<div class="empty">No data yet.</div>') + '</div>';
   }
   function coName(s) { return s.company && !s.network ? s.company : ''; }
-  function coLine(s) { return s.company ? (s.network ? '<br><small style="color:#5d7280">via ' + esc(s.company) + '</small>' : '<br><b class="ins-co">' + esc(s.company) + '</b>') : ''; }
+  function coLine(s) { return s.company ? (s.network ? '<br><small style="color:#5B6670">via ' + esc(s.company) + '</small>' : '<br><b class="ins-co">' + esc(s.company) + '</b>') : ''; }
   var PENDING_Q = '';
   function barCell(n, max) { return '<div class="ins-bar"><i style="width:' + pct(n, max) + '%"></i><span>' + n + '</span></div>'; }
 
@@ -98,10 +98,10 @@
   function chart(daily) {
     var W = 900, H = 220, pad = 28, n = daily.length, max = Math.max(1, Math.max.apply(null, daily.map(function (d) { return Math.max(d.s, d.pv); })));
     var bw = (W - pad * 2) / n, x = function (i) { return pad + i * bw; }, y = function (v) { return H - pad - (v / max) * (H - pad * 2); };
-    var bars = daily.map(function (d, i) { return '<rect x="' + (x(i) + bw * 0.15) + '" y="' + y(d.s) + '" width="' + (bw * 0.7) + '" height="' + (H - pad - y(d.s)) + '" rx="2" fill="#0f7ac4"><title>' + d.date.slice(0, 4) + '-' + d.date.slice(4, 6) + '-' + d.date.slice(6) + ': ' + d.s + ' visitors, ' + d.pv + ' page views</title></rect>'; }).join('');
+    var bars = daily.map(function (d, i) { return '<rect x="' + (x(i) + bw * 0.15) + '" y="' + y(d.s) + '" width="' + (bw * 0.7) + '" height="' + (H - pad - y(d.s)) + '" rx="2" fill="#20292F"><title>' + d.date.slice(0, 4) + '-' + d.date.slice(4, 6) + '-' + d.date.slice(6) + ': ' + d.s + ' visitors, ' + d.pv + ' page views</title></rect>'; }).join('');
     var line = daily.map(function (d, i) { return (i ? 'L' : 'M') + (x(i) + bw / 2) + ' ' + y(d.pv); }).join(' ');
-    var labels = daily.map(function (d, i) { if (n > 14 && i % Math.ceil(n / 10)) return ''; return '<text x="' + (x(i) + bw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#5d7280">' + d.date.slice(6) + '/' + d.date.slice(4, 6) + '</text>'; }).join('');
-    return '<div class="ins-scroll"><svg viewBox="0 0 ' + W + ' ' + H + '" class="ins-svg" role="img" aria-label="Visitors and page views per day">' + (max >= 2 ? [0, 0.5, 1] : [0, 1]).map(function (f) { return '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="#edf3f7"/><text x="' + (pad - 6) + '" y="' + (y(max * f) + 4) + '" text-anchor="end" font-size="11" fill="#5d7280">' + Math.round(max * f) + '</text>'; }).join('') + bars + '<path d="' + line + '" fill="none" stroke="#0d1d2b" stroke-width="2"/>' + labels + '</svg></div><div class="ins-legend"><span><i style="background:#0f7ac4"></i>Visitors</span><span><i style="background:#0d1d2b;height:2px"></i>Page views</span></div>';
+    var labels = daily.map(function (d, i) { if (n > 14 && i % Math.ceil(n / 10)) return ''; return '<text x="' + (x(i) + bw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#5B6670">' + d.date.slice(6) + '/' + d.date.slice(4, 6) + '</text>'; }).join('');
+    return '<div class="ins-scroll"><svg viewBox="0 0 ' + W + ' ' + H + '" class="ins-svg" role="img" aria-label="Visitors and page views per day">' + (max >= 2 ? [0, 0.5, 1] : [0, 1]).map(function (f) { return '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="#EAF4FE"/><text x="' + (pad - 6) + '" y="' + (y(max * f) + 4) + '" text-anchor="end" font-size="11" fill="#5B6670">' + Math.round(max * f) + '</text>'; }).join('') + bars + '<path d="' + line + '" fill="none" stroke="#20292F" stroke-width="2"/>' + labels + '</svg></div><div class="ins-legend"><span><i style="background:#20292F"></i>Visitors</span><span><i style="background:#20292F;height:2px"></i>Page views</span></div>';
   }
   function funnel(steps) {
     var max = Math.max(1, steps[0][1]);
@@ -185,7 +185,7 @@
     $('ins-rows').innerHTML = rows.map(function (s) {
       var loc = [s.city, country(s.country)].filter(Boolean).join(', ') || 'Unknown location';
       var fun = s.booked ? '<span class="tag ok">✓ Booked a call</span>' : s.submit ? '<span class="tag">Submitted</span>' : s.popup ? '<span class="tag off">Opened</span>' : '';
-      return '<tr data-id="' + esc(s.id) + '" class="' + (s.booked ? 'is-booked' : s.submit ? 'is-submit' : '') + '"><td><b>' + esc(ago(s.start)) + '</b><br><small style="color:#5d7280">' + esc(when(s.start)) + '</small></td><td>' + flag(s.country) + ' ' + esc(loc) + coLine(s) + '</td><td>' + esc(s.device) + '<br><small style="color:#5d7280">' + esc(s.browser + (s.os ? ' · ' + s.os : '')) + '</small></td><td>' + esc(s.entry) + '</td><td class="num">' + s.pages + '</td><td class="num">' + dur(s.duration) + '</td><td>' + esc(srcLabel(s.source)) + (AI[s.source] ? ' <span class="tag">AI</span>' : '') + '</td><td>' + fun + '</td><td><span class="tag play">▶ Play</span></td></tr>';
+      return '<tr data-id="' + esc(s.id) + '" class="' + (s.booked ? 'is-booked' : s.submit ? 'is-submit' : '') + '"><td><b>' + esc(ago(s.start)) + '</b><br><small style="color:#5B6670">' + esc(when(s.start)) + '</small></td><td>' + flag(s.country) + ' ' + esc(loc) + coLine(s) + '</td><td>' + esc(s.device) + '<br><small style="color:#5B6670">' + esc(s.browser + (s.os ? ' · ' + s.os : '')) + '</small></td><td>' + esc(s.entry) + '</td><td class="num">' + s.pages + '</td><td class="num">' + dur(s.duration) + '</td><td>' + esc(srcLabel(s.source)) + (AI[s.source] ? ' <span class="tag">AI</span>' : '') + '</td><td>' + fun + '</td><td><span class="tag play">▶ Play</span></td></tr>';
     }).join('');
     $('ins-count').textContent = SESS.rows.length ? rows.length.toLocaleString() + ' recording' + (rows.length === 1 ? '' : 's') + (rows.length !== SESS.rows.length ? ' of ' + SESS.rows.length.toLocaleString() : '') : '';
     $('ins-empty').hidden = rows.length > 0; $('ins-empty').textContent = SESS.rows.length ? 'No recordings match these filters.' : 'No recordings yet. They appear here a few minutes after visitors arrive.';
@@ -218,7 +218,7 @@
       $('ins-progress').remove();
       var stage = $('ins-stage'), w = Math.min(meta.w || 1280, stage.clientWidth - 2), scale = w / (meta.w || 1280), h = Math.max(300, Math.min(window.innerHeight - 250, Math.round((meta.h || 720) * scale)));
       var P = window.rrwebPlayer && (window.rrwebPlayer.default || window.rrwebPlayer.Player || window.rrwebPlayer);
-      player = new P({ target: stage, props: { events: events, width: stage.clientWidth - 2, height: h, autoPlay: true, skipInactive: true, showController: true, speedOption: [1, 2, 4, 8], tags: { popup_open: '#0f7ac4', popup_submit: '#2e9e5b', booked: '#c0392b', pageview: '#8ea4b3', form_submit: '#2e9e5b' } } });
+      player = new P({ target: stage, props: { events: events, width: stage.clientWidth - 2, height: h, autoPlay: true, skipInactive: true, showController: true, speedOption: [1, 2, 4, 8], tags: { popup_open: '#20292F', popup_submit: '#20292F', booked: '#4EA6F8', pageview: '#5B6670', form_submit: '#20292F' } } });
       var start = events[0].timestamp;
       var list = events.filter(function (e) { return e.type === 5 && e.data && e.data.tag !== 'field' && e.data.tag !== 'scroll_depth'; });
       $('ins-events').innerHTML = list.map(function (e, i) { var p = e.data.payload || {}, t = e.timestamp - start, text = e.data.tag === 'pageview' ? (p.title || p.path) + ' <small>' + esc(p.path) + '</small>' : e.data.tag === 'js_error' ? 'Page error: ' + esc(p.msg) : (TAG_LABELS[e.data.tag] || e.data.tag); return '<li data-t="' + t + '" class="' + esc(e.data.tag) + '"><span>' + dur(t / 1000) + '</span>' + text + '</li>'; }).join('');
@@ -247,7 +247,7 @@
         var max = Math.max(1, Math.max.apply(null, fields.map(function (f) { return f.focus; })));
         var started = fields.length ? Math.max.apply(null, fields.map(function (f) { return f.focus; })) : 0;
         return '<div class="card ins-table"><h3>' + esc(F.form) + '</h3><p class="sub" style="padding:0 16px">' + started + ' started · ' + F.submits + ' sent' + (F.abandoned ? ' · ' + F.abandoned + ' gave up' : '') + (/pop-up/.test(F.form) ? ' (sent = reached the calendar)' : '') + '</p><table><thead><tr><th>Field</th><th>Touched</th><th class="num">Filled in</th><th class="num">Gave up here</th></tr></thead><tbody>' +
-          fields.map(function (f) { return '<tr><td>' + esc(label(f.name)) + '</td><td>' + barCell(f.focus, max) + '</td><td class="num">' + f.filled + ' <small style="color:#5d7280">(' + pct(f.filled, f.focus) + '%)</small></td><td class="num">' + (f.abandon ? '<span class="tag warn">' + f.abandon + '</span>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+          fields.map(function (f) { return '<tr><td>' + esc(label(f.name)) + '</td><td>' + barCell(f.focus, max) + '</td><td class="num">' + f.filled + ' <small style="color:#5B6670">(' + pct(f.filled, f.focus) + '%)</small></td><td class="num">' + (f.abandon ? '<span class="tag warn">' + f.abandon + '</span>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
       }).join('');
     }).catch(function (e) { $('ins-body').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
   }
