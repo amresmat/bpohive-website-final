@@ -95,13 +95,17 @@
     $('ins-body').innerHTML = body;
     [].forEach.call(document.querySelectorAll('.ins-cos tr[data-co]'), function (tr) { tr.onclick = function () { PENDING_Q = tr.dataset.co; location.hash = '#insight/sessions'; }; });
   }
+  // Visitors and page views per day as two lines (page views dashed); the totals sit in the legend.
   function chart(daily) {
-    var W = 900, H = 220, pad = 28, n = daily.length, max = Math.max(1, Math.max.apply(null, daily.map(function (d) { return Math.max(d.s, d.pv); })));
-    var bw = (W - pad * 2) / n, x = function (i) { return pad + i * bw; }, y = function (v) { return H - pad - (v / max) * (H - pad * 2); };
-    var bars = daily.map(function (d, i) { return '<rect x="' + (x(i) + bw * 0.15) + '" y="' + y(d.s) + '" width="' + (bw * 0.7) + '" height="' + (H - pad - y(d.s)) + '" rx="2" fill="#20292F"><title>' + d.date.slice(0, 4) + '-' + d.date.slice(4, 6) + '-' + d.date.slice(6) + ': ' + d.s + ' visitors, ' + d.pv + ' page views</title></rect>'; }).join('');
-    var line = daily.map(function (d, i) { return (i ? 'L' : 'M') + (x(i) + bw / 2) + ' ' + y(d.pv); }).join(' ');
-    var labels = daily.map(function (d, i) { if (n > 14 && i % Math.ceil(n / 10)) return ''; return '<text x="' + (x(i) + bw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#5B6670">' + d.date.slice(6) + '/' + d.date.slice(4, 6) + '</text>'; }).join('');
-    return '<div class="ins-scroll"><svg viewBox="0 0 ' + W + ' ' + H + '" class="ins-svg" role="img" aria-label="Visitors and page views per day">' + (max >= 2 ? [0, 0.5, 1] : [0, 1]).map(function (f) { return '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="#EAF4FE"/><text x="' + (pad - 6) + '" y="' + (y(max * f) + 4) + '" text-anchor="end" font-size="11" fill="#5B6670">' + Math.round(max * f) + '</text>'; }).join('') + bars + '<path d="' + line + '" fill="none" stroke="#20292F" stroke-width="2"/>' + labels + '</svg></div><div class="ins-legend"><span><i style="background:#20292F"></i>Visitors</span><span><i style="background:#20292F;height:2px"></i>Page views</span></div>';
+    var W = 900, H = 220, L = 40, R = 16, T = 14, B = 30, n = daily.length, max = Math.max(1, Math.max.apply(null, daily.map(function (d) { return Math.max(d.s, d.pv); })));
+    var x = function (i) { return n < 2 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1); }, y = function (v) { return T + (H - T - B) * (1 - v / max); };
+    var path = function (k) { return daily.map(function (d, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(d[k]).toFixed(1); }).join(' '); };
+    var day = function (d) { return d.date.slice(6) + '/' + d.date.slice(4, 6); };
+    var dots = daily.map(function (d, i) { return '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(d.s).toFixed(1) + '" r="3" fill="#FFFFFF" stroke="#4EA6F8" stroke-width="2"><title>' + day(d) + ': ' + d.s + ' visitors, ' + d.pv + ' page views</title></circle>'; }).join('');
+    var labels = daily.map(function (d, i) { if (n > 10 && i % Math.ceil(n / 8) && i !== n - 1) return ''; return '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (i === n - 1 && n > 1 ? 'end' : i === 0 && n > 1 ? 'start' : 'middle') + '" font-size="11" fill="#5B6670">' + day(d) + '</text>'; }).join('');
+    var grid = (max >= 2 ? [0, 0.5, 1] : [0, 1]).map(function (f) { return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(max * f).toFixed(1) + '" y2="' + y(max * f).toFixed(1) + '" stroke="#EAF4FE"/><text x="' + (L - 8) + '" y="' + (y(max * f) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#5B6670">' + Math.round(max * f) + '</text>'; }).join('');
+    var sum = function (k) { return daily.reduce(function (a, d) { return a + d[k]; }, 0); };
+    return '<div class="ins-scroll"><svg viewBox="0 0 ' + W + ' ' + H + '" class="ins-svg" role="img" aria-label="Visitors and page views per day">' + grid + '<path d="' + path('pv') + '" fill="none" stroke="#20292F" stroke-width="2" stroke-dasharray="6 5"/><path d="' + path('s') + '" fill="none" stroke="#4EA6F8" stroke-width="2.5" stroke-linejoin="round"/>' + dots + labels + '</svg></div><div class="ins-legend"><span><i class="pl-key" style="--k:#4EA6F8"></i>Visitors <b>' + sum('s').toLocaleString() + '</b></span><span><i class="pl-key dash" style="--k:#20292F"></i>Page views <b>' + sum('pv').toLocaleString() + '</b></span></div>';
   }
   function funnel(steps) {
     var max = Math.max(1, steps[0][1]);
