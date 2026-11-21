@@ -78,13 +78,12 @@
     var line = (s.since ? 'From ' + day(s.since + 'T12:00:00') + '. ' : '') + (c.connected ? 'Calendly synced ' + ago(c.lastSync) : 'Calendly not connected') + ', ' + (sh.files.length ? 'Sheets synced ' + ago(sh.lastSync) : 'Sheets not connected') + ', ' + (s.fathom && s.fathom.connected ? 'Fathom synced ' + ago(s.fathom.lastSync) : 'Fathom not connected') + (isAdmin() ? ', Website forms live' : '');
     var cnt = function (st) { return DATA.leads.filter(function (l) { return l.status === st; }).length; };
     var needs = DATA.meetings.filter(function (m) { return m.outcome === 'needs'; }).length;
-    var sub = isAdmin() ? 'Booked, then a show or a no-show. Shows stay in Showed while you follow up, until they are won, not replying or unqualified.' : 'Your leads and appointments' + (DATA.me ? ', ' + esc(DATA.me.name) : '') + '.';
-    var sc = stageCounts(DATA.leads);
-    var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['booked', 'Booked', sc.booked || ''], ['shown', 'Showed', sc.shown || ''], ['noshow', 'No-shows', sc.no_show || ''], ['noreply', 'Not replying', sc.no_reply || ''], ['unqualified', 'Unqualified', sc.unqualified || ''], ['won', 'Won', sc.won || ''], ['leads', 'All leads', DATA.leads.length]];
+    // Booked, Showed, No-shows, Not replying, Unqualified and Won open from the dashboard tiles, so they are not tabs.
+    var tabs = [['', 'Dashboard', ''], ['stages', 'Stages', ''], ['leads', 'All leads', DATA.leads.length]];
     if (isAdmin()) tabs.push(['sources', 'Sources', ''], ['team', 'Team access', (DATA.team || []).length || '']);
-    return '<div class="ins-head"><div><h1>Pipeline</h1><p class="sub">' + sub + ' <span class="pl-sync">' + esc(line) + '</span></p></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button">Refresh</button></div></div>' +
+    return '<div class="ins-head"><div><h1>Pipeline</h1></div><div class="bar" style="margin:0"><button class="btn" id="pl-refresh" type="button" title="' + esc(line) + '">Refresh</button></div></div>' +
       (isAdmin() ? setup() + intelNote() : '') +
-      '<div class="tabs">' + tabs.map(function (x) { return '<a class="tab' + (SUB === x[0] || (SUB === 'view' && !x[0]) ? ' on' : '') + (x[0] === 'shown' ? ' pl-hot' : '') + '" href="#pipeline' + (x[0] ? '/' + x[0] : '') + '">' + x[1] + (x[2] !== '' ? '<b>' + esc(x[2]) + '</b>' : '') + '</a>'; }).join('') + '</div>';
+      '<div class="tabs">' + tabs.map(function (x) { return '<a class="tab' + (SUB === x[0] || (!x[0] && ['view', 'booked', 'shown', 'noshow', 'noreply', 'unqualified', 'won'].indexOf(SUB) > -1) ? ' on' : '') + '" href="#pipeline' + (x[0] ? '/' + x[0] : '') + '">' + x[1] + (x[2] !== '' ? '<b>' + esc(x[2]) + '</b>' : '') + '</a>'; }).join('') + '</div>';
   }
   function setup() {
     var s = DATA.status, bits = [];
