@@ -525,13 +525,27 @@ test('a colleague from a company already in the Pipeline joins that company lead
   assert.equal(r.leads.filter(l => /falcon/.test(l.email)).length, 2, 'two people from one company booking before either meeting has happened stay apart');
 });
 
-test('meetings before tracking started count as not tracked unless something marked them', () => {
+test('meetings before tracking started count as shows unless cancelled, a no-show or marked', () => {
   const { effectiveOutcome } = require('../lib/pipeline.cjs');
   const now = Date.parse('2026-11-13T00:00:00Z');
   const old = { end: '2025-03-01T10:00:00Z', invitees: [{}] };
-  assert.equal(effectiveOutcome(old, now), 'untracked');
+  assert.equal(effectiveOutcome(old, now), 'showed');
+  assert.equal(effectiveOutcome({ ...old, status: 'canceled' }, now), 'cancelled');
+  assert.equal(effectiveOutcome({ ...old, override: { outcome: 'no_show' } }, now), 'no_show');
   assert.equal(effectiveOutcome({ ...old, invitees: [{ noShow: 'x' }] }, now), 'no_show');
   assert.equal(effectiveOutcome({ ...old, fathomSpoke: true }, now), 'showed');
   assert.equal(effectiveOutcome({ ...old, override: { outcome: 'showed' } }, now), 'showed');
   assert.equal(effectiveOutcome({ end: '2026-10-01T10:00:00Z', invitees: [{}] }, now), 'needs');
+});
+
+test('a lead met only before tracking counts as a show but stays out of the follow-up list', () => {
+  const iso = t => new Date(t).toISOString();
+  const at = Date.parse('2024-05-01T10:00:00Z');
+  const m = (id, extra) => Object.assign({ id, name: 'Discovery Call', start: iso(at), end: iso(at + 1800e3), status: 'active', created: iso(at - 864e5), invitees: [{ name: 'Old Co', email: 'ceo@oldco.com', qa: [], utm: {}, created: iso(at - 864e5) }] }, extra);
+  const r = pl.build({ since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, leadOv: {}, trails: {}, manual: [], meetings: [m('A1')] });
+  const l = r.leads.find(x => x.email === 'ceo@oldco.com');
+  assert.equal(r.meetings[0].outcome, 'showed'); assert.equal(r.meetings[0].assumed, true);
+  assert.equal(l.status, 'past'); assert.ok(l.shownAt, 'counts as showed up in the funnel');
+  const r2 = pl.build({ since: '', entries: [], sheets: [], recordings: [], outcomes: {}, skipEvents: null, leadOv: {}, trails: {}, manual: [], meetings: [m('A1', { status: 'canceled' })] });
+  assert.equal(r2.meetings[0].outcome, 'cancelled');
 });
