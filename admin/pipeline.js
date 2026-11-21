@@ -7,10 +7,25 @@
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var DATA = null, MAIN = null, SUB = '', VIEW = '', LOADING = null;
-  var F = { range: 30, from: '', to: '', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
+  var F = { range: 30, from: '', to: '', preset: '30', type: '', campaign: '', caller: '', stage: '', q: '', mtab: '' };
+  var PRESETS = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This month'], ['lastmonth', 'Last month'], ['lastquarter', 'Last quarter'], ['all', 'All time']];
+  var CUSTOM_OPEN = false, FILTERS_OPEN = false;
   function iso10(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
-  var STATUS = { booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
-  var OUT = { upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
+  // A preset fills From and To; "All time" has no limits.
+  function applyPreset(p) {
+    var now = new Date(), a = new Date(now), b = new Date(now);
+    F.preset = p;
+    if (p === 'all') { F.range = 0; F.from = ''; F.to = ''; return; }
+    if (p === 'yesterday') { a.setDate(a.getDate() - 1); b = new Date(a); }
+    else if (p === 'month') a = new Date(now.getFullYear(), now.getMonth(), 1);
+    else if (p === 'lastmonth') { a = new Date(now.getFullYear(), now.getMonth() - 1, 1); b = new Date(now.getFullYear(), now.getMonth(), 0); }
+    else if (p === 'lastquarter') { var q = Math.floor(now.getMonth() / 3) * 3; a = new Date(now.getFullYear(), q - 3, 1); b = new Date(now.getFullYear(), q, 0); }
+    else if (p !== 'today') a.setDate(a.getDate() - (+p - 1));
+    F.range = 'custom'; F.from = iso10(a); F.to = iso10(b);
+  }
+  applyPreset('30');
+  var STATUS = { past: ['Met before tracking', 'st-off'], booked: ['Booked', 'st-booked'], to_mark: ['Date passed', 'st-needs'], shown: ['Showed', 'st-showed'], no_show: ['No-show', 'st-noshow'], dead: ['Not replying or unqualified', 'st-off'], won: ['Won', 'st-won'], cancelled: ['Cancelled', 'st-off'], new: ['No meeting yet', 'st-new'] };
+  var OUT = { untracked: ['Not tracked', 'st-off'], upcoming: ['Booked', 'st-booked'], needs: ['Date passed', 'st-needs'], showed: ['Show', 'st-showed'], no_show: ['No-show', 'st-noshow'], rescheduled: ['Rescheduled', 'st-off'], cancelled: ['Cancelled', 'st-off'] };
   var HOT = { contract: ['Waiting on contract', '#7a5af5'] };
   var OLD_HOT = { must_close: ['Must close', '#c0392b'], nurture: ['Nurture', '#1B7381'] }; // only for older trail entries
   var HOT_RANK = { contract: 0 };
@@ -96,20 +111,33 @@
     if (s.calendly.connected && !s.calendly.backfilled) bits.push('<li><b>Calendly:</b> still loading past meetings. Refresh in a minute.</li>');
     return bits.length ? '<div class="note"><ul style="margin:0;padding-left:18px">' + bits.join('') + '</ul></div>' : '';
   }
+  function shortDay(v) { var p = String(v).split('-').map(Number); return p[0] ? new Date(Date.UTC(p[0], p[1] - 1, p[2])).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : v; }
+  function dateBar(btn) {
+    var showInputs = CUSTOM_OPEN || (!F.preset && F.range === 'custom');
+    var summary = !F.range ? 'All time' : F.from === F.to ? shortDay(F.from) : shortDay(F.from) + ' to ' + shortDay(F.to);
+    return '<div class="pl-datebar"><div class="pl-presets" role="group" aria-label="Date range">' + PRESETS.map(function (p) { var on = !CUSTOM_OPEN && F.preset === p[0]; return '<button type="button" class="pl-pill' + (on ? ' on' : '') + '" data-p="' + p[0] + '" aria-pressed="' + on + '">' + p[1] + '</button>'; }).join('') +
+      '<button type="button" class="pl-pill' + (showInputs ? ' on' : '') + '" id="pl-custom" aria-expanded="' + showInputs + '">Custom dates</button>' + btn + '</div>' +
+      (showInputs ? '<form class="pl-custom" id="pl-custom-form" novalidate><label for="pl-from">From<input id="pl-from" type="date" value="' + esc(F.from) + '"></label><label for="pl-to">To<input id="pl-to" type="date" value="' + esc(F.to) + '"></label><button type="submit" class="btn pri">Apply</button></form>' : '') +
+      '<p class="pl-showing">Showing ' + esc(summary) + '</p></div>';
+  }
   function filters(withRange, withStage) {
     var camps = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.campaigns || []; })));
     var callers = uniq([].concat.apply([], DATA.leads.map(function (l) { return l.callers || []; })));
-    return '<div class="bar">' +
-      (withRange ? '<select id="pl-range">' + [[7, 'Last 7 days'], [30, 'Last 30 days'], [90, 'Last 90 days'], [0, 'All time'], ['custom', 'Custom dates']].map(function (r) { return '<option value="' + r[0] + '"' + (F.range === r[0] ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select>' + (F.range === 'custom' ? '<label class="pl-dates">From <input id="pl-from" type="date" value="' + esc(F.from) + '"' + (F.to ? ' max="' + esc(F.to) + '"' : '') + '></label><label class="pl-dates">to <input id="pl-to" type="date" value="' + esc(F.to) + '"' + (F.from ? ' min="' + esc(F.from) + '"' : '') + '></label>' : '') : '<input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">') +
-      '<select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
+    var selects = '<select id="pl-type"><option value="">Inbound + outbound</option><option value="inbound"' + (F.type === 'inbound' ? ' selected' : '') + '>Inbound only</option><option value="outbound"' + (F.type === 'outbound' ? ' selected' : '') + '>Outbound only</option></select>' +
       '<select id="pl-campaign">' + opts(camps, F.campaign, 'All campaigns') + '</select>' +
       (isAdmin() ? '<select id="pl-caller">' + opts(callers, F.caller, 'All callers') + '</select>' : '') +
-      (withStage ? '<select id="pl-stage">' + '<option value="">Every status</option>' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (F.stage === k ? ' selected' : '') + '>' + STATUS[k][0] + '</option>'; }).join('') + '</select>' : '') +
-      '</div>';
+      (withStage ? '<select id="pl-stage">' + '<option value="">Every status</option>' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (F.stage === k ? ' selected' : '') + '>' + STATUS[k][0] + '</option>'; }).join('') + '</select>' : '');
+    if (!withRange) return '<div class="bar"><input id="pl-q" type="search" placeholder="Search name, company, email" value="' + esc(F.q) + '">' + selects + '</div>';
+    var n = [F.type, F.campaign, isAdmin() ? F.caller : ''].filter(Boolean).length;
+    var btn = '<button type="button" class="pl-ficon' + (n ? ' on' : '') + '" id="pl-ftoggle" aria-expanded="' + FILTERS_OPEN + '" aria-controls="pl-fwrap" title="Filters" aria-label="Filters' + (n ? ', ' + n + ' in use' : '') + '"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>' + (n ? '<b>' + n + '</b>' : '') + '</button>';
+    return dateBar(btn) + '<div class="bar pl-fwrap" id="pl-fwrap"' + (FILTERS_OPEN ? '' : ' hidden') + '>' + selects + '</div>';
   }
   function bindFilters() {
-    [['pl-range', 'range', true], ['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = x[2] && el.value !== 'custom' ? +el.value : el.value; if (F.range === 'custom' && !F.from && !F.to) { var d = new Date(); F.to = iso10(d); d.setDate(d.getDate() - 29); F.from = iso10(d); } draw(); }; });
-    ['from', 'to'].forEach(function (k) { var el = $('pl-' + k); if (el) el.onchange = function () { F[k] = el.value; draw(); }; });
+    [['pl-type', 'type'], ['pl-campaign', 'campaign'], ['pl-caller', 'caller'], ['pl-stage', 'stage']].forEach(function (x) { var el = $(x[0]); if (el) el.onchange = function () { F[x[1]] = el.value; draw(); }; });
+    [].forEach.call(document.querySelectorAll('.pl-presets [data-p]'), function (b) { b.onclick = function () { CUSTOM_OPEN = false; applyPreset(b.getAttribute('data-p')); draw(); }; });
+    var cb = $('pl-custom'); if (cb) cb.onclick = function () { CUSTOM_OPEN = !CUSTOM_OPEN; draw(); };
+    var cf = $('pl-custom-form'); if (cf) cf.onsubmit = function (e) { e.preventDefault(); var a = $('pl-from').value, b = $('pl-to').value; if (!a || !b) return; if (a > b) { var x = a; a = b; b = x; } F.from = a; F.to = b; F.range = 'custom'; F.preset = ''; CUSTOM_OPEN = false; draw(); };
+    var ft = $('pl-ftoggle'); if (ft) ft.onclick = function () { FILTERS_OPEN = !FILTERS_OPEN; ft.setAttribute('aria-expanded', FILTERS_OPEN); var w = $('pl-fwrap'); if (w) w.hidden = !FILTERS_OPEN; };
     var q = $('pl-q'); if (q) q.oninput = function () { F.q = q.value; drawLeadsTable(); };
     var rf = $('pl-refresh'); if (rf) rf.onclick = function () { rf.disabled = true; rf.textContent = 'Syncing…'; (isAdmin() ? api('POST', { action: 'sync' }).catch(function () {}) : Promise.resolve()).then(function () { return load(isAdmin() ? false : true); }).then(draw).catch(fail); };
   }
@@ -129,7 +157,8 @@
     cols.forEach(function (c, i) {
       var x = pad + i * bw + bw * .18, w = bw * .64, y = H;
       series.forEach(function (s) { var v = c.n[s[0]] || 0; if (!v) return; var h = v / max * (H - 10); y -= h; svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + s[2] + '"><title>' + esc(s[1]) + ': ' + v + '</title></rect>'; });
-      if (i % 2 === 0 || cols.length <= 8) svg += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="#8a9aa6">' + new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + '</text>';
+      var every = Math.max(1, Math.ceil(cols.length / 10));
+      if (i % every === 0) svg += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="#8a9aa6">' + (c.label || new Date(c.from).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</text>';
     });
     svg += '</svg>';
     return '<div class="card ins-chart"><h3>' + esc(title) + '</h3><div class="ins-scroll">' + svg + '</div><div class="ins-legend">' + series.map(function (s) { return '<span><i style="background:' + s[2] + '"></i>' + esc(s[1]) + '</span>'; }).join('') + '</div></div>';
@@ -182,40 +211,55 @@
         return '<div class="pl-fun-step"><div class="pl-fun-top"><span>' + x[0] + '</span><b>' + x[1] + '</b></div><div class="pl-fun-bar"><i style="width:' + (b ? Math.max(x[1] / b * 100, x[1] ? 3 : 0) : 0).toFixed(1) + '%"></i></div><small>' + (x[2] || '&nbsp;') + '</small></div>';
       }).join('') + '<p class="pl-fun-end">' + (b ? pct(cl, b) + '% of bookings closed' : 'Nothing booked yet') + '</p></div>';
     };
-    return '<div class="card pl-funnel"><h3>Booked, show, closed <small>people booked during this period, counted once each</small></h3><div class="pl-funs">' +
+    return '<div class="card pl-funnel"><h3>Booked, show, closed</h3><div class="pl-funs">' +
       col('All', cohort, 'all') + col('Inbound', cohort.filter(function (l) { return l.type === 'inbound'; }), 'in') + col('Outbound', cohort.filter(function (l) { return l.type !== 'inbound'; }), 'out') + '</div></div>';
   }
   function rangeLabel() {
     if (F.range === 'custom') return (F.from ? day(F.from + 'T12:00:00') : 'Start') + ' to ' + (F.to ? day(F.to + 'T12:00:00') : 'today');
     return F.range ? 'Last ' + F.range + ' days' : 'All time';
   }
+  // A lead belongs to the chosen dates when it came in, or had a meeting booked or held, inside them.
+  function leadInRange(l) {
+    if (!F.range) return true;
+    if (inRange(l.firstAt)) return true;
+    return (l.meetings || []).some(function (id) { var m = DATA.meetings.find(function (x) { return x.id === id; }); return m && (inRange(m.created) || inRange(m.start)); });
+  }
+  // Chart columns follow the chosen dates: by week up to about four months, by month beyond that.
+  function buckets(items, getTs, groups) {
+    var now = Date.now(), from = F.range === 'custom' && F.from ? +new Date(F.from + 'T00:00:00') : 0, to = F.range === 'custom' && F.to ? +new Date(F.to + 'T00:00:00') + 864e5 : now;
+    if (!from) { var ts = items.map(getTs).filter(Boolean); from = ts.length ? Math.min.apply(null, ts) : now - 84 * 864e5; }
+    var cols = [], monthly = to - from > 120 * 864e5, d = new Date(from); d.setHours(0, 0, 0, 0);
+    if (monthly) d.setDate(1); else d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    while (+d < to && cols.length < 60) { var e = new Date(d); if (monthly) e.setMonth(e.getMonth() + 1); else e.setDate(e.getDate() + 7); cols.push({ from: +d, to: +e, n: {}, label: monthly ? d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }) : '' }); d = e; }
+    items.forEach(function (x) { var t0 = getTs(x); cols.forEach(function (c) { if (t0 >= c.from && t0 < c.to) { var g = groups(x); c.n[g] = (c.n[g] || 0) + 1; } }); });
+    cols.unit = monthly ? 'month' : 'week';
+    return cols;
+  }
   function dashboard() {
     var S = sets(), showed = S.showed.length, noshow = S.noshow.length, needs = S.needs.length;
     var sub = function (k, n, label) { return n ? '<a href="#pipeline/view/' + k + '">' + n + ' ' + label + '</a>' : '0 ' + label; };
-    var now = DATA.leads.filter(matchesLead), sc = stageCounts(now);
-    var stageTiles = STAGES.map(function (s) { return [s[1], sc[s[0]], s[0] === 'booked' && needs ? needs + ' date passed, mark them' : s[0] === 'shown' ? now.filter(function (l) { return l.status === 'shown' && l.temp === 'hot'; }).length + ' hot' : '', '#pipeline/' + ({ booked: 'booked', shown: 'shown', no_show: 'noshow', no_reply: 'noreply', unqualified: 'unqualified', won: 'won' })[s[0]], s[2]]; });
+    var now = DATA.leads.filter(matchesLead).filter(leadInRange), sc = stageCounts(now);
+    var stageTiles = STAGES.map(function (s) { return [s[1], sc[s[0]], s[0] === 'shown' ? now.filter(function (l) { return l.status === 'shown' && l.temp === 'hot'; }).length + ' hot' : '', '#pipeline/' + ({ booked: 'booked', shown: 'shown', no_show: 'noshow', no_reply: 'noreply', unqualified: 'unqualified', won: 'won' })[s[0]], s[2]]; });
     var tiles = [
       ['Meetings booked', S.booked.length, sub('bookedIn', S.bookedIn.length, 'inbound') + ', ' + sub('bookedOut', S.bookedOut.length, 'outbound'), '#pipeline/view/booked'],
       ['Meetings held', S.held.length, 'date passed and marked', '#pipeline/view/showed'],
       ['Shows', showed, 'meetings that happened', '#pipeline/view/showed'],
       ['No-shows', noshow, 'meetings missed', '#pipeline/view/noshow'],
-      ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'shows out of held', '#pipeline/view/rate']
+      ['Show rate', showed + noshow ? pct(showed, showed + noshow) + '%' : '—', 'shows out of held', '#pipeline/view/rate'],
+      ['To mark', needs, 'date passed, not marked', '#pipeline/booked']
     ];
     var upcoming = S.ms.filter(function (m) { return m.outcome === 'upcoming' && t(m.start) < Date.now() + 7 * 864e5; }).sort(function (a, b) { return t(a.start) - t(b.start); });
-    var weeks = 12;
-    var lc = weekly(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; }, weeks);
-    var mc = weekly(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; }, weeks);
+    var lc = buckets(S.ms, function (m) { return t(m.created); }, function (m) { return m.type; });
+    var mc = buckets(S.ms.filter(function (m) { return t(m.start) < Date.now(); }), function (m) { return t(m.start); }, function (m) { return m.outcome; });
     return filters(true, false) +
-      '<h3 class="pl-dh">Where every lead is now <small>each lead counted once, in its stage</small></h3>' +
-      '<div class="ins-tiles pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
-      '<h3 class="pl-dh">' + esc(rangeLabel()) + ' <small>meetings, by their date</small></h3>' +
-      '<div class="ins-tiles">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
+      '<div class="ins-tiles pl-six pl-stagetiles">' + stageTiles.map(function (x) { return '<a class="ins-tile pl-tile pl-stile" href="' + x[3] + '" style="--c:' + x[4] + '"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></a>'; }).join('') + '</div>' +
+      '<div class="ins-tiles pl-six">' + tiles.map(function (x) { return '<div class="ins-tile pl-tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><span>' + x[2] + '</span>' + viewLink(x[3]) + '</div>'; }).join('') + '</div>' +
       funnel() +
-      '<div class="ins-grid">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per week') +
-      bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE']], 'Meetings per week') + '</div>' +
-      '<div class="card ins-table" style="margin-bottom:14px"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
-      breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
-      '<div style="height:14px"></div>' + breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; });
+      '<div class="pl-two">' + bars(lc, [['inbound', 'Inbound', '#6F9FC4'], ['outbound', 'Outbound', '#1B7381']], 'Meetings booked per ' + lc.unit) +
+      bars(mc, [['showed', 'Show', '#2B6E4C'], ['no_show', 'No-show', '#B5523F'], ['needs', 'Not marked yet', '#D6A34A'], ['rescheduled', 'Rescheduled', '#A9B4BA'], ['cancelled', 'Cancelled', '#D5DBDE'], ['untracked', 'Not tracked', '#E6EBEE']], 'Meetings per ' + mc.unit) + '</div>' +
+      '<div class="card ins-table pl-next"><h3>Next 7 days</h3>' + (upcoming.length ? meetingTable(upcoming, true) : '<div class="empty">No meetings booked for the next 7 days.</div>') + '</div>' +
+      '<div class="pl-two">' + breakdown('By campaign', 'Campaign', function (l) { return (l.campaigns || []).length ? l.campaigns : [l.type === 'inbound' ? 'Booked on the website' : 'Calendly link from the team']; }) +
+      breakdown('By caller', 'Caller', function (l) { return (l.callers || []).length ? l.callers : [l.type === 'inbound' ? 'Inbound (no caller)' : 'Unassigned']; }) + '</div>';
   }
   function viewPage() {
     var v = VIEWS[VIEW] || VIEWS.booked, rows = sets()[v[1]] || [];
