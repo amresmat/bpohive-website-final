@@ -476,9 +476,11 @@ a,.pl-view,.pl-rec{color:#20292F;text-decoration-color:#4EA6F8}
 a.pl-stile b,.pl-stg-n{color:#20292F}
 .st:before,.pl-chips .pl-chip-hot:before,.pl-chips .pl-chip-warm:before,.pl-chips .pl-chip-cold:before{display:none}
 /* Motion: every control eases when pressed; panels, dialogs and pages ease open and closed */
-.btn,.mini,.pl-pill,.tab,.pl-ficon,.pl-stg,.pl-play,.pl-del,.pl-chips button,.pl-tset button,.login button,.top .out,.top .site,.pl-edit-btn,.side a,.side summary,.pl-view,.pl-vlinks a,.pl-orow,.pl-card,.pl-hcard,a.pl-stile,.ins-tile,.list .item,tbody tr{transition:transform .2s cubic-bezier(.16,1,.3,1),background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease,opacity .22s ease}
-.btn:active,.mini:active,.pl-pill:active,.tab:active,.pl-ficon:active,.pl-stg:active,.pl-play:active,.pl-chips button:active,.pl-tset button:active,.login button:active,.top .out:active,.side a:active,.side summary:active,a.pl-stile:active,.pl-hcard:active,.pl-card:active{transform:scale(.97)}
-.btn:disabled:active{transform:none}
+.btn,.mini,.pl-pill,.tab,.pl-ficon,.pl-stg,.pl-play,.pl-del,.pl-chips button,.pl-tset button,.login button,.top .out,.top .site,.pl-edit-btn,.side a,.side summary,.pl-view,.pl-vlinks a,.pl-orow,.pl-card,.pl-hcard,a.pl-stile,.ins-tile,.list .item,tbody tr{transition:background-color .18s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease,opacity .22s ease}
+/* Pressing a control darkens it slightly; nothing shrinks or bounces, and cards stay still when a button inside them is pressed */
+.btn:active,.mini:active,.pl-pill:active,.pl-ficon:active,.pl-stg:active,.pl-play:active,.pl-chips button:active,.pl-tset button:active,.login button:active,.top .out:active{filter:brightness(.94)}
+.btn:disabled:active{filter:none}
+#main{overflow-x:clip}
 a.pl-stile:hover,.pl-hcard:hover{background:#F7FAFD}
 .tabs .tab{transition:color .22s ease,border-color .3s cubic-bezier(.16,1,.3,1)}
 @keyframes bh-dlg-in{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
@@ -487,7 +489,6 @@ dialog[open]{animation:bh-dlg-in .34s cubic-bezier(.16,1,.3,1)}
 dialog[open]::backdrop{animation:bh-fade .3s ease}
 .side .grp>summary:after,.pl-sec>summary:after{transition:transform .3s cubic-bezier(.16,1,.3,1)}
 @media(prefers-reduced-motion:reduce){.btn,.mini,.pl-pill,.tab,.pl-ficon,.pl-stg,.pl-play,.pl-del,.pl-chips button,.pl-tset button,.login button,.top .out,.top .site,.pl-edit-btn,.side a,.side summary,.pl-view,.pl-vlinks a,.pl-orow,.pl-card,.pl-hcard,a.pl-stile,.ins-tile,.list .item,tbody tr{transition:none}
-.btn:active,.mini:active,.pl-pill:active,.tab:active,.pl-ficon:active,.pl-stg:active,.pl-play:active,.pl-chips button:active,.pl-tset button:active,.login button:active,.top .out:active,.side a:active,.side summary:active,a.pl-stile:active,.pl-hcard:active,.pl-card:active{transform:none}
 dialog[open],dialog[open]::backdrop{animation:none}}
 /* Line charts and the booked, showed up, won table */
 .pl-line-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 16px 4px}.pl-line-h h3{padding:0}
@@ -568,10 +569,19 @@ dialog[open],dialog[open]::backdrop{animation:none}}
     var a = d.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px) scale(.985)' }], { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)' });
     a.onfinish = a.oncancel = function () { d._bhClosing = false; nativeClose.call(d, v); };
   };
-  // A new page eases in.
-  window.addEventListener('hashchange', function () {
+  // Changing page slides sideways: to a tab further right (or deeper in) it comes from the right,
+  // going back left it comes from the left. Redrawing the same page (saving a change) does not move.
+  var RANK = { '': 0, view: 0.5, stages: 1, booked: 1.5, shown: 1.5, noshow: 1.5, noreply: 1.5, unqualified: 1.5, won: 1.5, leads: 2, sources: 3, team: 4 };
+  function where(h) {
+    var p = String(h || '').replace(/^.*#/, '').split('/');
+    if (p[0] !== 'pipeline') return { page: p[0] || 'pipeline', rank: 10 };
+    return { page: 'pipeline/' + (p[1] || ''), rank: RANK[p[1] || ''] != null ? RANK[p[1] || ''] : 1 };
+  }
+  window.addEventListener('hashchange', function (e) {
     if (calm()) return;
-    requestAnimationFrame(function () { var m = document.getElementById('main'); if (m) m.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: EASE }); });
+    var a = where(e.oldURL), b = where(e.newURL); if (a.page === b.page) return;
+    var dx = b.rank < a.rank ? -28 : 28;
+    requestAnimationFrame(function () { var m = document.getElementById('main'); if (m) m.animate([{ opacity: 0, transform: 'translateX(' + dx + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: EASE }); });
   });
   // Anything that appears in the page (filters, custom dates, edit boxes) slides into place.
   new MutationObserver(function (list) {
